@@ -1,4 +1,6 @@
-Mathematica-tmbundle
-====================
+h2. Mathematica Textmate Bundle
 
-There's nothing to see here, yet!
+Nothing much to see here yet!
+
+I've just started the language grammar, with definitions for some constants, keywords, 
+operators, and FullForm expressions.  
