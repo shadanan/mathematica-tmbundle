@@ -8,18 +8,20 @@
 		<string>nb</string>
 	</array>
 	<key>foldingStartMarker</key>
-	<string>(\*|\{\s*$</string>
+	<string></string>
 	<key>foldingStopMarker</key>
-	<string>^\s*\*)|\*)}</string>
+	<string></string>
 	<key>name</key>
 	<string>Mathematica</string>
 	<key>patterns</key>
 	<array>
 		<dict>
-			<key>match</key>
-			<string>\b(if|while|for|return)\b</string>
+			<key>begin</key>
+			<string>\(\*</string>
+			<key>end</key>
+			<string>\*\)</string>
 			<key>name</key>
-			<string>keyword.control.untitled</string>
+			<string>comment.block.mathematica</string>
 		</dict>
 		<dict>
 			<key>begin</key>
@@ -27,7 +29,7 @@
 			<key>end</key>
 			<string>"</string>
 			<key>name</key>
-			<string>string.quoted.double.untitled</string>
+			<string>string.quoted.double.mathematica</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -38,7 +40,95 @@
 				</dict>
 			</array>
 		</dict>
+		<dict>
+			<key>match</key>
+			<string>[a-zA-Z$][\w$]*(?=_|\s*:)</string>
+			<key>name</key>
+			<string>variable.parameter.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>True|False|Null|Automatic|All</string>
+			<key>name</key>
+			<string>keyword.language.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(Pi|I|E)\b</string>
+			<key>name</key>
+			<string>keyword.math.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\+|-|/|\*|\^</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(\d+)</string>
+			<key>name</key>
+			<string>constant.numeric.integer.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(\d+\.\d*)</string>
+			<key>name</key>
+			<string>constant.numeric.float.mathematica</string>
+		</dict>
+		<dict>
+			<key>begin</key>
+			<string>\b([a-zA-Z$][\w$]*)\[</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function.mathematica</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\]</string>
+			<key>name</key>
+			<string>meta.full_form.mathematica</string>
+		</dict>
 	</array>
+	<key>repository</key>
+	<dict>
+		<key>brackets</key>
+		<dict>
+			<key>begin</key>
+			<string>\[</string>
+			<key>end</key>
+			<string>\]</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#brackets</string>
+				</dict>
+			</array>
+		</dict>
+		<key>generic_symbol</key>
+		<dict>
+			<key>match</key>
+			<string>[a-zA-Z$][\w$]*</string>
+		</dict>
+		<key>list</key>
+		<dict>
+			<key>begin</key>
+			<string>\{</string>
+			<key>end</key>
+			<string>\}</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#list</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>scopeName</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
