@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>BeginPackage["${TM_FILENAME/\.m$/`/}"]
+$0
+EndPackage[]</string>
+	<key>name</key>
+	<string>BeginPackage</string>
+	<key>tabTrigger</key>
+	<string>package</string>
+	<key>uuid</key>
+	<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
+</dict>
+</plist>

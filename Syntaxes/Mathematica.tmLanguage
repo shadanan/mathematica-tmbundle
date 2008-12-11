@@ -42,13 +42,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>[a-zA-Z$][\w$]*(?=_|\s*:)</string>
+			<string>\b[a-zA-Z$][\w$]*((?=_{1,3})|(?=\s*:(?![=:&gt;])))</string>
 			<key>name</key>
 			<string>variable.parameter.mathematica</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>True|False|Null|Automatic|All</string>
+			<string>\b(True|False|Null|Automatic|All)\b</string>
 			<key>name</key>
 			<string>keyword.language.mathematica</string>
 		</dict>
@@ -60,9 +60,27 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\+|-|/|\*|\^</string>
+			<string>\+|-(?!&gt;)|/(?![;/@.])|\*|\^</string>
 			<key>name</key>
 			<string>keyword.operator.arithmetic.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/;|&amp;&amp;|\|\|</string>
+			<key>name</key>
+			<string>keyword.operator.logical.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/{1,2}@|@{1,3}</string>
+			<key>name</key>
+			<string>keyword.operator.functional.mathematica</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-&gt;|:&gt;|/.</string>
+			<key>name</key>
+			<string>keyword.operator.rules.mathematica</string>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -91,6 +109,13 @@
 			<string>\]</string>
 			<key>name</key>
 			<string>meta.full_form.mathematica</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>$self</string>
+				</dict>
+			</array>
 		</dict>
 	</array>
 	<key>repository</key>
