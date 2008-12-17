@@ -11,10 +11,20 @@
 	<string></string>
 	<key>foldingStopMarker</key>
 	<string></string>
+	<key>keyEquivalent</key>
+	<string>^~M</string>
 	<key>name</key>
 	<string>Mathematica</string>
 	<key>patterns</key>
 	<array>
+		<dict>
+			<key>include</key>
+			<string>#value</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#patterns</string>
+		</dict>
 		<dict>
 			<key>begin</key>
 			<string>\(\*</string>
@@ -23,6 +33,148 @@
 			<key>name</key>
 			<string>comment.block.mathematica</string>
 		</dict>
+		<dict>
+			<key>match</key>
+			<string>=|:=|\^:=|\^=</string>
+			<key>name</key>
+			<string>keyword.operator.assignment</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\+|-|\*|\/</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic</string>
+		</dict>
+	</array>
+	<key>repository</key>
+	<dict>
+		<key>constant</key>
+		<dict>
+			<key>match</key>
+			<string>\b(True|False|Null|Automatic|All)\b</string>
+			<key>name</key>
+			<string>constant.language.mathematica</string>
+		</dict>
+		<key>full_form</key>
+		<dict>
+			<key>begin</key>
+			<string>([a-zA-Z$][a-zA-Z0-9$]*)(\[)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function.mathematica</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.full_form.begin.mathematica</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\]</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.full_form.end.mathematica</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.structure.full_form.mathematica</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#value</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#patterns</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>,</string>
+					<key>name</key>
+					<string>punctuation.separator.full_form.mathematica</string>
+				</dict>
+			</array>
+		</dict>
+		<key>list</key>
+		<dict>
+			<key>begin</key>
+			<string>\{</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.list.begin.mathematica</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\}</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.list.end.mathematica</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.structure.list.mathematica</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#value</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#patterns</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>,</string>
+					<key>name</key>
+					<string>punctuation.separator.list.mathematica</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>[^\s\}]</string>
+					<key>name</key>
+					<string>invalid.illegal.expected-list-separator.mathematica</string>
+				</dict>
+			</array>
+		</dict>
+		<key>named_pattern</key>
+		<dict>
+			<key>match</key>
+			<string>[a-zA-Z$][a-zA-Z0-9$]*_</string>
+			<key>name</key>
+			<string>variable.parameter.named_pattern.mathematica</string>
+		</dict>
+		<key>number</key>
+		<dict>
+			<key>match</key>
+			<string>\b(\d+(\.\d*)?)</string>
+			<key>name</key>
+			<string>constant.numeric.mathematica</string>
+		</dict>
+		<key>patterns</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#named_pattern</string>
+				</dict>
+			</array>
+		</dict>
+		<key>string</key>
 		<dict>
 			<key>begin</key>
 			<string>"</string>
@@ -40,116 +192,40 @@
 				</dict>
 			</array>
 		</dict>
+		<key>symbol</key>
 		<dict>
 			<key>match</key>
-			<string>\b[a-zA-Z$][\w$]*((?=_{1,3})|(?=\s*:(?![=:&gt;])))</string>
+			<string>[a-zA-Z$][a-zA-Z0-9$]*</string>
 			<key>name</key>
-			<string>variable.parameter.mathematica</string>
+			<string>constant.other.symbol.mathematica</string>
 		</dict>
+		<key>value</key>
 		<dict>
-			<key>match</key>
-			<string>\b(True|False|Null|Automatic|All)\b</string>
-			<key>name</key>
-			<string>keyword.language.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>(Pi|I|E)\b</string>
-			<key>name</key>
-			<string>keyword.math.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>\+|-(?!&gt;)|/(?![;/@.])|\*|\^</string>
-			<key>name</key>
-			<string>keyword.operator.arithmetic.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>/;|&amp;&amp;|\|\|</string>
-			<key>name</key>
-			<string>keyword.operator.logical.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>/{1,2}@|@{1,3}</string>
-			<key>name</key>
-			<string>keyword.operator.functional.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>-&gt;|:&gt;|/.</string>
-			<key>name</key>
-			<string>keyword.operator.rules.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>\b(\d+)</string>
-			<key>name</key>
-			<string>constant.numeric.integer.mathematica</string>
-		</dict>
-		<dict>
-			<key>match</key>
-			<string>\b(\d+\.\d*)</string>
-			<key>name</key>
-			<string>constant.numeric.float.mathematica</string>
-		</dict>
-		<dict>
-			<key>begin</key>
-			<string>\b([a-zA-Z$][\w$]*)\[</string>
-			<key>beginCaptures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>entity.name.function.mathematica</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>\]</string>
-			<key>name</key>
-			<string>meta.full_form.mathematica</string>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>include</key>
-					<string>$self</string>
+					<string>#constant</string>
 				</dict>
-			</array>
-		</dict>
-	</array>
-	<key>repository</key>
-	<dict>
-		<key>brackets</key>
-		<dict>
-			<key>begin</key>
-			<string>\[</string>
-			<key>end</key>
-			<string>\]</string>
-			<key>patterns</key>
-			<array>
 				<dict>
 					<key>include</key>
-					<string>#brackets</string>
+					<string>#number</string>
 				</dict>
-			</array>
-		</dict>
-		<key>generic_symbol</key>
-		<dict>
-			<key>match</key>
-			<string>[a-zA-Z$][\w$]*</string>
-		</dict>
-		<key>list</key>
-		<dict>
-			<key>begin</key>
-			<string>\{</string>
-			<key>end</key>
-			<string>\}</string>
-			<key>patterns</key>
-			<array>
+				<dict>
+					<key>include</key>
+					<string>#string</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#list</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#full_form</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#symbol</string>
 				</dict>
 			</array>
 		</dict>
