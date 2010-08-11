@@ -48,6 +48,22 @@
 	</array>
 	<key>repository</key>
 	<dict>
+		<key>array_index</key>
+		<dict>
+			<key>begin</key>
+			<string>\[\[</string>
+			<key>end</key>
+			<string>\]\]</string>
+			<key>name</key>
+			<string>keyword.operator.list_index</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>source.mathematica</string>
+				</dict>
+			</array>
+		</dict>
 		<key>constant</key>
 		<dict>
 			<key>match</key>
@@ -88,11 +104,7 @@
 			<array>
 				<dict>
 					<key>include</key>
-					<string>#value</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#patterns</string>
+					<string>source.mathematica</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -130,23 +142,13 @@
 			<array>
 				<dict>
 					<key>include</key>
-					<string>#value</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#patterns</string>
+					<string>source.mathematica</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>,</string>
 					<key>name</key>
 					<string>punctuation.separator.list.mathematica</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>[^\s\}]</string>
-					<key>name</key>
-					<string>invalid.illegal.expected-list-separator.mathematica</string>
 				</dict>
 			</array>
 		</dict>
