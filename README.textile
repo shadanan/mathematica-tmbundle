@@ -1,6 +1,58 @@
 h2. Mathematica Textmate Bundle
 
-Nothing much to see here yet!
+TextMate is a popular text editor for Mac OS X. For more information about the editor, 
+visit "Macromedia":http://www.macromates.com/, the author's web site.
 
-I've just started the language grammar, with definitions for some constants, keywords, 
-operators, and FullForm expressions.  
+Mathematica is a computational software program used in scientific, engineering, and 
+mathematical fields and other areas of technical computing. It is created by 
+"Wolfram Research":http://www.wolfram.com/.
+
+This bundle allows TextMate to understand Mathematica .m files. 
+
+It was created by David Howell and is being maintained by David Howell and Shad Sharma.
+
+h3. Installation
+
+Open up a terminal and navigate to the TextMate bundle folder:
+@$ cd ~/Library/Application\ Support/TextMate/Bundles@
+*NOTE*: You may need to create this folder first.
+
+Clone the bundle's repository using git:
+@$ git clone http://github.com/dehowell/mathematica-tmbundle.git Mathematica.tmbundle@
+
+By default, TextMate interprets .m files as Objective-C. You will have to switch the
+language to Mathematica in order to activate the bundle.
+
+h3. Stuff That Works (for the most part...)
+
+This TextMate bundle is a side project for us and still has a far way to go. It is,
+however, being actively developed. 
+
+h4. Language Features
+
+ * Operators (there are a lot!)
+ * Constants (@True, False, Null, Automatic, All@)
+ * Comments (@(* This is a comment *)@)
+ * Lists (@{a, b, c}@)
+ * Parts (@[[1, 2]]@)
+ * Some function calls (@FunctionName[..]@)
+ * Strings (@"Hello World!"@)
+ * Symbols (@thisIsASymbol@)
+ * Named patterns (@x_@)
+
+h4. Snippets
+
+ * SetDelayed (Shift+Enter)
+ * Module (module ->|)
+ * BeginPackage (package ->|)
+ * Begin ... `Private` (begin ->|)
+ * If (if ->|)
+
+h4. Other
+
+ * Indentation on '[]' and :=
+ 
+h3. Stuff That We Still Need to Do
+
+ * So many things we can't list it all... your help would be appreciated. =)
+ 
