@@ -2,18 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>content</key>
+	<string>[$1] := $0</string>
+	<key>keyEquivalent</key>
+	<string>$</string>
 	<key>name</key>
-	<string>Indent</string>
+	<string>New SetDelayed</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
-	<key>settings</key>
-	<dict>
-		<key>decreaseIndentPattern</key>
-		<string>\]</string>
-		<key>increaseIndentPattern</key>
-		<string>(^.*\[[^\]\n]*$|^.*:=\s*$|^.*/@\s*$)</string>
-	</dict>
 	<key>uuid</key>
-	<string>52795E95-1D99-4A39-B995-C10CA9B4D044</string>
+	<string>81832602-4717-4BF4-AC23-A6A50C3A9F53</string>
 </dict>
 </plist>

@@ -19,11 +19,31 @@
 	<array>
 		<dict>
 			<key>include</key>
-			<string>#value</string>
+			<string>#array_index</string>
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#patterns</string>
+			<string>#constant</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#string</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#number</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#list</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#function</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#symbol</string>
 		</dict>
 		<dict>
 			<key>begin</key>
@@ -35,15 +55,243 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>=|:=|\^:=|\^=</string>
+			<string>\^:=</string>
 			<key>name</key>
-			<string>keyword.operator.assignment</string>
+			<string>keyword.operator.assignment.up_set_delayed</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\+|-|\*|\/</string>
+			<string>===</string>
 			<key>name</key>
-			<string>keyword.operator.arithmetic</string>
+			<string>keyword.operator.logical.equivalent</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&gt;\&gt;\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.put_append</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\*\^</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.scientific_notation</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>:=</string>
+			<key>name</key>
+			<string>keyword.operator.assignment.set_delayed</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\^=</string>
+			<key>name</key>
+			<string>keyword.operator.assignment.up_set</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>&amp;&amp;</string>
+			<key>name</key>
+			<string>keyword.operator.logical.and</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>||</string>
+			<key>name</key>
+			<string>keyword.operator.logical.or</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>==</string>
+			<key>name</key>
+			<string>keyword.operator.logical.equal</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&gt;=</string>
+			<key>name</key>
+			<string>keyword.operator.logical.greater_than_or_equal</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&lt;=</string>
+			<key>name</key>
+			<string>keyword.operator.logical.less_than_or_equal</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>;;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.span</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\.\.</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.repeated</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/\.</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.replace</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.rule</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>:\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.rule_delayed</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>@@</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.apply</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/@</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.map</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&lt;\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.string_join</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&lt;\&lt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.get</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&gt;\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.put</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/@</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.map</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.condition</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>//</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.postfix</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>~~</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.string_expression</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\+</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.plus</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.minus</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\*</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.times</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.divide</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\^</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.power</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>!</string>
+			<key>name</key>
+			<string>keyword.operator.logical.not</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&gt;</string>
+			<key>name</key>
+			<string>keyword.operator.logical.greater_than</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\&lt;</string>
+			<key>name</key>
+			<string>keyword.operator.logical.less_than</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>|</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.alternative</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>@</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.prefix</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.compound_expression</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>`</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.context</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>&amp;</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.function</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>#\d*</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.slot</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\?</string>
+			<key>name</key>
+			<string>keyword.operator.mathematica.pattern_test</string>
 		</dict>
 	</array>
 	<key>repository</key>
@@ -52,15 +300,37 @@
 		<dict>
 			<key>begin</key>
 			<string>\[\[</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.part.begin.mathematica</string>
+				</dict>
+			</dict>
 			<key>end</key>
 			<string>\]\]</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.part.end.mathematica</string>
+				</dict>
+			</dict>
 			<key>name</key>
-			<string>keyword.operator.list_index</string>
+			<string>meta.structure.part.mathematica</string>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>include</key>
-					<string>source.mathematica</string>
+					<string>$self</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>,</string>
+					<key>name</key>
+					<string>punctuation.separator.part.mathematica</string>
 				</dict>
 			</array>
 		</dict>
@@ -71,10 +341,10 @@
 			<key>name</key>
 			<string>constant.language.mathematica</string>
 		</dict>
-		<key>full_form</key>
+		<key>function</key>
 		<dict>
 			<key>begin</key>
-			<string>([a-zA-Z$][a-zA-Z0-9$]*)(\[)</string>
+			<string>([a-zA-Z$][a-zA-Z0-9$]*)(\[)(?!\[)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -85,7 +355,7 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.full_form.begin.mathematica</string>
+					<string>punctuation.definition.function.begin.mathematica</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -95,22 +365,22 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.full_form.end.mathematica</string>
+					<string>punctuation.definition.function.end.mathematica</string>
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>meta.structure.full_form.mathematica</string>
+			<string>meta.structure.function.mathematica</string>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>include</key>
-					<string>source.mathematica</string>
+					<string>$self</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>,</string>
 					<key>name</key>
-					<string>punctuation.separator.full_form.mathematica</string>
+					<string>punctuation.separator.list.mathematica</string>
 				</dict>
 			</array>
 		</dict>
@@ -142,7 +412,7 @@
 			<array>
 				<dict>
 					<key>include</key>
-					<string>source.mathematica</string>
+					<string>$self</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -200,36 +470,6 @@
 			<string>[a-zA-Z$][a-zA-Z0-9$]*</string>
 			<key>name</key>
 			<string>constant.other.symbol.mathematica</string>
-		</dict>
-		<key>value</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#constant</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#number</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#string</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#list</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#full_form</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#symbol</string>
-				</dict>
-			</array>
 		</dict>
 	</dict>
 	<key>scopeName</key>
