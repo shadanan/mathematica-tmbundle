@@ -8,6 +8,8 @@ $0
 End[]</string>
 	<key>name</key>
 	<string>Begin ... `Private`</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
 	<key>tabTrigger</key>
 	<string>begin</string>
 	<key>uuid</key>

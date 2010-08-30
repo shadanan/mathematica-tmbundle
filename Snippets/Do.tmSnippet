@@ -3,16 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>BeginPackage["${TM_FILENAME/\.m$/`/}"]
-$0
-EndPackage[]</string>
+	<string>Do[${0:(* body *)}, {${1:(* i *)}, ${2:(* i_min *)}, ${3:(* i_max *)}${4:, ${5:(* di *)}}}]</string>
 	<key>name</key>
-	<string>BeginPackage</string>
+	<string>Do</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>tabTrigger</key>
-	<string>package</string>
+	<string>do</string>
 	<key>uuid</key>
-	<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
+	<string>8BD46A49-9C94-4F3E-A00E-BEE3E67237AC</string>
 </dict>
 </plist>

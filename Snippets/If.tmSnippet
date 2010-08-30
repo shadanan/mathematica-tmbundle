@@ -3,9 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>If[$1,
-	$2,
-	$3]</string>
+	<string>If[${1:(* condition *)}, ${2:(* value when true *)}${3:, ${4:(* value when false *)}${5:, ${6:(* value otherwise *)}}}]</string>
 	<key>name</key>
 	<string>If</string>
 	<key>tabTrigger</key>
