@@ -3,12 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>Module[{$1},
-	$0
+	<string>Module[{${1:${2:x}${3: = ${4:x0}}}},
+	${0:expr}
 ]
 	</string>
 	<key>name</key>
 	<string>Module</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
 	<key>tabTrigger</key>
 	<string>module</string>
 	<key>uuid</key>

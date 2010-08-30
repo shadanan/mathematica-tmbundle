@@ -3,16 +3,12 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>BeginPackage["${TM_FILENAME/\.m$/`/}"]
-$0
-EndPackage[]</string>
+	<string>While[${1:(* test condition *)}, ${0:(* body *)}]</string>
 	<key>name</key>
-	<string>BeginPackage</string>
-	<key>scope</key>
-	<string>source.mathematica</string>
+	<string>While</string>
 	<key>tabTrigger</key>
-	<string>package</string>
+	<string>while</string>
 	<key>uuid</key>
-	<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
+	<string>DF6EE342-1779-4386-B466-5D988C9D0029</string>
 </dict>
 </plist>
