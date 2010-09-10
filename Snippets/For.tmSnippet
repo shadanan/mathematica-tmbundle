@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>For[${1:i${2: = ${3:(* start *)}}}, ${4:(* condition *)}, ${5:(* increment *)}, ${0:(* body *)}]</string>
+	<string>For[${1:${2:i} = ${3:(* start *)}}, ${4:(* condition *)}, ${5:(* increment *)}, ${0:(* body *)}]</string>
 	<key>name</key>
 	<string>For</string>
 	<key>scope</key>

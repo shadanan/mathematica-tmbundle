@@ -6,6 +6,8 @@
 	<string>While[${1:(* test condition *)}, ${0:(* body *)}]</string>
 	<key>name</key>
 	<string>While</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
 	<key>tabTrigger</key>
 	<string>while</string>
 	<key>uuid</key>
