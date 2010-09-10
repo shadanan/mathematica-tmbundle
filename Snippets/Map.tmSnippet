@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>Map[${1:(* function *)}, ${2:(* expression *)}${3:, ${4:(* levelspec *)}}]</string>
+	<key>name</key>
+	<string>Map</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>map</string>
+	<key>uuid</key>
+	<string>FF5218AE-319D-4BE3-8841-F2C8E63CF148</string>
+</dict>
+</plist>

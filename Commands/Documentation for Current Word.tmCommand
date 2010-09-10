@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+url = "http://reference.wolfram.com/mathematica/ref/#{ENV['TM_CURRENT_WORD']}.html"
+puts "&lt;meta http-equiv='Refresh' content='0;URL=#{url}'&gt;"
+</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^h</string>
+	<key>name</key>
+	<string>Documentation for Current Word</string>
+	<key>output</key>
+	<string>showAsHTML</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
+	<key>uuid</key>
+	<string>9C35A266-15F0-4CF2-ADDA-D7465902C713</string>
+</dict>
+</plist>

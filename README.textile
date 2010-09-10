@@ -46,13 +46,20 @@ h4. Snippets
  * Module (module ->|)
  * BeginPackage (package ->|)
  * Begin ... `Private` (begin ->|)
- * If (if ->|)
+ * Do (do ->|)
+ * For (for ->|)
+ * If/Condition/True, If/Condition/True/False, If/Condition/True/False/Otherwise (if ->|)
+ * Map (map ->|)
+ * Select (select ->|)
+ * While (while ->|)
 
-h4. Other
+h4. Other (Commands, Indentation, etc.)
 
- * Indentation on '[]' and :=
- 
-h3. Stuff That We Still Need to Do
+ * Removed indentation rules. They caused more problems than they fixed.
+ * Documentation for Current Word (click on word and press ^H)
 
- * So many things we can't list it all... your help would be appreciated. =)
- 
+h3. Next on the list...
+
+ * Connect to Mathematica Kernel and execute statements directly...
+ * Add more snippets (Function, etc.)
+ * Code auto formatter -- to be done in python or ruby
