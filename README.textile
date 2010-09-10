@@ -1,7 +1,7 @@
 h2. Mathematica Textmate Bundle
 
 TextMate is a popular text editor for Mac OS X. For more information about the editor, 
-visit "Macromedia":http://www.macromates.com/, the author's web site.
+visit "Macromates":http://www.macromates.com/, the author's web site.
 
 Mathematica is a computational software program used in scientific, engineering, and 
 mathematical fields and other areas of technical computing. It is created by 
