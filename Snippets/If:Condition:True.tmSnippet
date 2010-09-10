@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>If[${1:(* condition *)}, ${2:(* value when true *)}]</string>
+	<key>name</key>
+	<string>If/Condition/True</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>if</string>
+	<key>uuid</key>
+	<string>A5E129FE-158C-4AE8-A85C-39FFD7D8B3CB</string>
+</dict>
+</plist>
