@@ -236,6 +236,7 @@ class MathMate(object):
                     current += c1
                     pos += 1
                     statements.append((ss_line_number, ss_line_index, ss_pos, line_number, pos - line_index_start, pos, "".join(current)))
+                    current = []
                     continue
             
                 if c1 in ("[", "(", "{"):
@@ -292,13 +293,25 @@ class MathMate(object):
                 pos += 1
                 continue
     
-        statements.append((ss_line_number, ss_line_index, ss_pos, line_number, line_index, pos, "".join(current)))
+        if current != []:
+            statements.append((ss_line_number, ss_line_index, ss_pos, line_number, line_index, pos, "".join(current)))
         
         for ssln, ssli, ssp, esln, esli, esp, statement in statements:
-            if self.tmln >= ssln and self.tmln <= esln and self.tmli >= ssli and self.tmli <= esli:
-                return ssln, ssli, ssp, esln, esli, esp, statement
+            if self.tmln < ssln:
+                continue
+            
+            if self.tmln > esln:
+                continue
+            
+            if self.tmln == ssln and self.tmli < ssli:
+                continue
+                
+            if self.tmln == esln and self.tmli > esli:
+                continue
+            
+            return ssln, ssli, ssp, esln, esli, esp, statement
         
-        return None, None, None, None, None, None, None
+        raise Exception("Could not determine current statement.")
     
     def show_current_statement(self):
         ssln, ssli, ssp, esln, esli, esp, statement = self.get_current_statement()
