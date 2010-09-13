@@ -469,7 +469,7 @@
 			<key>match</key>
 			<string>[a-zA-Z$][a-zA-Z0-9$]*</string>
 			<key>name</key>
-			<string>constant.other.symbol.mathematica</string>
+			<string>variable.symbol.mathematica</string>
 		</dict>
 	</dict>
 	<key>scopeName</key>
