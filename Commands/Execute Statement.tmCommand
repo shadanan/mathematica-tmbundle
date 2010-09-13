@@ -5,20 +5,20 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" reformat</string>
+	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" show_current_statement</string>
 	<key>fallbackInput</key>
 	<string>document</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^q</string>
+	<string>$</string>
 	<key>name</key>
-	<string>Reformat Statement / Selection</string>
+	<string>Execute Statement</string>
 	<key>output</key>
-	<string>replaceSelectedText</string>
+	<string>showAsTooltip</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>075E04F0-0870-439A-862D-5740C5B8BA8A</string>
+	<string>E36658BA-47F4-48D7-8485-F6435BB3816F</string>
 </dict>
 </plist>

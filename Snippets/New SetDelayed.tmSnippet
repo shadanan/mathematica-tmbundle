@@ -5,11 +5,13 @@
 	<key>content</key>
 	<string>[$1] := $0</string>
 	<key>keyEquivalent</key>
-	<string>$</string>
+	<string>:</string>
 	<key>name</key>
 	<string>SetDelayed</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>:=</string>
 	<key>uuid</key>
 	<string>81832602-4717-4BF4-AC23-A6A50C3A9F53</string>
 </dict>
