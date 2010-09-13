@@ -34,143 +34,160 @@ class MathMate(object):
         return count
     
     def reformat_block(self, block, initial_indent_level = None):
-        indented_block = []
-        indent_level = initial_indent_level
-        scope = "source"
+        statements = self.get_statements(block)
+        indented_statements = []
+        if initial_indent_level is None:
+            initial_indent_level = self.count_indents(block)
         
-        for line in block.splitlines(True):
-            if indent_level is None:
-                indent_level = self.count_indents(line)
-
-            # Parse line
-            pos = 0
+        for ssln, ssli, ssp, esln, esli, esp, statement in statements:
             result = []
-
-            while pos < len(line):
-                c1 = line[pos]
-                c2 = line[pos:pos+2]
-                c3 = line[pos:pos+3]
-
-                pc = line[pos-1] if pos > 0 else None
-
-                nnsc = None
-                for i in range(pos, len(line)):
-                    if line[i] not in (" ", "\t"):
-                        nnsc = line[i]
-                        break
-
-                if scope == "string":
-                    if c2 == '\\"':
-                        result += c2
-                        pos += 2
-                        continue
-
-                    if c1 == '"':
-                        scope = "source"
-                        result += c1
-                        pos += 1
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-                if scope == "comment":
-                    if c3 == "\\*)":
-                        result += c3
-                        pos += 3
-                        continue
-
-                    if c2 == "*)":
-                        scope = "source"
-                        result += c2
-                        pos += 2
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-                if scope == "source":
-                    if pos == 0:
-                        if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
-                            result += (self.indent * (indent_level - 1))
-                        else:
-                            result += (self.indent * indent_level)
-
-                    if c1 in (" ", "\t"):
-                        vsc = string.ascii_letters + string.digits
-                        if pc is not None and pc in vsc and nnsc in vsc:
-                            result += " "
-                        pos += 1
-                        continue
-
-                    if c3 in ("^:=", "===", ">>>"):
-                        result += " ", c3, " "
-                        pos += 3
-                        continue
-
-                    if c2 in ("*^", ":=", "^=", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
-                        result += " ", c2, " "
-                        pos += 2
-                        continue
-
-                    if c2 == "..":
-                        result += c2, " "
-                        pos += 2
-                        continue
-
-                    if c2 == "(*":
-                        scope = "comment"
-                        result += c2
-                        pos += 2
-                        continue
-
-                    if c1 in ("[", "{", "("):
-                        result += c1
-                        indent_level += 1
-                        pos += 1
-                        continue
-
-                    if c1 in ("]", "}", ")"):
-                        result += c1
-                        indent_level -= 1
-                        pos += 1
-                        continue
-
-                    if c1 in (","):
-                        result += c1, " "
-                        pos += 1
-                        continue
-
-                    if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?", "="):
-                        result += " ", c1, " "
-                        pos += 1
-                        continue
-
-                    if c1 == "&":
-                        result += " ", c1
-                        pos += 1
-                        continue
-
-                    if c1 in ("@", ";", "#"):
-                        result += c1
-                        pos += 1
-                        continue
-
-                    if c1 == '"':
-                        scope = "string"
-                        result += c1
-                        pos += 1
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-            indented_block.append("".join(result))
-        return indented_block
+            indent_level = initial_indent_level
+            scope = "source"
         
+            for line in statement.splitlines(True):
+                pos = 0
+                while pos < len(line):
+                    c1 = line[pos]
+                    c2 = line[pos:pos+2]
+                    c3 = line[pos:pos+3]
+
+                    pc = line[pos-1] if pos > 0 else None
+
+                    nnsc = None
+                    for i in range(pos, len(line)):
+                        if line[i] not in (" ", "\t"):
+                            nnsc = line[i]
+                            break
+
+                    if scope == "string":
+                        if c2 == '\\"':
+                            result += c2
+                            pos += 2
+                            continue
+
+                        if c1 == '"':
+                            scope = "source"
+                            result += c1
+                            pos += 1
+                            continue
+
+                        result += c1
+                        pos += 1
+                        continue
+
+                    if scope == "comment":
+                        if c3 == "\\*)":
+                            result += c3
+                            pos += 3
+                            continue
+
+                        if c2 == "*)":
+                            scope = "source"
+                            result += c2
+                            pos += 2
+                            continue
+
+                        result += c1
+                        pos += 1
+                        continue
+
+                    if scope == "source":
+                        if pos == 0:
+                            if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
+                                result += (self.indent * (indent_level - 1))
+                            else:
+                                result += (self.indent * indent_level)
+
+                        if c1 in (" ", "\t"):
+                            vsc = string.ascii_letters + string.digits
+                            if pc is not None and pc in vsc and nnsc in vsc:
+                                result += " "
+                            pos += 1
+                            continue
+                        
+                        if c3 == "^:=":
+                            indent_level += 1
+                            result += " ", c3, " "
+                            pos += 3
+                            continue
+                        
+                        if c3 in ("===", ">>>"):
+                            result += " ", c3, " "
+                            pos += 3
+                            continue
+
+                        if c2 in (":=", "^="):
+                            indent_level += 1
+                            result += " ", c2, " "
+                            pos += 2
+                            continue
+
+                        if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
+                            result += " ", c2, " "
+                            pos += 2
+                            continue
+
+                        if c2 == "..":
+                            result += c2, " "
+                            pos += 2
+                            continue
+
+                        if c2 == "(*":
+                            scope = "comment"
+                            result += c2
+                            pos += 2
+                            continue
+
+                        if c1 in ("[", "{", "("):
+                            indent_level += 1
+                            result += c1
+                            pos += 1
+                            continue
+
+                        if c1 in ("]", "}", ")"):
+                            indent_level -= 1
+                            result += c1
+                            pos += 1
+                            continue
+
+                        if c1 == ",":
+                            result += c1, " "
+                            pos += 1
+                            continue
+                        
+                        if c1 == "=":
+                            indent_level += 1
+                            result += " ", c1, " "
+                            pos += 1
+                            continue
+
+                        if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?"):
+                            result += " ", c1, " "
+                            pos += 1
+                            continue
+
+                        if c1 == "&":
+                            result += " ", c1
+                            pos += 1
+                            continue
+
+                        if c1 in ("@", ";", "#"):
+                            result += c1
+                            pos += 1
+                            continue
+
+                        if c1 == '"':
+                            scope = "string"
+                            result += c1
+                            pos += 1
+                            continue
+
+                        result += c1
+                        pos += 1
+                        continue
+
+            indented_statements.append("".join(result))
+        return indented_statements
     
     def reformat_current_statement(self):
         ssln, ssli, ssp, esln, esli, esp, statement = self.get_current_statement()
@@ -188,7 +205,7 @@ class MathMate(object):
         else:
             self.reformat_current_statement()
     
-    def get_current_statement(self):
+    def get_statements(self, block):
         statements = []
         level = 0
         scope = "next"
@@ -201,10 +218,10 @@ class MathMate(object):
         line_number = 1
         line_index_start = 0
     
-        while pos < len(self.doc):
-            c1 = self.doc[pos]
-            c2 = self.doc[pos:pos+2]
-            c3 = self.doc[pos:pos+3]
+        while pos < len(block):
+            c1 = block[pos]
+            c2 = block[pos:pos+2]
+            c3 = block[pos:pos+3]
         
             if c1 == "\n":
                 line_number += 1
@@ -295,6 +312,11 @@ class MathMate(object):
     
         if current != []:
             statements.append((ss_line_number, ss_line_index, ss_pos, line_number, line_index, pos, "".join(current)))
+        
+        return statements
+        
+    def get_current_statement(self):
+        statements = self.get_statements(self.doc)
         
         for ssln, ssli, ssp, esln, esli, esp, statement in statements:
             if self.tmln < ssln:
