@@ -3,9 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>[$1] := $0</string>
-	<key>keyEquivalent</key>
-	<string>:</string>
+	<string>$1[$2] := $0</string>
 	<key>name</key>
 	<string>SetDelayed</string>
 	<key>scope</key>
