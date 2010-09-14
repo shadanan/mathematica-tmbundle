@@ -34,6 +34,7 @@ class MathMate(object):
         return count
     
     def reformat_block(self, block, initial_indent_level = None):
+        scope = []
         statements = self.get_statements(block)
         if statements is None:
             return
@@ -45,7 +46,7 @@ class MathMate(object):
         for ssln, ssli, ssp, esln, esli, esp, statement in statements:
             result = []
             indent_level = initial_indent_level
-            scope = "source"
+            scope.append("source")
         
             for line in statement.splitlines(True):
                 pos = 0
@@ -53,6 +54,7 @@ class MathMate(object):
                     c1 = line[pos]
                     c2 = line[pos:pos+2]
                     c3 = line[pos:pos+3]
+                    scope_index = len(scope) - 1
 
                     pc = line[pos-1] if pos > 0 else None
 
@@ -61,15 +63,15 @@ class MathMate(object):
                         if line[i] not in (" ", "\t"):
                             nnsc = line[i]
                             break
-
-                    if scope == "string":
+                    
+                    if "string" in scope:
                         if c2 == '\\"':
                             result += c2
                             pos += 2
                             continue
 
                         if c1 == '"':
-                            scope = "source"
+                            scope.pop()
                             result += c1
                             pos += 1
                             continue
@@ -78,14 +80,14 @@ class MathMate(object):
                         pos += 1
                         continue
 
-                    if scope == "comment":
+                    if "comment" in scope:
                         if c3 == "\\*)":
                             result += c3
                             pos += 3
                             continue
 
                         if c2 == "*)":
-                            scope = "source"
+                            scope.pop()
                             result += c2
                             pos += 2
                             continue
@@ -94,7 +96,7 @@ class MathMate(object):
                         pos += 1
                         continue
 
-                    if scope == "source":
+                    if "source" in scope:
                         if pos == 0:
                             if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
                                 result += (self.indent * (indent_level - 1))
@@ -107,19 +109,21 @@ class MathMate(object):
                                 result += " "
                             pos += 1
                             continue
-                        
+                    
                         if c3 == "^:=":
+                            scope.append("define")
                             indent_level += 1
                             result += " ", c3, " "
                             pos += 3
                             continue
-                        
+                    
                         if c3 in ("===", ">>>"):
                             result += " ", c3, " "
                             pos += 3
                             continue
 
                         if c2 in (":=", "^="):
+                            scope.append("define")
                             indent_level += 1
                             result += " ", c2, " "
                             pos += 2
@@ -136,19 +140,24 @@ class MathMate(object):
                             continue
 
                         if c2 == "(*":
-                            scope = "comment"
+                            scope.append("comment")
                             result += c2
                             pos += 2
                             continue
 
                         if c1 in ("[", "{", "("):
+                            scope.append("nest")
                             indent_level += 1
                             result += c1
                             pos += 1
                             continue
 
                         if c1 in ("]", "}", ")"):
+                            scope.pop()
                             indent_level -= 1
+                            if scope[-1] == "define":
+                                indent_level -= 1
+                                scope.pop()
                             result += c1
                             pos += 1
                             continue
@@ -157,8 +166,9 @@ class MathMate(object):
                             result += c1, " "
                             pos += 1
                             continue
-                        
+                    
                         if c1 == "=":
+                            scope.append("define")
                             indent_level += 1
                             result += " ", c1, " "
                             pos += 1
@@ -175,12 +185,15 @@ class MathMate(object):
                             continue
 
                         if c1 in ("@", ";", "#"):
+                            if scope[-1] == "define":
+                                indent_level -= 1
+                                scope.pop()
                             result += c1
                             pos += 1
                             continue
 
                         if c1 == '"':
-                            scope = "string"
+                            scope.append("string")
                             result += c1
                             pos += 1
                             continue
@@ -188,6 +201,8 @@ class MathMate(object):
                         result += c1
                         pos += 1
                         continue
+                    
+                    scope_index -= 1
 
             indented_statements.append("".join(result))
         return indented_statements
