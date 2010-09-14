@@ -27,6 +27,10 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#sqlstring</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#string</string>
 		</dict>
 		<dict>
@@ -443,6 +447,32 @@
 				<dict>
 					<key>include</key>
 					<string>#named_pattern</string>
+				</dict>
+			</array>
+		</dict>
+		<key>sqlstring</key>
+		<dict>
+			<key>begin</key>
+			<string>"(?=\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|REPLACE|ALTER))</string>
+			<key>comment</key>
+			<string>double quoted string</string>
+			<key>end</key>
+			<string>"</string>
+			<key>name</key>
+			<string>string.quoted.double.sql.mathematica</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#constant_placeholder</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#escaped_char</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>source.sql</string>
 				</dict>
 			</array>
 		</dict>
