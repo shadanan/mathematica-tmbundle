@@ -35,6 +35,9 @@ class MathMate(object):
     
     def reformat_block(self, block, initial_indent_level = None):
         statements = self.get_statements(block)
+        if statements is None:
+            return
+            
         indented_statements = []
         if initial_indent_level is None:
             initial_indent_level = self.count_indents(block)
@@ -190,7 +193,11 @@ class MathMate(object):
         return indented_statements
     
     def reformat_current_statement(self):
-        ssln, ssli, ssp, esln, esli, esp, statement = self.get_current_statement()
+        current_statement = self.get_current_statement()
+        if current_statement is None:
+            return
+            
+        ssln, ssli, ssp, esln, esli, esp, statement = current_statement
         
         sys.stdout.write(self.doc[0:ssp])
         sys.stdout.write("".join(self.reformat_block(statement)))
@@ -231,13 +238,17 @@ class MathMate(object):
         
             if scope == "next":
                 if c1 not in (" ", "\t", "\n"):
+                    if current != []:
+                        statements.append((ss_line_number, ss_line_index, ss_pos, line_number, pos - line_index_start, pos, "".join(current)))
+                        
                     ss_pos = pos
                     ss_line_number = line_number
                     ss_line_index = line_index
                     current = []
                     scope = "source"
                     continue
-            
+                
+                current += c1
                 pos += 1
                 continue
         
@@ -252,8 +263,6 @@ class MathMate(object):
                     scope = "next"
                     current += c1
                     pos += 1
-                    statements.append((ss_line_number, ss_line_index, ss_pos, line_number, pos - line_index_start, pos, "".join(current)))
-                    current = []
                     continue
             
                 if c1 in ("[", "(", "{"):
@@ -317,27 +326,40 @@ class MathMate(object):
         
     def get_current_statement(self):
         statements = self.get_statements(self.doc)
+        if statements is None:
+            return None
         
-        for ssln, ssli, ssp, esln, esli, esp, statement in statements:
+        previous_statement = None
+        
+        for current_statement in statements:
+            ssln, ssli, ssp, esln, esli, esp, statement = current_statement
+            
             if self.tmln < ssln:
                 continue
             
             if self.tmln > esln:
+                if previous_statement is None or ssp > previous_statement[2]:
+                    previous_statement = current_statement
                 continue
             
             if self.tmln == ssln and self.tmli < ssli:
                 continue
                 
             if self.tmln == esln and self.tmli > esli:
+                if previous_statement is None or ssp > previous_statement[2]:
+                    previous_statement = current_statement
                 continue
             
             return ssln, ssli, ssp, esln, esli, esp, statement
         
-        raise Exception("Could not determine current statement.")
+        if previous_statement is not None:
+            return previous_statement
+            
+        return None
     
     def show_current_statement(self):
-        ssln, ssli, ssp, esln, esli, esp, statement = self.get_current_statement()
         print "Cursor Position: (Line: %d, Index: %d)" % (self.tmln, self.tmli)
+        ssln, ssli, ssp, esln, esli, esp, statement = self.get_current_statement()
         print "Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli)
         print statement
 
