@@ -35,176 +35,6 @@ class MathMate(object):
                 break
         return count
     
-    def reformat_statement(self, statement, initial_indent_level = None):
-        scope = []
-        if initial_indent_level is None:
-            initial_indent_level = self.count_indents(statement)
-            
-        result = []
-        indent_level = initial_indent_level
-        scope.append("source")
-
-        for line in statement.splitlines(True):
-            pos = 0
-            while pos < len(line):
-                c1 = line[pos]
-                c2 = line[pos:pos+2]
-                c3 = line[pos:pos+3]
-                pc = line[pos-1] if pos > 0 else None
-
-                nnsc = None
-                for i in range(pos, len(line)):
-                    if line[i] not in (" ", "\t"):
-                        nnsc = line[i]
-                        break
-
-                if "string" in scope:
-                    if c2 == '\\"':
-                        result += c2
-                        pos += 2
-                        continue
-
-                    if c1 == '"':
-                        scope.pop()
-                        result += c1
-                        pos += 1
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-                if "comment" in scope:
-                    if c3 == "\\*)":
-                        result += c3
-                        pos += 3
-                        continue
-
-                    if c2 == "*)":
-                        scope.pop()
-                        result += c2
-                        pos += 2
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-                if "source" in scope:
-                    if pos == 0:
-                        if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
-                            result += (self.indent * (indent_level - 1))
-                        else:
-                            result += (self.indent * indent_level)
-
-                    if c1 in (" ", "\t"):
-                        vsc = string.ascii_letters + string.digits
-                        if pc is not None and pc in vsc and nnsc in vsc:
-                            result += " "
-                        pos += 1
-                        continue
-
-                    if c3 == "^:=":
-                        scope.append("define")
-                        indent_level += 1
-                        result += " ", c3, " "
-                        pos += 3
-                        continue
-
-                    if c3 in ("===", ">>>"):
-                        result += " ", c3, " "
-                        pos += 3
-                        continue
-
-                    if c2 in (":=", "^="):
-                        scope.append("define")
-                        indent_level += 1
-                        result += " ", c2, " "
-                        pos += 2
-                        continue
-
-                    if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
-                        result += " ", c2, " "
-                        pos += 2
-                        continue
-
-                    if c2 == "..":
-                        result += c2, " "
-                        pos += 2
-                        continue
-
-                    if c2 == "(*":
-                        scope.append("comment")
-                        result += c2
-                        pos += 2
-                        continue
-
-                    if c1 in ("[", "{", "("):
-                        scope.append("nest")
-                        indent_level += 1
-                        result += c1
-                        pos += 1
-                        continue
-
-                    if c1 in ("]", "}", ")"):
-                        scope.pop()
-                        indent_level -= 1
-                        if scope[-1] == "define":
-                            indent_level -= 1
-                            scope.pop()
-                        result += c1
-                        pos += 1
-                        continue
-
-                    if c1 == ",":
-                        result += c1, " "
-                        pos += 1
-                        continue
-
-                    if c1 == "=":
-                        scope.append("define")
-                        indent_level += 1
-                        result += " ", c1, " "
-                        pos += 1
-                        continue
-
-                    if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?"):
-                        result += " ", c1, " "
-                        pos += 1
-                        continue
-
-                    if c1 == "&":
-                        result += " ", c1
-                        pos += 1
-                        continue
-
-                    if c1 == ";":
-                        if scope[-1] == "define":
-                            indent_level -= 1
-                            scope.pop()
-                        result += c1
-                        pos += 1
-                        continue
-
-                    if c1 in ("@", "#"):
-                        result += c1
-                        pos += 1
-                        continue
-
-                    if c1 == '"':
-                        scope.append("string")
-                        result += c1
-                        pos += 1
-                        continue
-
-                    result += c1
-                    pos += 1
-                    continue
-
-                scope_index -= 1
-
-        return "".join(result)
-
     def reformat_block(self, block, initial_indent_level = None):
         scope = []
         statements = self.parse_statements(block)
@@ -384,26 +214,212 @@ class MathMate(object):
             indented_statements.append("".join(result))
         return indented_statements
     
-    def reformat_current_statement(self):
-        current_statement = self.get_current_statement()
-        if current_statement is None:
-            return
-            
-        ssln, ssli, ssp, esln, esli, esp, statement = current_statement
-        
-        sys.stdout.write(self.doc[0:ssp])
-        sys.stdout.write("".join(self.reformat_block(statement)))
-        sys.stdout.write(self.doc[esp:])
-        
-    def reformat_selection(self):
-        sys.stdout.write("".join(self.reformat_block(self.doc)))
-        
     def reformat(self):
         if self.selected_text is not None:
-            self.reformat_selection()
+            initial_indent_level = self.count_indents(self.doc)
+            for ssln, ssli, ssp, esln, esli, esp, statement in self.statements:
+                sys.stdout.write(self.reformat_statement(statement, initial_indent_level))
         else:
-            self.reformat_current_statement()
+            current_statement = self.get_current_statement()
+            if current_statement is None:
+                return
+
+            ssln, ssli, ssp, esln, esli, esp, statement = current_statement
+
+            sys.stdout.write(self.doc[0:ssp])
+            sys.stdout.write(self.reformat_statement(statement))
+            sys.stdout.write(self.doc[esp:])
     
+    def reformat_statement(self, statement, initial_indent_level = None):
+        current = []
+        scope = ["root"]
+
+        if initial_indent_level is None:
+            initial_indent_level = self.count_indents(statement)
+        
+        for line_number, line in enumerate(statement.splitlines(True)):
+            pos = 0
+            indent_level = len(scope) + initial_indent_level - 1
+            
+            while pos < len(line):
+                c1 = line[pos]
+                c2 = line[pos:pos+2]
+                c3 = line[pos:pos+3]
+                pc = line[pos-1] if pos > 0 else None
+
+                nnsc = None
+                for i in range(pos, len(line)):
+                    if line[i] not in (" ", "\t"):
+                        nnsc = line[i]
+                        break
+
+                if scope[-1] == "string":
+                    if c2 == '\\"':
+                        current += c2
+                        pos += 2
+                        continue
+
+                    if c1 == '"':
+                        scope.pop()
+                        current += c1
+                        pos += 1
+                        continue
+
+                    current += c1
+                    pos += 1
+                    continue
+
+                if scope[-1] == "comment":
+                    if c3 == '\\*)':
+                        current += c3
+                        pos += 3
+                        continue
+
+                    if c2 == '*)':
+                        scope.pop()
+                        current += c2
+                        pos += 2
+                        continue
+
+                    current += c1
+                    pos += 1
+                    continue
+
+                if pos == 0:
+                    if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
+                        current += (self.indent * (indent_level - 1))
+                    else:
+                        current += (self.indent * indent_level)
+                            
+                if c1 in (" ", "\t"):
+                    vsc = string.ascii_letters + string.digits
+                    if pc is not None and pc in vsc and nnsc in vsc:
+                        current += " "
+                    pos += 1
+                    continue
+            
+                if c3 == "^:=":
+                    scope.append("define")
+                    current += " ", c3, " "
+                    pos += 3
+                    continue
+
+                if c3 in ("===", ">>>"):
+                    current += " ", c3, " "
+                    pos += 3
+                    continue
+
+                if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
+                    current += " ", c2, " "
+                    pos += 2
+                    continue
+
+                if c2 == "..":
+                    current += c2, " "
+                    pos += 2
+                    continue
+
+                if c2 in (":=", "^="):
+                    scope.append("define")
+                    current += " ", c2, " "
+                    pos += 2
+                    continue
+
+                if c2 == "(*":
+                    scope.append("comment")
+                    current += c2
+                    pos += 2
+                    continue
+
+                if c2 == "[[":
+                    scope.append("part")
+                    current += c2
+                    pos += 2
+                    continue
+            
+                if c2 == "]]" and scope[-1] == "part":
+                    scope.pop()
+                    current += c2
+                    pos += 2
+                    continue
+            
+                if c1 == "[":
+                    scope.append("function")
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 == "]":
+                    scope.pop()
+                    if scope[-1] == "define":
+                        scope.pop()
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 == "{":
+                    scope.append("list")
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 == "}":
+                    scope.pop()
+                    if scope[-1] == "define":
+                        scope.pop()
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 == "(":
+                    scope.append("group")
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 == ")":
+                    scope.pop()
+                    if scope[-1] == "define":
+                        scope.pop()
+                    current += c1
+                    pos += 1
+                    continue
+            
+                if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?"):
+                    current += " ", c1, " "
+                    pos += 1
+                    continue
+
+                if c1 == "&":
+                    current += " ", c1
+                    pos += 1
+                    continue
+                
+                if c1 == "=":
+                    scope.append("define")
+                    current += " ", c1, " "
+                    pos += 1
+                    continue
+            
+                if c1 == ",":
+                    if scope[-1] == "define":
+                        scope.pop()
+                    current += c1, " "
+                    pos += 1
+                    continue
+
+                if c1 == '"':
+                    scope.append("string")
+                    current += c1
+                    pos += 1
+                    continue
+
+                current += c1
+                pos += 1
+                continue
+
+        return "".join(current)
+
     def parse_statements(self, block):
         statements = []
         scope = []
@@ -650,7 +666,7 @@ def main():
     mm = MathMate()
 
     if command == "show":
-        mm.show()
+        mm.reformat()
         return
     
     if command == "reformat":
