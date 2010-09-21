@@ -6,6 +6,9 @@ from optparse import OptionParser
 
 class MathMate(object):
     def __init__(self):
+        self.parse_tree_level = None
+        self.doc = sys.stdin.read()
+        
         self.indent_size = int(os.environ['TM_TAB_SIZE'])
         if os.environ.get('TM_SOFT_TABS') == "YES":
             self.indent = " " * self.indent_size
@@ -14,13 +17,10 @@ class MathMate(object):
         
         self.tmln = int(os.environ.get('TM_LINE_NUMBER'))
         self.tmli = int(os.environ.get('TM_LINE_INDEX'))
-        self.tmcursor = self.find_pos(self.tmln, self.tmli)
+        self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
-    
-        self.doc = sys.stdin.read()
-        self.parse_tree_level = None
         self.statements = self.parse(self.doc)
-
+    
     def get_pos(self, line, column):
         line_index = 1
         line_pos = 0
@@ -44,6 +44,8 @@ class MathMate(object):
             if char == "\n":
                 line_index += 1
                 line_pos = pos + 1
+        
+        return (line_index, pos - line_pos)
 
     def count_indents(self, line):
         count = 0
@@ -60,15 +62,26 @@ class MathMate(object):
                 break
         return count
     
-    def reformat(self):
-        if self.selected_text is not None:
-            for ssp, esp, reformatted_statement, current_statement in self.statements:
-                sys.stdout.write(reformatted_statement)
-        else:
-            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-            sys.stdout.write(self.doc[0:ssp])
-            sys.stdout.write(reformatted_statement)
-            sys.stdout.write(self.doc[esp:])
+    def get_next_non_space_char(self, pos):
+        for i in xrange(pos, len(self.doc)):
+            if self.doc[i] in (" ", "\t"):
+                continue
+            if self.doc[i] == "\n":
+                return None
+            return self.doc[i]
+        return None
+    
+    def get_prev_non_space_char(self, pos):
+        for i in xrange(pos, -1, -1):
+            if self.doc[i] in (" ", "\t"):
+                continue
+            if self.doc[i] == "\n":
+                return None
+            return self.doc[i]
+        return None
+
+    def is_end_of_line(self, pos):
+        return self.get_next_non_space_char(pos) == None
     
     def parse(self, block, initial_indent_level = None):
         statements = []
@@ -82,8 +95,6 @@ class MathMate(object):
             initial_indent_level = self.count_indents(block)
         
         while pos < len(block):
-            indent_level = len(scope) + initial_indent_level - 1
-            
             c1 = block[pos]
             c2 = block[pos:pos+2]
             c3 = block[pos:pos+3]
@@ -98,7 +109,7 @@ class MathMate(object):
                     nnsc = block[i]
                     break
 
-            if pos = self.tmcursor:
+            if pos == self.tmcursor:
                 self.parse_tree_level = ".".join(scope)
 
             if len(scope) == 0:
@@ -156,7 +167,7 @@ class MathMate(object):
         
             if c3 == "^:=":
                 scope.append("define")
-                if nnsc is None:
+                if self.is_end_of_line(pos + 3):
                     scope.append("start")
                 current += " ", c3, " "
                 pos += 3
@@ -179,7 +190,7 @@ class MathMate(object):
 
             if c2 in (":=", "^="):
                 scope.append("define")
-                if nnsc is None:
+                if self.is_end_of_line(pos + 2):
                     scope.append("start")
                 current += " ", c2, " "
                 pos += 2
@@ -243,8 +254,16 @@ class MathMate(object):
                 pos += 1
                 continue
         
-            if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?"):
+            if c1 in ("+", "*", "/", "^", "!", ">", "<", "|", "?"):
                 current += " ", c1, " "
+                pos += 1
+                continue
+            
+            if c1 == "-":
+                if self.get_prev_non_space_char(pos-1) not in ("{", "(", "["):
+                    current += " ", c1, " "
+                else:
+                    current += c1
                 pos += 1
                 continue
 
@@ -255,7 +274,7 @@ class MathMate(object):
             
             if c1 == "=":
                 scope.append("define")
-                if nnsc is None:
+                if self.is_end_of_line(pos + 1):
                     scope.append("start")
                 current += " ", c1, " "
                 pos += 1
@@ -273,6 +292,8 @@ class MathMate(object):
                     scope.pop()
                 if scope[-1] == "start":
                     scope.pop()
+                if scope[-1] == "root":
+                    scope.pop()
                 current += c1
                 pos += 1
                 continue
@@ -282,9 +303,12 @@ class MathMate(object):
                     scope.pop()
                 if scope[-1] == "start":
                     scope.pop()
+                if scope[-1] == "root":
+                    scope.pop()
                 current += c1
                 pos += 1
 
+                indent_level = len(scope) + initial_indent_level - 1
                 if nnsc in ("]", "}", ")"):
                     current += (self.indent * (indent_level - 1))
                 else:
@@ -304,18 +328,26 @@ class MathMate(object):
 
         if current != []:
             statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
+        return statements
     
     def get_current_statement_index(self):
         for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
-            if self.tmcursor < ssp:
-                continue
-            
-            if self.tmcursor >= ssp:
+            if self.tmcursor >= ssp and self.tmcursor < esp:
                 return index
             
     def get_current_statement(self):
         return self.statements[self.get_current_statement_index()]
     
+    def reformat(self):
+        if self.selected_text is not None:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                sys.stdout.write(reformatted_statement)
+        else:
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            sys.stdout.write(self.doc[0:ssp])
+            sys.stdout.write(reformatted_statement)
+            sys.stdout.write(self.doc[esp:])
+
     def show(self):
         print "Cursor: (Line: %d, Index: %d, Tree: %s)" % (self.tmln, self.tmli, self.parse_tree_level)
 
@@ -324,7 +356,7 @@ class MathMate(object):
             ssln, ssli = self.get_line_col(ssp)
             esln, esli = self.get_line_col(esp)
             print "Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli)
-            print statement
+            print reformatted_statement,
         else:
             for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
                 ssln, ssli = self.get_line_col(ssp)
