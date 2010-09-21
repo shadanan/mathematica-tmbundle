@@ -14,12 +14,37 @@ class MathMate(object):
         
         self.tmln = int(os.environ.get('TM_LINE_NUMBER'))
         self.tmli = int(os.environ.get('TM_LINE_INDEX'))
+        self.tmcursor = self.find_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
     
         self.doc = sys.stdin.read()
         self.parse_tree_level = None
-        self.statements = self.parse_statements(self.doc)
+        self.statements = self.parse(self.doc)
+
+    def get_pos(self, line, column):
+        line_index = 1
+        line_pos = 0
+    
+        for pos, char in enumerate(self.doc):
+            if line == line_index and column == pos - line_pos:
+                return pos
         
+            if char == "\n":
+                line_index += 1
+                line_pos = pos + 1
+    
+    def get_line_col(self, posq):
+        line_index = 1
+        line_pos = 0
+        
+        for pos, char in enumerate(self.doc):
+            if posq == pos:
+                return (line_index, pos - line_pos)
+        
+            if char == "\n":
+                line_index += 1
+                line_pos = pos + 1
+
     def count_indents(self, line):
         count = 0
         space_count = 0
@@ -37,34 +62,21 @@ class MathMate(object):
     
     def reformat(self):
         if self.selected_text is not None:
-            initial_indent_level = self.count_indents(self.doc)
-            for ssln, ssli, ssp, esln, esli, esp, statement in self.statements:
-                sys.stdout.write(self.reformat_statement(statement, initial_indent_level))
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                sys.stdout.write(reformatted_statement)
         else:
-            current_statement = self.get_current_statement()
-            if current_statement is None:
-                return
-
-            ssln, ssli, ssp, esln, esli, esp, statement = current_statement
-
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             sys.stdout.write(self.doc[0:ssp])
-            sys.stdout.write(self.reformat_statement(statement))
+            sys.stdout.write(reformatted_statement)
             sys.stdout.write(self.doc[esp:])
     
     def parse(self, block, initial_indent_level = None):
-        original_statements = []
-        reformated_statements = []
-        
-        current = []
-        scope = []
+        statements = []
         
         pos = 0
         ss_pos = 0
         current = []
-        ss_line_number = 1
-        ss_line_index = 0
-        line_number = 1
-        line_index_start = 0
+        scope = []
         
         if initial_indent_level is None:
             initial_indent_level = self.count_indents(block)
@@ -86,24 +98,16 @@ class MathMate(object):
                     nnsc = block[i]
                     break
 
-            if c1 == "\n":
-                line_number += 1
-                line_index_start = pos + 1
-
-            line_index = pos - line_index_start
-
-            if self.tmln == line_number and self.tmli == line_index:
+            if pos = self.tmcursor:
                 self.parse_tree_level = ".".join(scope)
 
             if len(scope) == 0:
                 if c1 not in (" ", "\t", "\n"):
                     if current != []:
-                        statements.append((ss_line_number, ss_line_index, ss_pos, line_number, pos - line_index_start, pos, "".join(current)))
+                        statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
                         current = []
 
                     ss_pos = pos
-                    ss_line_number = line_number
-                    ss_line_index = line_index
                     scope.append("root")
                     continue
 
@@ -298,467 +302,36 @@ class MathMate(object):
             pos += 1
             continue
 
-        return "".join(current)
-    
-    def reformat_statement(self, statement, initial_indent_level = None):
-        current = []
-        scope = ["root"]
-
-        if initial_indent_level is None:
-            initial_indent_level = self.count_indents(statement)
-        
-        for line_number, line in enumerate(statement.splitlines(True)):
-            pos = 0
-            indent_level = len(scope) + initial_indent_level - 1
-            
-            while pos < len(line):
-                c1 = line[pos]
-                c2 = line[pos:pos+2]
-                c3 = line[pos:pos+3]
-                pc = line[pos-1] if pos > 0 else None
-
-                nnsc = None
-                for i in xrange(pos + 1, len(line)):
-                    if line[i] == "\n":
-                        break
-                        
-                    if line[i] not in (" ", "\t"):
-                        nnsc = line[i]
-                        break
-
-                if scope[-1] == "string":
-                    if c2 == '\\"':
-                        current += c2
-                        pos += 2
-                        continue
-
-                    if c1 == '"':
-                        scope.pop()
-                        current += c1
-                        pos += 1
-                        continue
-
-                    current += c1
-                    pos += 1
-                    continue
-
-                if scope[-1] == "comment":
-                    if c3 == '\\*)':
-                        current += c3
-                        pos += 3
-                        continue
-
-                    if c2 == '*)':
-                        scope.pop()
-                        current += c2
-                        pos += 2
-                        continue
-
-                    current += c1
-                    pos += 1
-                    continue
-
-                if pos == 0:
-                    if len(line.strip()) > 0 and line.strip()[0] in ("]", "}", ")"):
-                        current += (self.indent * (indent_level - 1))
-                    else:
-                        current += (self.indent * indent_level)
-                            
-                if c1 in (" ", "\t"):
-                    vsc = string.ascii_letters + string.digits
-                    if pc is not None and pc in vsc and nnsc in vsc:
-                        current += " "
-                    pos += 1
-                    continue
-            
-                if c3 == "^:=":
-                    scope.append("define")
-                    if nnsc is None:
-                        scope.append("start")
-                    current += " ", c3, " "
-                    pos += 3
-                    continue
-
-                if c3 in ("===", ">>>"):
-                    current += " ", c3, " "
-                    pos += 3
-                    continue
-
-                if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
-                    current += " ", c2, " "
-                    pos += 2
-                    continue
-
-                if c2 == "..":
-                    current += c2, " "
-                    pos += 2
-                    continue
-
-                if c2 in (":=", "^="):
-                    scope.append("define")
-                    if nnsc is None:
-                        scope.append("start")
-                    current += " ", c2, " "
-                    pos += 2
-                    continue
-
-                if c2 == "(*":
-                    scope.append("comment")
-                    current += c2
-                    pos += 2
-                    continue
-
-                if c2 == "[[":
-                    scope.append("part")
-                    current += c2
-                    pos += 2
-                    continue
-            
-                if c2 == "]]" and scope[-1] == "part":
-                    scope.pop()
-                    current += c2
-                    pos += 2
-                    continue
-            
-                if c1 == "[":
-                    scope.append("function")
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 == "]":
-                    scope.pop()
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 == "{":
-                    scope.append("list")
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 == "}":
-                    if scope[-1] == "define":
-                        scope.pop()
-                    scope.pop()
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 == "(":
-                    scope.append("group")
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 == ")":
-                    # if scope[-1] == "define":
-                    #     scope.pop()
-                    scope.pop()
-                    current += c1
-                    pos += 1
-                    continue
-            
-                if c1 in ("+", "-", "*", "/", "^", "!", ">", "<", "|", "?"):
-                    current += " ", c1, " "
-                    pos += 1
-                    continue
-
-                if c1 == "&":
-                    current += " ", c1
-                    pos += 1
-                    continue
-                
-                if c1 == "=":
-                    scope.append("define")
-                    if nnsc is None:
-                        scope.append("start")
-                    current += " ", c1, " "
-                    pos += 1
-                    continue
-            
-                if c1 == ",":
-                    if scope[-1] == "define":
-                        scope.pop()
-                    current += c1, " "
-                    pos += 1
-                    continue
-
-                if c1 in (";", "\n"):
-                    if scope[-1] == "define":
-                        scope.pop()
-                    if scope[-1] == "start":
-                        scope.pop()
-                    current += c1
-                    pos += 1
-                    continue
-
-                if c1 == '"':
-                    scope.append("string")
-                    current += c1
-                    pos += 1
-                    continue
-                
-                current += c1
-                pos += 1
-                continue
-
-        return "".join(current)
-
-    def parse_statements(self, block):
-        statements = []
-        scope = []
-        
-        pos = 0
-        ss_pos = 0
-        current = []
-        ss_line_number = 1
-        ss_line_index = 0
-        line_number = 1
-        line_index_start = 0
-        
-        while pos < len(block):
-            c1 = block[pos]
-            c2 = block[pos:pos+2]
-            c3 = block[pos:pos+3]
-
-            nnsc = None
-            for i in xrange(pos + 1, len(block)):
-                if block[i] == "\n":
-                    break
-                if block[i] not in (" ", "\t"):
-                    nnsc = block[i]
-                    break
-                    
-            if c1 == "\n":
-                line_number += 1
-                line_index_start = pos + 1
-
-            line_index = pos - line_index_start
-
-            if self.tmln == line_number and self.tmli == line_index:
-                self.parse_tree_level = ".".join(scope)
-            
-            if len(scope) == 0:
-                if c1 not in (" ", "\t", "\n"):
-                    if current != []:
-                        statements.append((ss_line_number, ss_line_index, ss_pos, line_number, pos - line_index_start, pos, "".join(current)))
-                        current = []
-
-                    ss_pos = pos
-                    ss_line_number = line_number
-                    ss_line_index = line_index
-                    scope.append("root")
-                    continue
-
-                current += c1
-                pos += 1
-                continue
-
-            if scope[-1] == "string":
-                if c2 == '\\"':
-                    current += c2
-                    pos += 2
-                    continue
-
-                if c1 == '"':
-                    scope.pop()
-                    current += c1
-                    pos += 1
-                    continue
-
-                current += c1
-                pos += 1
-                continue
-
-            if scope[-1] == "comment":
-                if c3 == '\\*)':
-                    current += c3
-                    pos += 3
-                    continue
-
-                if c2 == '*)':
-                    scope.pop()
-                    current += c2
-                    pos += 2
-                    continue
-
-                current += c1
-                pos += 1
-                continue
-
-
-            if c3 == "^:=":
-                scope.append("define")
-                if nnsc is None:
-                    scope.append("start")
-                current += c3
-                pos += 3
-                continue
-        
-            if c2 in (":=", "^="):
-                scope.append("define")
-                if nnsc is None:
-                    scope.append("start")
-                current += c2
-                pos += 2
-                continue
-
-            if c2 == "(*":
-                scope.append("comment")
-                current += c2
-                pos += 2
-                continue
-
-            if c2 == "[[":
-                scope.append("part")
-                current += c2
-                pos += 2
-                continue
-            
-            if c2 == "]]" and scope[-1] == "part":
-                scope.pop()
-                current += c2
-                pos += 2
-                continue
-            
-            if scope[-1] == "root" and c1 in (";", "\n"):
-                scope.pop()
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "[":
-                scope.append("function")
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "]":
-                scope.pop()
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "{":
-                if scope[-1] == "define":
-                    scope.pop()
-                scope.append("list")
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "}":
-                scope.pop()
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "(":
-                scope.append("group")
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == ")":
-                scope.pop()
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == "=":
-                scope.append("define")
-                if nnsc is None:
-                    scope.append("start")
-                current += c1
-                pos += 1
-                continue
-            
-            if c1 == ",":
-                if scope[-1] == "define":
-                    scope.pop()
-                current += c1
-                pos += 1
-                continue
-                
-            if c1 in (";", "\n"):
-                if scope[-1] == "define":
-                    scope.pop()
-                if scope[-1] == "start":
-                    scope.pop()
-                current += c1
-                pos += 1
-                continue
-
-            if c1 == '"':
-                scope.append("string")
-                current += c1
-                pos += 1
-                continue
-
-            current += c1
-            pos += 1
-            continue
-
         if current != []:
-            statements.append((ss_line_number, ss_line_index, ss_pos, line_number, line_index, pos, "".join(current)))
-
-        return statements
+            statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
     
     def get_current_statement_index(self):
-        if self.statements is None:
-            return None
-        
-        prev_statement_index = None
-
-        for index, current_statement in enumerate(self.statements):
-            ssln, ssli, ssp, esln, esli, esp, statement = current_statement
-
-            if self.tmln < ssln:
+        for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
+            if self.tmcursor < ssp:
                 continue
-
-            if self.tmln > esln:
-                if prev_statement_index is None or ssp > self.statements[prev_statement_index][2]:
-                    prev_statement_index = index
-                continue
-
-            if self.tmln == ssln and self.tmli < ssli:
-                continue
-
-            if self.tmln == esln and self.tmli > esli:
-                if prev_statement_index is None or ssp > self.statements[prev_statement_index][2]:
-                    prev_statement_index = index
-                continue
-
-            return index
             
-        return prev_statement_index
-        
+            if self.tmcursor >= ssp:
+                return index
+            
     def get_current_statement(self):
-        current_statement_index = self.get_current_statement_index()
-        if current_statement_index is None:
-            return None
-        
-        return self.statements[current_statement_index]
+        return self.statements[self.get_current_statement_index()]
     
     def show(self):
         print "Cursor: (Line: %d, Index: %d, Tree: %s)" % (self.tmln, self.tmli, self.parse_tree_level)
 
         if self.selected_text is None:
-            curr_statement_index = self.get_current_statement_index()
-            if curr_statement_index is None:
-                return
-
-            ssln, ssli, ssp, esln, esli, esp, statement = self.statements[curr_statement_index]
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            ssln, ssli = self.get_line_col(ssp)
+            esln, esli = self.get_line_col(esp)
             print "Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli)
             print statement
         else:
-            for index, current_statement in enumerate(self.statements):
-                ssln, ssli, ssp, esln, esli, esp, statement = current_statement
+            for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
+                ssln, ssli = self.get_line_col(ssp)
+                esln, esli = self.get_line_col(esp)
                 print "Statement %d Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (index, ssln, ssli, esln, esli)
-                if len(statement.strip()) != 0:
-                    print statement.rstrip()
+                if len(reformatted_statement.strip()) != 0:
+                    print reformatted_statement.rstrip()
                 else:
                     print "*** Empty Statement ***"
                 print
