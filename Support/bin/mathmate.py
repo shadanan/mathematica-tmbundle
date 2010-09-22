@@ -2,6 +2,7 @@
 import sys
 import os
 import string
+import socket
 from optparse import OptionParser
 
 class MathMate(object):
@@ -21,6 +22,141 @@ class MathMate(object):
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
     
+    def readline(self, sock):
+        result = []
+        while True:
+            char = sock.recv(1)
+            
+            if char == "\r":
+                continue
+                
+            if char == "\n":
+                break
+                
+            if char == "":
+                return None
+                
+            result.append(char)
+            
+        return "".join(result)
+    
+    def execute(self):
+        sock = socket.socket()
+        sock.connect(("localhost", 8456))
+        
+        state = 0
+        running = True
+        doread = True
+        
+        statements = []
+        
+        if self.selected_text is not None:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                statements.append(current_statement)
+        else:
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            statements.append(current_statement)
+        
+        while running:
+            if doread:
+                line = self.readline(sock)
+
+                if line is None:
+                    running = False
+                    continue
+                    
+                if line.find(" -- ") != -1:
+                    response = line[0:line.find(" -- ")]
+                    comment = line[line.find(" -- ")+4:]
+                else:
+                    response = line
+                    comment = None
+                words = response.split(" ")
+            else:
+                doread = True
+            
+            if state == 0:
+                if response == "TMJLink Status OK":
+                    sock.send("sessid shad\n")
+                    state = 1
+                    continue
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 1:
+                if response == "TMJLink Okay":
+                    doread = False
+                    state = 2
+                    continue
+                        
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            if state == 2:
+                if len(statements) > 0:
+                    statement = statements.pop(0).rstrip()
+                    sock.send("evali %d\n" % len(statement))
+                    sock.send(statement)
+                    state = 3
+                    continue
+                else:
+                    doread = False
+                    state = 4
+                    continue
+                    
+            if state == 3:
+                if words[0] == "TMJLink" and words[1] == "FileSaved":
+                    if len(statements) > 0:
+                        doread = False
+                        state = 2
+                        continue
+                    else:
+                        doread = False
+                        state = 4
+                        continue
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 4:
+                sock.send("show\n")
+                state = 5
+                continue
+            
+            if state == 5:
+                if words[0] == "TMJLink" and words[1] == "FileSaved":
+                    output_html = words[2]
+                    sock.send("quit\n")
+                    state = 6
+                    continue
+                
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            if state == 6:
+                if response == "TMJLink Okay":
+                    sock.close()
+                    running = False
+                    continue
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            raise Exception("Invalid state: " + state)
+        
+        print "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
+            
     def get_pos(self, line, column):
         line_index = 1
         line_pos = 0
@@ -376,7 +512,7 @@ def main():
     mm = MathMate()
 
     if command == "show":
-        mm.show()
+        mm.execute()
         return
     
     if command == "reformat":

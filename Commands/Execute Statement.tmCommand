@@ -15,7 +15,7 @@
 	<key>name</key>
 	<string>Execute Statement</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>showAsHTML</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
