@@ -260,7 +260,7 @@ class MathMate(object):
                 continue
             
             if c1 == "-":
-                if self.get_prev_non_space_char(pos-1) not in ("{", "(", "["):
+                if self.get_prev_non_space_char(pos-1) not in (None, "{", "(", "[", ","):
                     current += " ", c1, " "
                 else:
                     current += c1
