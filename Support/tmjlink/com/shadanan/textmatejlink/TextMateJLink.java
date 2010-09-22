@@ -5,13 +5,14 @@ public class TextMateJLink {
 	public static void main(String args[]) throws InterruptedException {
 		int port = Integer.parseInt(args[0]);
 		String cacheFolder = args[1];
+		int textMatePid = Integer.parseInt(args[2]);
 		
-		String[] mlargs = new String[args.length-2];
-		for (int i = 2; i < args.length; i++) {
-			mlargs[i-2] = args[i];
+		String[] mlargs = new String[args.length-3];
+		for (int i = 3; i < args.length; i++) {
+			mlargs[i-3] = args[i];
 		}
 		
-		Server server = new Server(port, cacheFolder, mlargs);
+		Server server = new Server(port, cacheFolder, textMatePid, mlargs);
 		Runtime.getRuntime().addShutdownHook(new Shutdown(server));
 		server.start();
 		server.join();

@@ -15,15 +15,17 @@ import com.wolfram.jlink.MathLinkException;
 public class Server extends Thread {
 	private int serverPort = -1;
 	private String cacheFolder = null;
+	private int textMatePid = -1;
 	private String[] mlargs = null;
 	private boolean running = false;
 	private Object sessionsLock = null;
 	private ArrayList<Session> sessions = null;
 	private HashMap<String, Resources> resourcesMap = null;
 	
-	public Server(int serverPort, String cacheFolder, String[] mlargs) {
+	public Server(int serverPort, String cacheFolder, int textMatePid, String[] mlargs) {
 		this.serverPort = serverPort;
 		this.cacheFolder = cacheFolder;
+		this.textMatePid = textMatePid;
 		this.mlargs = mlargs;
 		this.running = true;
 		
@@ -47,8 +49,16 @@ public class Server extends Thread {
 			
 			while (running) {
 				try {
+					Process p = Runtime.getRuntime().exec("kill -0 " + this.textMatePid);
+					p.waitFor();
+					if (p.exitValue() != 0) {
+						System.out.println("TextMate has quit.");
+						running = false;
+						continue;
+					}
+					
 					Socket socket = ss.accept();
-					socket.setSoTimeout(10000);
+					socket.setSoTimeout(1000);
 					
 					System.out.println("Opening connection: " + socket.getRemoteSocketAddress());
 					Session session = new Session(this, socket);
@@ -58,6 +68,10 @@ public class Server extends Thread {
 						sessions.add(session);
 					}
 				} catch (SocketTimeoutException te) {
+					continue;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					running = false;
 					continue;
 				}
 			}

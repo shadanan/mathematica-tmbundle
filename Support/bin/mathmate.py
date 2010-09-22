@@ -3,6 +3,7 @@ import sys
 import os
 import string
 import socket
+import shutil
 import subprocess
 from optparse import OptionParser
 
@@ -27,10 +28,55 @@ class MathMate(object):
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
     
+    def is_tmjlink_alive(self):
+        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
+        if os.path.exists(pidfile):
+            try:
+                pidfp = open(pidfile, 'r')
+                pid = int(pidfp.read())
+                pidfp.close()
+                
+                os.kill(pid, 0)
+                return True
+            except:
+                pass
+        return False
+                
+    def shutdown_tmjlink(self):
+        # Shutdown tmjlink
+        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
+        if os.path.exists(pidfile):
+            try:
+                pidfp = open(pidfile, 'r')
+                pid = int(pidfp.read())
+                pidfp.close()
+                
+                os.kill(pid)
+                os.waitpid(pid)
+            except:
+                pass
+        
+        # Delete all temporary files
+        shutil.rmtree(self.cacheFolder)
+    
     def launch_tmjlink(self):
-        proc = subprocess.Popen(['/usr/bin/java', '-cp', '.:/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar', 
-                'com.shadanan.textmatejlink.TextMateJLink', str(self.port), cacheFolder] + self.mlargs,
-            )
+        if self.is_tmjlink_alive():
+            return
+        
+        if not os.path.exists(self.cacheFolder):
+            os.mkdir(self.cacheFolder, mode=0777)
+        
+        # Launch TextMateJLink
+        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'a')
+        proc = subprocess.Popen(['/usr/bin/java', 
+                '-cp', '%s/tmjlink/:/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar' % os.environ.get('TM_BUNDLE_SUPPORT'), 
+                'com.shadanan.textmatejlink.TextMateJLink', str(self.port), self.cacheFolder, str(os.getppid())] + self.mlargs,
+            stdout=logfp, stderr=subprocess.STDOUT)
+        
+        # Save PID file
+        pidfp = open(os.path.join(self.cacheFolder, "tmjlink.pid"), 'w')
+        pidfp.write(str(proc.pid))
+        pidfp.close()
     
     def readline(self, sock):
         result = []
@@ -51,7 +97,7 @@ class MathMate(object):
         return "".join(result)
     
     def execute(self):
-        print os.environ.get('TM_BUNDLE_SUPPORT')
+        self.launch_tmjlink()
         return
         
         sock = socket.socket()
