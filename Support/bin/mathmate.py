@@ -3,10 +3,15 @@ import sys
 import os
 import string
 import socket
+import subprocess
 from optparse import OptionParser
 
 class MathMate(object):
     def __init__(self):
+        self.port = 8456
+        self.cacheFolder = '/tmp/tmjlink'
+        self.mlargs = ["-linkmode", "launch", "-linkname", '"/Applications/Mathematica.app/Contents/MacOS/MathKernel -mathlink"']
+        
         self.parse_tree_level = None
         self.doc = sys.stdin.read()
         
@@ -21,6 +26,11 @@ class MathMate(object):
         self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
+    
+    def launch_tmjlink(self):
+        proc = subprocess.Popen(['/usr/bin/java', '-cp', '.:/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar', 
+                'com.shadanan.textmatejlink.TextMateJLink', str(self.port), cacheFolder] + self.mlargs,
+            )
     
     def readline(self, sock):
         result = []
@@ -41,6 +51,9 @@ class MathMate(object):
         return "".join(result)
     
     def execute(self):
+        print os.environ.get('TM_BUNDLE_SUPPORT')
+        return
+        
         sock = socket.socket()
         sock.connect(("localhost", 8456))
         
