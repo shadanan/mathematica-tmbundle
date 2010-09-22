@@ -5,20 +5,18 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" execute</string>
-	<key>fallbackInput</key>
-	<string>document</string>
+	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" release</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>$</string>
+	<string>@&gt;</string>
 	<key>name</key>
-	<string>Execute Statement</string>
+	<string>Clear Mathematica Session</string>
 	<key>output</key>
-	<string>showAsHTML</string>
+	<string>showAsTooltip</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>E36658BA-47F4-48D7-8485-F6435BB3816F</string>
+	<string>1ED7059A-3BF7-47A8-92A1-249EAFC60A72</string>
 </dict>
 </plist>

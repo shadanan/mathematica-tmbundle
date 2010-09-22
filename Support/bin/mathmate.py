@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-import sys
 import os
+import sys
+import time
 import string
 import socket
 import shutil
@@ -11,7 +12,7 @@ class MathMate(object):
     def __init__(self):
         self.port = 8456
         self.cacheFolder = '/tmp/tmjlink'
-        self.mlargs = ["-linkmode", "launch", "-linkname", '"/Applications/Mathematica.app/Contents/MacOS/MathKernel -mathlink"']
+        self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
         
         self.parse_tree_level = None
         self.doc = sys.stdin.read()
@@ -28,6 +29,20 @@ class MathMate(object):
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
     
+    def shutdown(self):
+        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
+        if os.path.exists(pidfile):
+            try:
+                pidfp = open(pidfile, 'r')
+                pid = int(pidfp.read())
+                pidfp.close()
+                os.kill(pid, 1)
+                print "TextMateJLink Server Shutdown"
+                return
+            except:
+                pass
+        print "TextMateJLink Server is not Running"
+    
     def is_tmjlink_alive(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -42,41 +57,44 @@ class MathMate(object):
                 pass
         return False
                 
-    def shutdown_tmjlink(self):
-        # Shutdown tmjlink
-        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
-        if os.path.exists(pidfile):
-            try:
-                pidfp = open(pidfile, 'r')
-                pid = int(pidfp.read())
-                pidfp.close()
-                
-                os.kill(pid)
-                os.waitpid(pid)
-            except:
-                pass
-        
-        # Delete all temporary files
-        shutil.rmtree(self.cacheFolder)
-    
     def launch_tmjlink(self):
         if self.is_tmjlink_alive():
             return
         
-        if not os.path.exists(self.cacheFolder):
-            os.mkdir(self.cacheFolder, mode=0777)
+        classpath = []
+        classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink"))
+        classpath.append("/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar")
+        
+        if os.path.exists(self.cacheFolder):
+           shutil.rmtree(self.cacheFolder) 
+        os.mkdir(self.cacheFolder, 0777)
+        for sfile in ("jquery-1.4.2.min.js", "layout.html.erb", "tmjlink.css", "header_bg.gif"):
+            os.symlink(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "web", sfile), os.path.join(self.cacheFolder, sfile))
         
         # Launch TextMateJLink
-        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'a')
+        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'w')
         proc = subprocess.Popen(['/usr/bin/java', 
-                '-cp', '%s/tmjlink/:/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar' % os.environ.get('TM_BUNDLE_SUPPORT'), 
-                'com.shadanan.textmatejlink.TextMateJLink', str(self.port), self.cacheFolder, str(os.getppid())] + self.mlargs,
+                '-cp', ":".join(classpath), 
+                'com.shadanan.textmatejlink.TextMateJLink', 
+                str(self.port), self.cacheFolder, str(os.getppid())] + self.mlargs,
             stdout=logfp, stderr=subprocess.STDOUT)
+        logfp.close()
         
         # Save PID file
         pidfp = open(os.path.join(self.cacheFolder, "tmjlink.pid"), 'w')
         pidfp.write(str(proc.pid))
         pidfp.close()
+        
+        # Wait for server to be ready
+        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'r')
+        while True:
+            line = logfp.readline()
+            if line == "":
+                time.sleep(0.1)
+                continue
+            if line.strip() == "Server started.":
+                break
+        logfp.close()
     
     def readline(self, sock):
         result = []
@@ -98,7 +116,6 @@ class MathMate(object):
     
     def execute(self):
         self.launch_tmjlink()
-        return
         
         sock = socket.socket()
         sock.connect(("localhost", 8456))
@@ -571,7 +588,23 @@ def main():
     mm = MathMate()
 
     if command == "show":
+        mm.show()
+        return
+    
+    if command == "execute":
         mm.execute()
+        return
+    
+    if command == "release":
+        mm.release()
+        return
+    
+    if command == "close":
+        mm.close()
+        return
+    
+    if command == "shutdown":
+        mm.shutdown()
         return
     
     if command == "reformat":

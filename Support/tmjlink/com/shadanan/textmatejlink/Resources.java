@@ -2,6 +2,7 @@ package com.shadanan.textmatejlink;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,35 +125,54 @@ public class Resources implements PacketListener {
 		return resource;
 	}
 	
+	private String applyLayout(String content) throws IOException {
+		StringBuilder result = new StringBuilder();
+		FileReader layout = new FileReader(cacheFolder + "/layout.html.erb");
+		
+		int charsRead;
+		char[] buff = new char[1024];
+		do {
+			charsRead = layout.read(buff);
+			if (charsRead != -1) result.append(buff);
+		} while (charsRead != -1);
+		
+		String yieldToken = "<%= yield %>";
+		int start = result.indexOf(yieldToken);
+		result.replace(start, start + yieldToken.length(), content);
+		return result.toString();
+	}
+	
 	public File render() throws IOException {
 		int currentCount = -1;
+		StringBuilder content = new StringBuilder();
 		
 		if (resourceView != null) {
 			File resourceViewFile = getNamedFile(resourceView);
 			if (resourceViewFile.exists()) resourceViewFile.delete();
 		}
 		
-		resourceView = UUID.randomUUID().toString() + ".html";
-		FileWriter fp = new FileWriter(getNamedFile(resourceView));
 		for (Resource resource : resources) {
 			if (currentCount == -1) {
 				currentCount = resource.getCount();
-				fp.write("<div class='cellgroup'>");
+				content.append("<div class='cellgroup'>");
 			}
 			
 			if (resource.getCount() != currentCount) {
-				fp.write("</div>");
-				fp.write("<div class='cellgroup'>");
+				content.append("</div>");
+				content.append("<div class='cellgroup'>");
 				currentCount = resource.getCount();
 			}
 			
-			fp.write(resource.render());
+			content.append(resource.render());
 		}
 		
 		if (currentCount != -1) {
-			fp.write("</div>");
+			content.append("</div>");
 		}
 		
+		resourceView = UUID.randomUUID().toString() + ".html";
+		FileWriter fp = new FileWriter(getNamedFile(resourceView));
+		fp.write(applyLayout(content.toString()));
 		fp.close();
 		
 		return getNamedFile(resourceView);
@@ -212,41 +232,46 @@ public class Resources implements PacketListener {
 			StringBuilder result = new StringBuilder();
 			
 			if (type == -1) {
-				result.append("<div class='input'>");
+				result.append("<div class='cell input'>");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
 			// TODO: May need to convert \n to <br />
 			if (type == MathLink.TEXTPKT) {
-				result.append("<div class='text'>");
+				result.append("<div class='cell text'>");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
 			// TODO: May need to convert \n to <br />
 			if (type == MathLink.MESSAGEPKT) {
-				result.append("<div class='message'>");
+				result.append("<div class='cell message'>");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.DISPLAYPKT) {
-				result.append("<div class='display'>");
+				result.append("<div class='cell display'>");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>");
 				result.append("    <img src='" + getFilePointer() + "' />");
 				result.append("  </div>");
+				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.RETURNPKT) {
-				result.append("<div class='return'>");
+				result.append("<div class='cell return'>");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			

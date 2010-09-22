@@ -4,6 +4,7 @@ package com.shadanan.textmatejlink;
 public class TextMateJLink {
 	public static void main(String args[]) throws InterruptedException {
 		int port = Integer.parseInt(args[0]);
+		System.out.println("Server starting up on: " + port);
 		String cacheFolder = args[1];
 		int textMatePid = Integer.parseInt(args[2]);
 		

@@ -32,17 +32,10 @@ public class Server extends Thread {
 		resourcesMap = new HashMap<String, Resources>();
 		sessions = new ArrayList<Session>();
 		sessionsLock = new Object();
-
-		File tempFolder = new File(cacheFolder);
-		if (!tempFolder.exists()) { 
-			tempFolder.mkdir();
-			tempFolder.setWritable(true, false);
-		}
 	}
 	
 	public void run() {
 		try {
-			System.out.println("Server starting up on: " + serverPort);
 			ServerSocket ss = new ServerSocket(serverPort);
 			ss.setSoTimeout(1000);
 			System.out.println("Server started.");
@@ -50,9 +43,8 @@ public class Server extends Thread {
 			while (running) {
 				try {
 					Process p = Runtime.getRuntime().exec("kill -0 " + this.textMatePid);
-					p.waitFor();
-					if (p.exitValue() != 0) {
-						System.out.println("TextMate has quit.");
+					if (p.waitFor() != 0) {
+						System.out.println("TextMate's PID is gone: " + this.textMatePid);
 						running = false;
 						continue;
 					}

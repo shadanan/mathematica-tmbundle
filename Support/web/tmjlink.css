@@ -1,0 +1,55 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Verdana,Helvetica,Arial,sans-serif;
+  font-size: 0.75em;
+  background-color: #e6e6e6;
+}
+
+div.header {
+  background: url("/tmp/tmjlink/header_bg.gif") repeat-x scroll 0 -3px transparent;
+  border-top-width: 3px;
+  border-top-color: #dc0200;
+  border-top-style: solid;
+  height: 55px;
+  color: white;
+}
+
+div.margin {
+  float: left;
+  width: 60px;
+  clear: both;
+  text-align: right;
+  margin-right: 0.5em;
+}
+
+div.content {
+  float: left;
+}
+
+div.cellgroup {
+  margin: 1em;
+  border: 1px solid #888;
+  background-color: white;
+  padding: 0.5em;
+}
+
+div.cell {
+  margin: 0.5em;
+  border-right: 1px solid #888;
+  padding: 0.5em;
+}
+
+div.header div.text {
+  margin: 0.5em;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+div.header div.text span.textmate {
+  color: #a23f88;
+}
+
+div.header div.text span.mathematica {
+  font-style: italic;
+}
