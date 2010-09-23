@@ -9,9 +9,9 @@
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^Q</string>
+	<string>^$</string>
 	<key>name</key>
-	<string>Show Statement</string>
+	<string>Preview Statement</string>
 	<key>output</key>
 	<string>showAsTooltip</string>
 	<key>scope</key>

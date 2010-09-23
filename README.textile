@@ -60,7 +60,7 @@ h4. Other (Commands, Indentation, etc.)
  * Block comments (command + /)
  
  * Reformat current statement / selection (control + Q)
- * Preview reformat of current statement / selection in tool tip (control + shift + Q)
+ * Preview current statement / selection in tool tip (control + shift + enter)
 
  * Execute current statement / selection (shift + enter)
  * Clear mathmate session (command + shift + >)

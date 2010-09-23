@@ -457,7 +457,13 @@ class MathMate(object):
                     current += c3
                     pos += 3
                     continue
-
+                
+                if c2 == '(*':
+                    scope.append("comment")
+                    current += c2
+                    pos += 2
+                    continue
+                
                 if c2 == '*)':
                     scope.pop()
                     current += c2
