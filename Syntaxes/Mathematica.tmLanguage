@@ -50,12 +50,8 @@
 			<string>#symbol</string>
 		</dict>
 		<dict>
-			<key>begin</key>
-			<string>\(\*</string>
-			<key>end</key>
-			<string>\*\)</string>
-			<key>name</key>
-			<string>comment.block.mathematica</string>
+			<key>include</key>
+			<string>#comment</string>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -335,6 +331,22 @@
 					<string>,</string>
 					<key>name</key>
 					<string>punctuation.separator.part.mathematica</string>
+				</dict>
+			</array>
+		</dict>
+		<key>comment</key>
+		<dict>
+			<key>begin</key>
+			<string>\(\*</string>
+			<key>end</key>
+			<string>\*\)</string>
+			<key>name</key>
+			<string>comment.block.mathematica</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comment</string>
 				</dict>
 			</array>
 		</dict>
