@@ -28,7 +28,12 @@ class MathMate(object):
         self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
-        self.sessid = "shad"
+        
+        sessid = os.path.split(os.environ.get('TM_FILEPATH', 'mathmate-default'))[-1]
+        if sessid.endswith(".m"):
+            self.sessid = sessid[:-2]
+        else:
+            self.sessid = sessid
     
     def shutdown(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")

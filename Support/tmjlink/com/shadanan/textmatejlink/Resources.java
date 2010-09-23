@@ -155,6 +155,12 @@ public class Resources implements PacketListener {
 				resourceViewFile.delete();
 		}
 		
+		// Render session id div
+		content.append("<div class='session_id'>");
+		content.append("<span class='label'>Session ID:</span> ");
+		content.append("<span class='value'>" + sessionId + "</span>");
+		content.append("</div>");
+		
 		for (Resource resource : resources) {
 			if (currentCount == -1) {
 				currentCount = resource.getCount();
