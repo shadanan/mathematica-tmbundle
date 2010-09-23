@@ -56,10 +56,17 @@ h4. Snippets
 h4. Other (Commands, Indentation, etc.)
 
  * Removed indentation rules. They caused more problems than they fixed.
- * Documentation for Current Word (click on word and press ^H)
+ * Documentation for Current Word (control + H)
+ * Block comments (command + /)
+ 
+ * Reformat current statement / selection (control + Q)
+ * Preview reformat of current statement / selection in tool tip (control + shift + Q)
 
+ * Execute current statement / selection (shift + enter)
+ * Clear mathmate session (command + shift + >)
+ * Quick mathmate kernel (command + shift + control + >)
+ * Shutdown mathmate backend (command + shift + option + >)
+ 
 h3. Next on the list...
 
- * Connect to Mathematica Kernel and execute statements directly...
  * Add more snippets (Function, etc.)
- * Code auto formatter -- to be done in python or ruby
