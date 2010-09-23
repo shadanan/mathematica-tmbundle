@@ -279,7 +279,6 @@ public class Resources implements PacketListener {
 		}
 	}
 
-	@Override
 	public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
 		KernelLink ml = (KernelLink)evt.getSource();
 		

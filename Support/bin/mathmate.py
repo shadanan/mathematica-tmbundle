@@ -114,18 +114,33 @@ class MathMate(object):
             
         return "".join(result)
     
+    def connect(self):
+        sock = socket.socket()
+        sock.connect(("localhost", 8456))
+        return sock
+    
+    def read(self, sock):
+        line = self.readline(sock)
+
+        if line is None:
+            raise Exception("The server quit unexpectedly.")
+            
+        if line.find(" -- ") != -1:
+            response = line[0:line.find(" -- ")]
+            comment = line[line.find(" -- ")+4:]
+        else:
+            response = line
+            comment = None
+            
+        words = response.split(" ")
+        return (line, response, words, comment)
+    
     def execute(self):
         self.launch_tmjlink()
         
-        sock = socket.socket()
-        sock.connect(("localhost", 8456))
-        
-        state = 0
-        running = True
-        doread = True
+        sock = self.connect()
         
         statements = []
-        
         if self.selected_text is not None:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 statements.append(current_statement)
@@ -133,23 +148,9 @@ class MathMate(object):
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             statements.append(current_statement)
         
-        while running:
-            if doread:
-                line = self.readline(sock)
-
-                if line is None:
-                    running = False
-                    continue
-                    
-                if line.find(" -- ") != -1:
-                    response = line[0:line.find(" -- ")]
-                    comment = line[line.find(" -- ")+4:]
-                else:
-                    response = line
-                    comment = None
-                words = response.split(" ")
-            else:
-                doread = True
+        state = 0
+        while True:
+            line, response, words, comment = self.read(sock)
             
             if state == 0:
                 if response == "TMJLink Status OK":
@@ -164,8 +165,13 @@ class MathMate(object):
                 
             if state == 1:
                 if response == "TMJLink Okay":
-                    doread = False
-                    state = 2
+                    statement = statements.pop(0).rstrip()
+                    sock.send("evali %d\n" % len(statement))
+                    sock.send(statement)
+                    
+                    if len(statements) == 0:
+                        state = 2
+                        
                     continue
                         
                 if response == "TMJLink Exception":
@@ -174,43 +180,21 @@ class MathMate(object):
                 raise Exception("Unexpected message from JLink server: " + line)
             
             if state == 2:
-                if len(statements) > 0:
-                    statement = statements.pop(0).rstrip()
-                    sock.send("evali %d\n" % len(statement))
-                    sock.send(statement)
+                if response == "TMJLink Okay":
+                    sock.send("show\n")
                     state = 3
                     continue
-                else:
-                    doread = False
-                    state = 4
-                    continue
-                    
-            if state == 3:
-                if words[0] == "TMJLink" and words[1] == "FileSaved":
-                    if len(statements) > 0:
-                        doread = False
-                        state = 2
-                        continue
-                    else:
-                        doread = False
-                        state = 4
-                        continue
             
                 if response == "TMJLink Exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
                 
-            if state == 4:
-                sock.send("show\n")
-                state = 5
-                continue
-            
-            if state == 5:
+            if state == 3:
                 if words[0] == "TMJLink" and words[1] == "FileSaved":
                     output_html = words[2]
                     sock.send("quit\n")
-                    state = 6
+                    state = 4
                     continue
                 
                 if response == "TMJLink Exception":
@@ -218,11 +202,10 @@ class MathMate(object):
 
                 raise Exception("Unexpected message from JLink server: " + line)
             
-            if state == 6:
+            if state == 4:
                 if response == "TMJLink Okay":
                     sock.close()
-                    running = False
-                    continue
+                    break
             
                 if response == "TMJLink Exception":
                     raise Exception("TextMateJLink Exception: " + comment)
@@ -372,7 +355,7 @@ class MathMate(object):
 
             if c1 in (" ", "\t"):
                 vsc = string.ascii_letters + string.digits
-                if pc is not None and pc in vsc and nnsc in vsc:
+                if pc is not None and nnsc is not None and pc in vsc and nnsc in vsc:
                     current += " "
                 pos += 1
                 continue
@@ -546,6 +529,7 @@ class MathMate(object):
         for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
             if self.tmcursor >= ssp and self.tmcursor < esp:
                 return index
+        return len(self.statements) - 1
             
     def get_current_statement(self):
         return self.statements[self.get_current_statement_index()]

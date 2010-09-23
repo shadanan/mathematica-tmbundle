@@ -5,8 +5,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
 	  <title>TextMate Mathematica Output</title>
-	  <script type="text/javascript" charset="utf-8" src="../jquery-1.4.2.min.js"></script>
+	
 	  <link rel="stylesheet" href="../tmjlink.css" type="text/css" media="screen" charset="utf-8">
+	  <script type="text/javascript" charset="utf-8" src="../jquery-1.4.2.min.js"></script>
   </head>
   <body>
     <div class="header">
@@ -15,6 +16,13 @@
         <br style="clear:both" />
       </div>
     </div>
-  <%= yield %>
+  	
+		<%= yield %>
+		
+		<script type="text/javascript" charset="utf-8">
+			$(window).load(function() {
+				$(window).scrollTop($(document).height());
+			});
+		</script>
   </body>
 </html>

@@ -234,8 +234,8 @@ public class Session extends Thread {
 			
 			if (state == 3) {
 				try {
-					Resources.Resource resource = resources.evaluateToImage(data);
-					out.println("TMJLink FileSaved " + resource.getFilePointer());
+					resources.evaluateToImage(data);
+					out.println("TMJLink Okay");
 				} catch (Exception e) {
 					out.println("TMJLink Exception -- " + e.getMessage());
 					e.printStackTrace();
