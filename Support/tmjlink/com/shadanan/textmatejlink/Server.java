@@ -126,6 +126,23 @@ public class Server extends Thread {
 		return resources;
 	}
 	
+	public Resources newResources(String sessionId) throws MathLinkException, IOException {
+		Resources resources = resourcesMap.get(sessionId);
+		if (resources != null) {
+			System.out.println("Releasing Resources for Session ID: " + sessionId);
+			resources.close();
+			resourcesMap.remove(sessionId);
+		}
+		
+		System.out.println("Allocating Resources for Session ID: " + sessionId);
+		resources = new Resources(sessionId, cacheFolder, mlargs);
+		synchronized (sessionsLock) {
+			resourcesMap.put(sessionId, resources);
+		}
+		
+		return resources;
+	}
+	
 	public void printStatus() {
 		System.out.println("==== Current Connections ====");
 		for (Session session : sessions) {

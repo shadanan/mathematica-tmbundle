@@ -28,6 +28,7 @@ class MathMate(object):
         self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.statements = self.parse(self.doc)
+        self.sessid = "shad"
     
     def shutdown(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
@@ -137,7 +138,6 @@ class MathMate(object):
     
     def execute(self):
         self.launch_tmjlink()
-        
         sock = self.connect()
         
         statements = []
@@ -154,7 +154,7 @@ class MathMate(object):
             
             if state == 0:
                 if response == "TMJLink Status OK":
-                    sock.send("sessid shad\n")
+                    sock.send("sessid %s\n" % self.sessid)
                     state = 1
                     continue
             
@@ -215,7 +215,117 @@ class MathMate(object):
             raise Exception("Invalid state: " + state)
         
         print "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
+    
+    def clear(self):
+        self.launch_tmjlink()
+        sock = self.connect()
+        
+        state = 0
+        while True:
+            line, response, words, comment = self.read(sock)
             
+            if state == 0:
+                if response == "TMJLink Status OK":
+                    sock.send("sessid %s\n" % self.sessid)
+                    state = 1
+                    continue
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 1:
+                if response == "TMJLink Okay":
+                    sock.send("clear\n")
+                    state = 2
+                    continue
+                        
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            if state == 2:
+                if response == "TMJLink Okay":
+                    sock.send("quit\n")
+                    state = 3
+                    continue
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 3:
+                if response == "TMJLink Okay":
+                    sock.close()
+                    break
+            
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            raise Exception("Invalid state: " + state)
+        
+        print "Session Cleared"
+            
+    def reset(self):
+        self.launch_tmjlink()
+        sock = self.connect()
+
+        state = 0
+        while True:
+            line, response, words, comment = self.read(sock)
+
+            if state == 0:
+                if response == "TMJLink Status OK":
+                    sock.send("sessid %s\n" % self.sessid)
+                    state = 1
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 1:
+                if response == "TMJLink Okay":
+                    sock.send("reset\n")
+                    state = 2
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 2:
+                if response == "TMJLink Okay":
+                    sock.send("quit\n")
+                    state = 3
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 3:
+                if response == "TMJLink Okay":
+                    sock.close()
+                    break
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            raise Exception("Invalid state: " + state)
+
+        print "Session Reset"
+
     def get_pos(self, line, column):
         line_index = 1
         line_pos = 0
@@ -579,12 +689,12 @@ def main():
         mm.execute()
         return
     
-    if command == "release":
-        mm.release()
+    if command == "clear":
+        mm.clear()
         return
     
-    if command == "close":
-        mm.close()
+    if command == "reset":
+        mm.reset()
         return
     
     if command == "shutdown":

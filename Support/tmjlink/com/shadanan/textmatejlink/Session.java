@@ -43,6 +43,11 @@ public class Session extends Thread {
 		System.out.println("Associating connection: " + socket.getRemoteSocketAddress() + " with Session ID: " + sessionId);
 	}
 	
+	private void resetResources() throws MathLinkException, IOException {
+		server.newResources(resources.getSessionId());
+		System.out.println("Resetting Resources with Session ID: " + resources.getSessionId());
+	}
+	
 	private String readLine(InputStreamReader in) {
 		StringBuilder line = new StringBuilder();
 		
@@ -194,6 +199,20 @@ public class Session extends Thread {
 					int resourceSize = resources.getSize();
 					resources.release();
 					out.println("TMJLink Okay -- Resources released: " + resourceSize);
+					continue;
+				}
+				
+				if (command.equals("reset")) {
+					try {
+						resetResources();
+						out.println("TMJLink Okay -- All resources reset");
+					} catch (MathLinkException e) {
+						out.println("TMJLink Exception -- " + e.getMessage());
+						e.printStackTrace();
+					} catch (IOException e) {
+						out.println("TMJLink Exception -- " + e.getMessage());
+						e.printStackTrace();
+					}
 					continue;
 				}
 				
