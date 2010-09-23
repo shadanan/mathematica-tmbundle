@@ -184,15 +184,9 @@ public class Session extends Thread {
 					continue;
 				}
 				
-				if (command.equals("evalff")) {
+				if (command.equals("eval")) {
 					readsize = Integer.parseInt(args);
 					state = 2;
-					continue;
-				}
-				
-				if (command.equals("evali")) {
-					readsize = Integer.parseInt(args);
-					state = 3;
 					continue;
 				}
 				
@@ -221,20 +215,6 @@ public class Session extends Thread {
 			if (state == 2) {
 				try {
 					resources.evaluate(data);
-					out.println("TMJLink Okay");
-				} catch (MathLinkException e) {
-					out.println("TMJLink Exception -- " + e.getMessage());
-					e.printStackTrace();
-				}
-				
-				readsize = -1;
-				state = 1;
-				continue;
-			}
-			
-			if (state == 3) {
-				try {
-					resources.evaluateToImage(data);
 					out.println("TMJLink Okay");
 				} catch (Exception e) {
 					out.println("TMJLink Exception -- " + e.getMessage());

@@ -104,25 +104,22 @@ public class Resources implements PacketListener {
 		}
 	}
 	
-	public Resource evaluate(String query) throws MathLinkException {
+	public void evaluate(String query) throws MathLinkException, IOException {
+		// Log the input
 		resources.add(new Resource(query));
-		kernelLink.evaluate(query);
-		kernelLink.waitForAnswer();
-		Resource resource = new Resource(MathLink.RETURNPKT, kernelLink.getExpr().toString());
-		resources.add(resource);
-		kernelLink.newPacket();
-		currentCount++;
-		return resource;
-	}
-	
-	public Resource evaluateToImage(String query) throws IOException, MathLinkException {
-		resources.add(new Resource(query));
+		
+		// Log the output as an image
 		byte[] data = kernelLink.evaluateToImage(query, 0, 0);
-		if (data == null) return evaluate("%");
-		Resource resource = new Resource(MathLink.DISPLAYPKT, data);
-		resources.add(resource);
+		if (data != null)
+			resources.add(new Resource(MathLink.DISPLAYPKT, data));
+		
+		// Log the output as fullform text
+		String result = kernelLink.evaluateToInputForm(query, 120);
+		if (result != null)
+			resources.add(new Resource(MathLink.RETURNPKT, result));
+		
+		// Done with this. Move on...
 		currentCount++;
-		return resource;
 	}
 	
 	private String applyLayout(String content) throws IOException {
@@ -143,27 +140,40 @@ public class Resources implements PacketListener {
 	}
 	
 	public File render() throws IOException {
+		boolean renderedDisplay = false;
 		int currentCount = -1;
 		StringBuilder content = new StringBuilder();
 		
 		if (resourceView != null) {
 			File resourceViewFile = getNamedFile(resourceView);
-			if (resourceViewFile.exists()) resourceViewFile.delete();
+			if (resourceViewFile.exists()) 
+				resourceViewFile.delete();
 		}
 		
 		for (Resource resource : resources) {
 			if (currentCount == -1) {
 				currentCount = resource.getCount();
-				content.append("<div class='cellgroup'>");
+				content.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
 			}
 			
 			if (resource.getCount() != currentCount) {
 				content.append("</div>");
-				content.append("<div class='cellgroup'>");
 				currentCount = resource.getCount();
+				content.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
+				renderedDisplay = false;
 			}
 			
-			content.append(resource.render());
+			if (resource.type == MathLink.DISPLAYPKT) {
+				renderedDisplay = true;
+				content.append(resource.render(true));
+			} else if (resource.type == MathLink.RETURNPKT) {
+				if (renderedDisplay)
+					content.append(resource.render(false));
+				else
+					content.append(resource.render(true));
+			} else {
+				content.append(resource.render(true));
+			}
 		}
 		
 		if (currentCount != -1) {
@@ -228,11 +238,15 @@ public class Resources implements PacketListener {
 			}
 		}
 		
-		public String render() {
+		public String render(boolean visible) {
 			StringBuilder result = new StringBuilder();
 			
+			String style = "";
+			if (!visible)
+				style = " style='display:none;'";
+			
 			if (type == -1) {
-				result.append("<div class='cell input'>");
+				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
 				result.append("  <br style='clear:both' />");
@@ -241,7 +255,7 @@ public class Resources implements PacketListener {
 			
 			// TODO: May need to convert \n to <br />
 			if (type == MathLink.TEXTPKT) {
-				result.append("<div class='cell text'>");
+				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
 				result.append("  <br style='clear:both' />");
@@ -250,7 +264,7 @@ public class Resources implements PacketListener {
 			
 			// TODO: May need to convert \n to <br />
 			if (type == MathLink.MESSAGEPKT) {
-				result.append("<div class='cell message'>");
+				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
 				result.append("  <br style='clear:both' />");
@@ -258,17 +272,17 @@ public class Resources implements PacketListener {
 			}
 			
 			if (type == MathLink.DISPLAYPKT) {
-				result.append("<div class='cell display'>");
+				result.append("<div class='cell display'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>");
-				result.append("    <img src='" + getFilePointer() + "' />");
+				result.append("    <img src='" + getFilePointer() + "' onclick='toggle(" + count + ")' />");
 				result.append("  </div>");
 				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.RETURNPKT) {
-				result.append("<div class='cell return'>");
+				result.append("<div class='cell return'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
 				result.append("  <br style='clear:both' />");
@@ -289,6 +303,8 @@ public class Resources implements PacketListener {
 		if (evt.getPktType() == MathLink.MESSAGEPKT) {
 			resources.add(new Resource(evt.getPktType(), ml.getString()));
 		}
+		
+		System.out.println("Received Packet: " + evt.getPktType());
 		
 		return true;
 	}

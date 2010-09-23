@@ -166,7 +166,7 @@ class MathMate(object):
             if state == 1:
                 if response == "TMJLink Okay":
                     statement = statements.pop(0).rstrip()
-                    sock.send("evali %d\n" % len(statement))
+                    sock.send("eval %d\n" % len(statement))
                     sock.send(statement)
                     
                     if len(statements) == 0:

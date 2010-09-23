@@ -23,6 +23,10 @@
 			$(window).load(function() {
 				$(window).scrollTop($(document).height());
 			});
+			
+			function toggle(resource_id) {
+				$('#resource_' + resource_id + ' .return').toggle();
+			}
 		</script>
   </body>
 </html>
