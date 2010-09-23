@@ -2,7 +2,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: Verdana,Helvetica,Arial,sans-serif;
-  font-size: 0.75em;
+  font-size: 12px;
   background-color: #e6e6e6;
 }
 
@@ -17,27 +17,47 @@ div.header {
 
 div.margin {
   float: left;
-  width: 75px;
+  width: 65px;
   clear: both;
   text-align: right;
-  margin-right: 0.5em;
+  font-size: 10px;
+  margin-top: 1px;
+  color: #675ac0;
+}
+
+div.message div.content, div.text div.content {
+  color: #b5511b;
+  font-size: 11px;
+}
+
+div.message div.margin, div.text div.margin {
+  color: #b5511b;
+}
+
+div.return div.content {
+  color: #aaa;
+  font-size: 11px;
+}
+
+div.return div.margin {
+  color: #aaa;
 }
 
 div.content {
-  float: left;
+  margin-left: 75px;
 }
 
 div.cellgroup {
   margin: 1em;
   border: 1px solid #888;
   background-color: white;
-  padding: 0.5em;
+  padding: 0.5em 0.5em 0.5em 0;
 }
 
 div.cell {
-  margin: 0.5em;
+  margin: 0.5em 0.5em 0.5em 0;
   border-right: 1px solid #888;
-  padding: 0.5em;
+  padding: 2px;
   -webkit-border-top-right-radius: 2px; 
   -webkit-border-bottom-right-radius: 2px; 
 }

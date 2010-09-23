@@ -108,16 +108,21 @@ public class Resources implements PacketListener {
 		// Log the input
 		resources.add(new Resource(query));
 		
-		// Log the output as an image
-		byte[] data = kernelLink.evaluateToImage(query, 0, 0);
-		if (data != null)
-			resources.add(new Resource(MathLink.DISPLAYPKT, data));
-		
-		// Log the output as fullform text
-		String result = kernelLink.evaluateToInputForm(query, 120);
-		if (result != null)
-			resources.add(new Resource(MathLink.RETURNPKT, result));
-		
+		if (query.trim().charAt(query.trim().length()-1) == ';') {
+			// Evaluate and don't log the answer.
+			kernelLink.evaluate(query);
+			kernelLink.discardAnswer();
+		} else {
+			// Log the output as an image
+			byte[] data = kernelLink.evaluateToImage(query, 0, 0);
+			if (data != null)
+				resources.add(new Resource(MathLink.DISPLAYPKT, data));
+			
+			// Log the output as fullform text
+			String result = kernelLink.evaluateToInputForm(query, 120);
+			if (result != null)
+				resources.add(new Resource(MathLink.RETURNPKT, result));
+		}		
 		// Done with this. Move on...
 		currentCount++;
 	}
@@ -249,7 +254,6 @@ public class Resources implements PacketListener {
 				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
-				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
@@ -258,7 +262,6 @@ public class Resources implements PacketListener {
 				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
-				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
@@ -267,7 +270,6 @@ public class Resources implements PacketListener {
 				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
-				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
@@ -277,7 +279,6 @@ public class Resources implements PacketListener {
 				result.append("  <div class='content'>");
 				result.append("    <img src='" + getFilePointer() + "' onclick='toggle(" + count + ")' />");
 				result.append("  </div>");
-				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
@@ -285,7 +286,6 @@ public class Resources implements PacketListener {
 				result.append("<div class='cell return'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
-				result.append("  <br style='clear:both' />");
 				result.append("</div>");
 			}
 			
