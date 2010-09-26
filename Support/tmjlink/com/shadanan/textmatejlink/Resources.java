@@ -122,8 +122,10 @@ public class Resources implements PacketListener {
 			String result = kernelLink.evaluateToInputForm(query, 120);
 			if (result != null)
 				resources.add(new Resource(MathLink.RETURNPKT, result));
-		}		
+		}
+		
 		// Done with this. Move on...
+		kernelLink.newPacket();
 		currentCount++;
 	}
 	
@@ -304,6 +306,7 @@ public class Resources implements PacketListener {
 		
 		if (evt.getPktType() == MathLink.TEXTPKT) {
 			resources.add(new Resource(evt.getPktType(), ml.getString()));
+			
 		}
 		
 		if (evt.getPktType() == MathLink.MESSAGEPKT) {
