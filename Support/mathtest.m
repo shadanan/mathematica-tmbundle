@@ -1,5 +1,3 @@
-Needs["CorporateAnalysisUtilities`"];
-
 Plot[Sin[x], {x, -5, 5}]
 
 Plot3D[Sin[x] Sin[y], {x, -5, 5}, {y, -5, 5}]
