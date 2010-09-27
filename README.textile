@@ -11,6 +11,9 @@ This bundle allows TextMate to understand Mathematica .m files.
 
 It was created by David Howell and is being maintained by David Howell and Shad Sharma.
 
+Special thanks to Eric Wort whose invaluable help has saved this developer countless
+hours of random debugging.
+
 h3. Installation
 
 Open up a terminal and navigate to the TextMate bundle folder:
@@ -64,9 +67,14 @@ h4. Other (Commands, Indentation, etc.)
 
  * Execute current statement / selection (shift + enter)
  * Clear mathmate session (command + shift + >)
- * Quick mathmate kernel (command + shift + control + >)
+ * Quit mathmate kernel (command + shift + control + >)
+   * If Mathematica crashes, an exception will be displayed in the MathMate output as follows:
+     Connected MathLink program has closed the link, but there might still be data underway.
+     At this point, you should use this command to restart the kernel (you will lose previous kernel state).
  * Shutdown mathmate backend (command + shift + option + >)
  
 h3. Next on the list...
 
  * Add more snippets (Function, etc.)
+ * Command completion (via option + escape)
+ * Better handling of Mathematica kernel crashes
