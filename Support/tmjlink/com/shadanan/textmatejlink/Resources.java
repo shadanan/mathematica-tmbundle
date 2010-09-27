@@ -265,7 +265,6 @@ public class Resources implements PacketListener {
 				result.append("</div>");
 			}
 			
-			// TODO: May need to convert \n to <br />
 			if (type == MathLink.TEXTPKT) {
 				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
@@ -273,7 +272,6 @@ public class Resources implements PacketListener {
 				result.append("</div>");
 			}
 			
-			// TODO: May need to convert \n to <br />
 			if (type == MathLink.MESSAGEPKT) {
 				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
@@ -306,7 +304,6 @@ public class Resources implements PacketListener {
 		
 		if (evt.getPktType() == MathLink.TEXTPKT) {
 			resources.add(new Resource(evt.getPktType(), ml.getString()));
-			
 		}
 		
 		if (evt.getPktType() == MathLink.MESSAGEPKT) {
@@ -314,7 +311,6 @@ public class Resources implements PacketListener {
 		}
 		
 		System.out.println("Received Packet: " + evt.getPktType());
-		
 		return true;
 	}
 }

@@ -10,7 +10,6 @@ from optparse import OptionParser
 
 class MathMate(object):
     def __init__(self):
-        self.port = 8456
         self.cacheFolder = '/tmp/tmjlink'
         self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
         
@@ -62,7 +61,7 @@ class MathMate(object):
             except:
                 pass
         return False
-                
+    
     def launch_tmjlink(self):
         if self.is_tmjlink_alive():
             return
@@ -82,7 +81,7 @@ class MathMate(object):
         proc = subprocess.Popen(['/usr/bin/java', 
                 '-cp', ":".join(classpath), 
                 'com.shadanan.textmatejlink.TextMateJLink', 
-                str(self.port), self.cacheFolder, str(os.getppid())] + self.mlargs,
+                self.cacheFolder, str(os.getppid())] + self.mlargs,
             stdout=logfp, stderr=subprocess.STDOUT)
         logfp.close()
         
@@ -91,17 +90,6 @@ class MathMate(object):
         pidfp.write(str(proc.pid))
         pidfp.close()
         
-        # Wait for server to be ready
-        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'r')
-        while True:
-            line = logfp.readline()
-            if line == "":
-                time.sleep(0.1)
-                continue
-            if line.strip() == "Server started.":
-                break
-        logfp.close()
-    
     def readline(self, sock):
         result = []
         while True:
@@ -121,8 +109,22 @@ class MathMate(object):
         return "".join(result)
     
     def connect(self):
+        self.launch_tmjlink()
+        
+        # Wait for server to be ready and get listen port
+        logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'r')
+        while True:
+            line = logfp.readline()
+            if line == "":
+                time.sleep(0.1)
+                continue
+            if line.strip().startswith("Server started on port: "):
+                port = int(line.strip()[24:])
+                break
+        logfp.close()
+    
         sock = socket.socket()
-        sock.connect(("localhost", 8456))
+        sock.connect(("localhost", port))
         return sock
     
     def read(self, sock):
@@ -142,7 +144,6 @@ class MathMate(object):
         return (line, response, words, comment)
     
     def execute(self):
-        self.launch_tmjlink()
         sock = self.connect()
         
         statements = []
@@ -222,7 +223,6 @@ class MathMate(object):
         print "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
     
     def clear(self):
-        self.launch_tmjlink()
         sock = self.connect()
         
         state = 0
@@ -277,7 +277,6 @@ class MathMate(object):
         print "Session Cleared"
             
     def reset(self):
-        self.launch_tmjlink()
         sock = self.connect()
 
         state = 0

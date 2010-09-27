@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 import com.wolfram.jlink.MathLinkException;
 
 public class Server extends Thread {
-	private int serverPort = -1;
 	private String cacheFolder = null;
 	private int textMatePid = -1;
 	private String[] mlargs = null;
@@ -21,8 +20,7 @@ public class Server extends Thread {
 	private ArrayList<Session> sessions = null;
 	private HashMap<String, Resources> resourcesMap = null;
 	
-	public Server(int serverPort, String cacheFolder, int textMatePid, String[] mlargs) {
-		this.serverPort = serverPort;
+	public Server(String cacheFolder, int textMatePid, String[] mlargs) {
 		this.cacheFolder = cacheFolder;
 		this.textMatePid = textMatePid;
 		this.mlargs = mlargs;
@@ -35,9 +33,9 @@ public class Server extends Thread {
 	
 	public void run() {
 		try {
-			ServerSocket ss = new ServerSocket(serverPort);
+			ServerSocket ss = new ServerSocket(0);
 			ss.setSoTimeout(1000);
-			System.out.println("Server started.");
+			System.out.println("Server started on port: " + ss.getLocalPort());
 			
 			while (running) {
 				try {
@@ -77,8 +75,10 @@ public class Server extends Thread {
 		try {
 			synchronized (sessionsLock) {
 				while (sessions.size() > 0) {
+					System.out.println("Waiting for " + sessions.size() + " sessions to end...");
 					sessionsLock.wait();
 				}
+				System.out.println("All sessions closed.");
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

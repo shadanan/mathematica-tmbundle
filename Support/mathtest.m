@@ -1,5 +1,3 @@
-Needs["CorporateAnalysisUtilities`"];
-
 Plot[Sin[x], {x, -5, 5}]
 
 Plot3D[Sin[x] Sin[y], {x, -5, 5}, {y, -5, 5}]
@@ -34,3 +32,7 @@ Sqrt[4]
 
 x = 3;
 
+data = {};
+AppendTo[data, "shad"];
+
+Table[Plot[Sin[x y] E^(-x/4), {x, 0, 10}, PlotRange -> {-1, 1}], {y, 0, 5, 0.1}]
