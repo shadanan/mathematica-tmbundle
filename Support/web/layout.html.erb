@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
   <head>
-	  <title>TextMate Mathematica Output</title>
-	
-	  <link rel="stylesheet" href="../tmjlink.css" type="text/css" media="screen" charset="utf-8">
-	  <script type="text/javascript" charset="utf-8" src="../jquery-1.4.2.min.js"></script>
+    <title>TextMate Mathematica Output</title>
+  
+    <link rel="stylesheet" href="../tmjlink.css" type="text/css" media="screen" charset="utf-8">
+    <script type="text/javascript" src="../jquery-1.4.2.min.js" charset="utf-8"></script>
   </head>
   <body>
     <div class="header">
@@ -16,17 +16,27 @@
         <br style="clear:both" />
       </div>
     </div>
-  	
-		<%= yield %>
-		
-		<script type="text/javascript" charset="utf-8">
-			$(window).load(function() {
-				$(window).scrollTop($(document).height());
-			});
-			
-			function toggle(resource_id) {
-				$('#resource_' + resource_id + ' .return').toggle();
-			}
-		</script>
+    
+    <%= yield %>
+    
+    <script type="text/javascript" charset="utf-8">
+      $(window).load(function() {
+        $(window).scrollTop($(document).height());
+      });
+      
+      $('#white_space .value').click(function() {
+        if ($(this).html() == "Normal") {
+          $(this).html("Pre");
+          $('div.cell div.content').css('white-space', 'pre');
+        } else {
+          $(this).html("Normal");
+          $('div.cell div.content').css('white-space', 'normal');
+        }
+      });
+      
+      function toggle(resource_id) {
+        $('#resource_' + resource_id + ' .return').toggle();
+      }
+    </script>
   </body>
 </html>

@@ -54,14 +54,6 @@ div.cellgroup {
   padding: 0.5em 0.5em 0.5em 0;
 }
 
-div.session_id {
-  margin: 1em;
-  border: 1px solid #888;
-  background-color: white;
-  padding: 0.5em;
-  text-align: right;
-}
-
 div.cell {
   margin: 0.5em 0.5em 0.5em 0;
   border-right: 1px solid #888;
@@ -84,10 +76,19 @@ div.header div.text span.white {
   font-style: italic;
 }
 
-div.session_id {
+#status_bar {
+  margin: 1em;
+  border: 1px solid #888;
+  background-color: white;
+  padding: 0.5em;
+  text-align: right;
   color: #555;
 }
 
-div.session_id span.value {
+#status_bar span.value {
   font-weight: bold;
+}
+
+#white_space .value {
+  cursor: pointer;
 }

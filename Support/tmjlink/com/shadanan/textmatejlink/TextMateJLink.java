@@ -1,6 +1,5 @@
 package com.shadanan.textmatejlink;
 
-
 public class TextMateJLink {
 	public static void main(String args[]) throws InterruptedException {
 		System.out.println("Server starting up...");

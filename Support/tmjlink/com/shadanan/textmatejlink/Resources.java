@@ -144,7 +144,8 @@ public class Resources implements PacketListener {
 		char[] buff = new char[1024];
 		do {
 			charsRead = layout.read(buff);
-			if (charsRead != -1) result.append(buff);
+			if (charsRead != -1) 
+				result.append(buff, 0, charsRead);
 		} while (charsRead != -1);
 		
 		String yieldToken = "<%= yield %>";
@@ -165,9 +166,15 @@ public class Resources implements PacketListener {
 		}
 		
 		// Render session id div
-		content.append("<div class='session_id'>");
-		content.append("<span class='label'>Session ID:</span> ");
-		content.append("<span class='value'>" + sessionId + "</span>");
+		content.append("<div id='status_bar'>");
+		content.append("  <div id='session_id'>");
+		content.append("    <span class='label'>Session ID:</span>");
+		content.append("    <span class='value'>" + sessionId + "</span>");
+		content.append("  </div>");
+		content.append("  <div id='white_space'>");
+		content.append("    <span class='label'>White Space:</span>");
+		content.append("    <span class='value'>Normal</span>");
+		content.append("  </div>");
 		content.append("</div>");
 		
 		for (Resource resource : resources) {
