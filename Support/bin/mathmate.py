@@ -422,15 +422,27 @@ class MathMate(object):
                 self.parse_tree_level = ".".join(scope)
 
             if len(scope) == 0:
-                if c1 not in (" ", "\t", "\n"):
+                if c1 == "\n" and nnsc is not None:
                     if current != []:
                         statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
                         current = []
 
                     ss_pos = pos
                     scope.append("root")
+                    
+                    current += "\n"
+                    
+                    indent_level = len(scope) + initial_indent_level - 1
+                    if nnsc in ("]", "}", ")"):
+                        current += (self.indent * (indent_level - 1))
+                    else:
+                        current += (self.indent * indent_level)
+                    
+                    pos += 1
+                    while block[pos] in (" ", "\t"):
+                        pos += 1
                     continue
-
+                    
                 current += c1
                 pos += 1
                 continue
