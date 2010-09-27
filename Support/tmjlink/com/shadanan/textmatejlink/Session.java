@@ -154,7 +154,7 @@ public class Session extends Thread {
 				}
 			}
 			
-			System.out.println(data);
+			System.out.println("From " + socket.getRemoteSocketAddress() + ": " + data);
 			
 			if (state == 0) {
 				if (command.equals("quit")) {

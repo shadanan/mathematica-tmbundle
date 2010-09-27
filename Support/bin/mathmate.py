@@ -34,6 +34,9 @@ class MathMate(object):
         else:
             self.sessid = sessid
     
+    def format_exception_html(self):
+        
+    
     def shutdown(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -690,7 +693,7 @@ def main():
     command = args[0]
     
     mm = MathMate()
-
+    
     if command == "show":
         mm.show()
         return

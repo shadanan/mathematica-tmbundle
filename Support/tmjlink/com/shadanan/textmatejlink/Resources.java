@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class Resources implements PacketListener {
 	private String cacheFolder = null;
 	private KernelLink kernelLink = null;
 	private int currentCount = 0;
+	private String[] mlargs = null;
 	
 	private ArrayList<Resources.Resource> resources = null;
 	private String resourceView = null;
@@ -28,6 +30,7 @@ public class Resources implements PacketListener {
 	public Resources(String sessionId, String cacheFolder, String[] mlargs) throws MathLinkException, IOException {
 		this.sessionId = sessionId;
 		this.cacheFolder = cacheFolder;
+		this.mlargs = mlargs;
 		this.resources = new ArrayList<Resources.Resource>();
 		
 		// Allocate the kernel link and register packet listener
@@ -74,8 +77,13 @@ public class Resources implements PacketListener {
 		return file;
 	}
 	
-	public void refresh() throws MathLinkException {
-		kernelLink.connect();
+	public void reconnect() throws MathLinkException {
+		kernelLink.removePacketListener(this);
+		kernelLink.close();
+		
+		kernelLink = MathLinkFactory.createKernelLink(mlargs);
+		kernelLink.addPacketListener(this);
+		kernelLink.discardAnswer();
 	}
 	
 	public void close() {
@@ -108,13 +116,12 @@ public class Resources implements PacketListener {
 		// Log the input
 		resources.add(new Resource(query));
 		
-		if (query.trim().charAt(query.trim().length()-1) == ';') {
-			// Evaluate and don't log the answer.
-			kernelLink.evaluate(query);
-			kernelLink.discardAnswer();
-		} else {
+		kernelLink.evaluate("MathMate`lastOutput = " + query);
+		kernelLink.discardAnswer();
+		
+		if (query.trim().charAt(query.trim().length()-1) != ';') {
 			// Log the output as an image
-			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput = " + query, 0, 0);
+			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
 			if (data != null)
 				resources.add(new Resource(MathLink.DISPLAYPKT, data));
 			
@@ -310,7 +317,20 @@ public class Resources implements PacketListener {
 			resources.add(new Resource(evt.getPktType(), ml.getString()));
 		}
 		
-		System.out.println("Received Packet: " + evt.getPktType());
+		for (Field field : MathLink.class.getFields()) {
+			if (field.getName().endsWith("PKT")) {
+				try {
+					if (evt.getPktType() == field.getInt(field)) {
+						System.out.println("Received Mathematica Packet: " + field.getName() + " (" + evt.getPktType() + ")");
+					}
+				} catch (IllegalArgumentException e) {
+					System.out.println(e.getMessage());
+				} catch (IllegalAccessException e) {
+					System.out.println(e.getMessage());
+				}
+			}
+		}
+		
 		return true;
 	}
 }

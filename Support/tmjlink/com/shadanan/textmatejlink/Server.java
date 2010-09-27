@@ -71,7 +71,7 @@ public class Server extends Thread {
 			running = false;
 		}
 		
-		// Shutdown the kernels
+		// Wait for all connections to end
 		try {
 			synchronized (sessionsLock) {
 				while (sessions.size() > 0) {
@@ -84,7 +84,7 @@ public class Server extends Thread {
 			e.printStackTrace();
 		}
 		
-		// Remove all resources
+		// Close kernels and remove all resources
 		Iterator<Entry<String, Resources>> iterator = resourcesMap.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<String, Resources> entry = iterator.next();
@@ -122,7 +122,6 @@ public class Server extends Thread {
 		}
 		
 		Resources resources = resourcesMap.get(sessionId);
-		resources.refresh();
 		return resources;
 	}
 	
