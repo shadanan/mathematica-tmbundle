@@ -442,6 +442,21 @@ class MathMate(object):
                     while block[pos] in (" ", "\t"):
                         pos += 1
                     continue
+                
+                if c1 in (" ", "\t") and nnsc is not None:
+                    ss_pos = pos
+                    scope.append("root")
+                    
+                    indent_level = len(scope) + initial_indent_level - 1
+                    if nnsc in ("]", "}", ")"):
+                        current += (self.indent * (indent_level - 1))
+                    else:
+                        current += (self.indent * indent_level)
+                    
+                    pos += 1
+                    while block[pos] in (" ", "\t"):
+                        pos += 1
+                    continue
                     
                 current += c1
                 pos += 1
