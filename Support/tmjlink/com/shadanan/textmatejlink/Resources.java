@@ -114,12 +114,12 @@ public class Resources implements PacketListener {
 			kernelLink.discardAnswer();
 		} else {
 			// Log the output as an image
-			byte[] data = kernelLink.evaluateToImage(query, 0, 0);
+			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput = " + query, 0, 0);
 			if (data != null)
 				resources.add(new Resource(MathLink.DISPLAYPKT, data));
 			
 			// Log the output as fullform text
-			String result = kernelLink.evaluateToInputForm(query, 120);
+			String result = kernelLink.evaluateToInputForm("MathMate`lastOutput", 120);
 			if (result != null)
 				resources.add(new Resource(MathLink.RETURNPKT, result));
 		}		
