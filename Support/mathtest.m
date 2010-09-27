@@ -6,14 +6,7 @@ OutputForm[Integrate[Cos[x], x]]
 
 pages[[1]]
 
-ShadsFunction[x_] := Block[{}, 
-    Plot[Sin[x], {x, -5, 5}]
-    Plot[Sin[x] E^-x, {x, -5, 5}]
-  ]
-
-ShadsFunction[x]
-
-E
+Assuming[Element[Theta, Reals], E^(I Theta) === Cos[Theta] + I Sin[Theta]]
 
 Plot[Sin[x] E^(-x/4), {x, 0, 10}, Filling -> Axis]
 
@@ -33,6 +26,8 @@ Sqrt[4]
 x = 3;
 
 data = {};
-AppendTo[data, "shad"];
+AppendTo[data, "some data"];
 
 Table[Plot[Sin[x y] E^(-x/4), {x, 0, 10}, PlotRange -> {-1, 1}], {y, 0, 5, 0.1}]
+
+?System`*
