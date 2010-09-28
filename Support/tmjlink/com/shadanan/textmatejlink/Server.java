@@ -29,6 +29,8 @@ public class Server extends Thread {
 		resourcesMap = new HashMap<String, Resources>();
 		sessions = new ArrayList<Session>();
 		sessionsLock = new Object();
+		
+		System.out.println("TextMate PID: " + textMatePid);
 	}
 	
 	public void run() {

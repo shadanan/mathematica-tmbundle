@@ -10,9 +10,9 @@ Table[Plot[Sin[x y] E^(-x/4), {x, 0, 10}, PlotRange -> {-1, 1}], {y, 0, 5, 0.1}]
 
 BarChart[{1, 2, 3}]
 
-MatrixForm[{{1,2,3},{2,3,4},{3,4,5}}]
+MatrixForm[{{1, 2, 3}, {2, 3, 4}, {3, 4, 5}}]
 
-Pi
+Pi // N
 Sqrt[4]
 x = 3;
 
@@ -22,4 +22,12 @@ data[[1, 0]]
 
 ?System`*
 
+Names["System`*"]
+
 TreeForm[a + b^2 + c^3 + d]
+
+a = 
+  N[
+    4 + 
+      5] 4
+b = 4

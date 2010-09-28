@@ -6,6 +6,7 @@ import string
 import socket
 import shutil
 import subprocess
+import traceback
 from optparse import OptionParser
 
 class MathMate(object):
@@ -34,6 +35,44 @@ class MathMate(object):
         else:
             self.sessid = sessid
     
+    def exit_discard(self):
+        sys.exit(200)
+
+    def exit_replace_text(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(201)
+
+    def exit_replace_document(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(202)
+
+    def exit_insert_text(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(203)
+
+    def exit_insert_snippet(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(204)
+
+    def exit_show_html(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(205)
+
+    def exit_show_tool_tip(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(206)
+
+    def exit_create_new_document(self, out = None):
+        if out is not None:
+            print out
+        sys.exit(207)
+
     def shutdown(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -42,11 +81,10 @@ class MathMate(object):
                 pid = int(pidfp.read())
                 pidfp.close()
                 os.kill(pid, 1)
-                print "TextMateJLink Server Shutdown"
-                return
+                return "TextMateJLink Server Shutdown"
             except:
                 pass
-        print "TextMateJLink Server is not Running"
+        return "TextMateJLink Server is not Running"
     
     def is_tmjlink_alive(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
@@ -62,6 +100,16 @@ class MathMate(object):
                 pass
         return False
     
+    def get_textmate_pid(self):
+        current_pid = os.getpid()
+        while current_pid != 1:
+            shell = subprocess.Popen(["ps", "-p", str(current_pid), "-o", "pid,ppid,command"], stdout=subprocess.PIPE)
+            process = map(lambda x: x[:11].split() + [x[12:]], shell.stdout.read().rstrip().split("\n"))[1]
+            if "TextMate.app/Contents/MacOS/TextMate" in process[2]:
+                return current_pid
+            current_pid = int(process[1])
+        raise Exception("Could not determine TextMate.app pid.")
+
     def launch_tmjlink(self):
         if self.is_tmjlink_alive():
             return
@@ -77,11 +125,12 @@ class MathMate(object):
             os.symlink(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "web", sfile), os.path.join(self.cacheFolder, sfile))
         
         # Launch TextMateJLink
+        textmate_pid = self.get_textmate_pid()
         logfp = open(os.path.join(self.cacheFolder, "tmjlink.log"), 'w')
         proc = subprocess.Popen(['/usr/bin/java', 
                 '-cp', ":".join(classpath), 
                 'com.shadanan.textmatejlink.TextMateJLink', 
-                self.cacheFolder, str(os.getppid())] + self.mlargs,
+                self.cacheFolder, str(textmate_pid)] + self.mlargs,
             stdout=logfp, stderr=subprocess.STDOUT)
         logfp.close()
         
@@ -223,7 +272,7 @@ class MathMate(object):
             
             raise Exception("Invalid state: " + state)
         
-        print "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
+        return "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
     
     def clear(self):
         sock = self.connect()
@@ -277,7 +326,7 @@ class MathMate(object):
             
             raise Exception("Invalid state: " + state)
         
-        print "Session Cleared"
+        return "Session Cleared"
             
     def reset(self):
         sock = self.connect()
@@ -331,7 +380,7 @@ class MathMate(object):
 
             raise Exception("Invalid state: " + state)
 
-        print "Session Reset"
+        return "Session Reset"
 
     def get_pos(self, line, column):
         line_index = 1
@@ -501,7 +550,7 @@ class MathMate(object):
 
             if c1 in (" ", "\t"):
                 vsc = string.ascii_letters + string.digits
-                if pc is not None and nnsc is not None and pc in vsc and nnsc in vsc:
+                if pc is not None and nnsc is not None and pc in (vsc + "]})") and nnsc in vsc:
                     current += " "
                 pos += 1
                 continue
@@ -538,6 +587,8 @@ class MathMate(object):
                 continue
         
             if c2 == "]]" and scope[-1] == "part":
+                while scope[-1] == "binop":
+                    scope.pop()
                 scope.pop()
                 current += c2
                 pos += 2
@@ -550,6 +601,8 @@ class MathMate(object):
                 continue
         
             if c1 == "]":
+                while scope[-1] == "binop":
+                    scope.pop()
                 scope.pop()
                 current += c1
                 pos += 1
@@ -562,7 +615,7 @@ class MathMate(object):
                 continue
         
             if c1 == "}":
-                if scope[-1] == "binop":
+                while scope[-1] == "binop":
                     scope.pop()
                 scope.pop()
                 current += c1
@@ -576,8 +629,8 @@ class MathMate(object):
                 continue
         
             if c1 == ")":
-                # if scope[-1] == "binop":
-                #     scope.pop()
+                while scope[-1] == "binop":
+                    scope.pop()
                 scope.pop()
                 current += c1
                 pos += 1
@@ -593,7 +646,14 @@ class MathMate(object):
                 pos += 1
                 continue
             
-            if c1 in ("+", "*", "/", "^", ">", "<", "|", "="):
+            if c1 in ("*", "/", "^"):
+                if self.is_end_of_line(pos + 1):
+                    scope += ("binop", "start")
+                current += c1
+                pos += 1
+                continue
+            
+            if c1 in ("+", ">", "<", "|", "="):
                 if self.is_end_of_line(pos + 1):
                     scope += ("binop", "start")
                 current += " ", c1, " "
@@ -617,14 +677,14 @@ class MathMate(object):
                 continue
             
             if c1 == ",":
-                if scope[-1] == "binop":
+                while scope[-1] == "binop":
                     scope.pop()
                 current += c1, " "
                 pos += 1
                 continue
 
             if c1 == ";":
-                if scope[-1] == "binop":
+                while scope[-1] == "binop":
                     scope.pop()
                 if scope[-1] == "root":
                     scope.pop()
@@ -633,7 +693,7 @@ class MathMate(object):
                 continue
 
             if c1 == "\n":
-                if scope[-1] == "binop":
+                while scope[-1] == "binop":
                     scope.pop()
                 if scope[-1] == "start":
                     scope.pop()
@@ -655,6 +715,9 @@ class MathMate(object):
                 current += c1
                 pos += 1
                 continue
+            
+            if pc is not None and pc in "]})" and c1 in vsc:
+                current += " "
             
             current += c1
             pos += 1
@@ -684,24 +747,27 @@ class MathMate(object):
             sys.stdout.write(self.doc[esp:])
 
     def show(self):
-        print "Cursor: (Line: %d, Index: %d, Tree: %s)" % (self.tmln, self.tmli, self.parse_tree_level)
+        result = []
+        result.append("Cursor: (Line: %d, Index: %d, Tree: %s)" % (self.tmln, self.tmli, self.parse_tree_level))
 
         if self.selected_text is None:
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             ssln, ssli = self.get_line_col(ssp)
             esln, esli = self.get_line_col(esp)
-            print "Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli)
-            print reformatted_statement,
+            result.append("Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli))
+            result.append(reformatted_statement)
         else:
             for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
                 ssln, ssli = self.get_line_col(ssp)
                 esln, esli = self.get_line_col(esp)
-                print "Statement %d Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (index, ssln, ssli, esln, esli)
+                result.append("Statement %d Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (index, ssln, ssli, esln, esli))
                 if len(reformatted_statement.strip()) != 0:
-                    print reformatted_statement.rstrip()
+                    result.append(reformatted_statement.rstrip())
                 else:
-                    print "*** Empty Statement ***"
-                print
+                    result.append("*** Empty Statement ***")
+                result.append("")
+
+        return "\n".join(result)
 
 def main():
     parser = OptionParser()
@@ -710,33 +776,36 @@ def main():
     
     mm = MathMate()
     
-    if command == "show":
-        mm.show()
-        return
+    try:
+        if command == "show":
+            mm.exit_show_tool_tip(mm.show())
     
-    if command == "execute":
-        mm.execute()
-        return
+        if command == "execute":
+            mm.exit_show_html(mm.execute())
     
-    if command == "image":
-        mm.execute(True)
-        return
+        if command == "image":
+            mm.exit_show_html(mm.execute(True))
     
-    if command == "clear":
-        mm.clear()
-        return
+        if command == "clear":
+            mm.exit_show_tool_tip(mm.clear())
     
-    if command == "reset":
-        mm.reset()
-        return
+        if command == "reset":
+            mm.exit_show_tool_tip(mm.reset())
     
-    if command == "shutdown":
-        mm.shutdown()
-        return
+        if command == "shutdown":
+            mm.exit_show_tool_tip(mm.shutdown())
     
-    if command == "reformat":
-        mm.reformat()
-        return
+        if command == "reformat":
+            mm.exit_replace_text(mm.reformat())
+    
+        if command == "complete":
+            command = [os.environ.get('DIALOG'), "popup"]
+            subprocess.call(command)
+            mm.exit_show_tool_tip(command)
+            
+    except Exception:
+        stacktrace = traceback.format_exc()
+        mm.exit_show_tool_tip(stacktrace)
     
     print "Command not recognized: %s" % command
 
