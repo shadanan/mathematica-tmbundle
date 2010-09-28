@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
+import com.wolfram.jlink.Expr;
 import com.wolfram.jlink.KernelLink;
 import com.wolfram.jlink.MathLink;
 import com.wolfram.jlink.MathLinkException;
@@ -117,11 +118,11 @@ public class Resources implements PacketListener {
 		resources.add(new Resource(query));
 		
 		kernelLink.evaluate("MathMate`lastOutput = " + query);
-		kernelLink.discardAnswer();
+		kernelLink.waitForAnswer();
+		Expr result = kernelLink.getExpr();
 		
 		if (query.trim().charAt(query.trim().length()-1) != ';') {
 			// Log the output as fullform text
-			String result = kernelLink.evaluateToInputForm("MathMate`lastOutput", 120);
 			Resource textResource = new Resource(MathLink.RETURNPKT, result);
 			if (textResource.isGraphics()) {
 				// Log the output as an image
@@ -143,7 +144,8 @@ public class Resources implements PacketListener {
 		resources.add(new Resource(query));
 		
 		kernelLink.evaluate("MathMate`lastOutput = " + query);
-		kernelLink.discardAnswer();
+		kernelLink.waitForAnswer();
+		Expr result = kernelLink.getExpr();
 		
 		if (query.trim().charAt(query.trim().length()-1) != ';') {
 			// Log the output as an image
@@ -152,7 +154,6 @@ public class Resources implements PacketListener {
 				resources.add(new Resource(MathLink.DISPLAYPKT, data));
 			
 			// Log the output as fullform text
-			String result = kernelLink.evaluateToInputForm("MathMate`lastOutput", 120);
 			Resource textResource = new Resource(MathLink.RETURNPKT, result);
 			resources.add(textResource);
 			if (data != null)
@@ -248,12 +249,22 @@ public class Resources implements PacketListener {
 		private String value;
 		private int count;
 		private boolean subdue;
+		private Expr expr;
 		
 		public Resource(String value) {
 			this.type = -1;
 			this.value = value;
 			this.count = currentCount;
 			this.subdue = false;
+			this.expr = null;
+		}
+		
+		public Resource(int type, Expr expr) {
+			this.type = type;
+			this.value = null;
+			this.count = currentCount;
+			this.subdue = false;
+			this.expr = expr;
 		}
 		
 		public Resource(int type, String value) {
@@ -261,6 +272,7 @@ public class Resources implements PacketListener {
 			this.value = value;
 			this.count = currentCount;
 			this.subdue = false;
+			this.expr = null;
 		}
 		
 		public Resource(int type, byte[] data) throws IOException {
@@ -268,6 +280,7 @@ public class Resources implements PacketListener {
 			this.value = UUID.randomUUID().toString() + ".gif";
 			this.count = currentCount;
 			this.subdue = false;
+			this.expr = null;
 			
 			FileOutputStream fp = new FileOutputStream(getFilePointer());
 			fp.write(data);
@@ -283,7 +296,9 @@ public class Resources implements PacketListener {
 		}
 		
 		public String getValue() {
-			return value;
+			if (value != null)
+				return value;
+			return expr.toString();
 		}
 		
 		public int getCount() {
@@ -294,50 +309,39 @@ public class Resources implements PacketListener {
 			return getNamedFile(value);
 		}
 		
-		private String getFunctionName() {
-			if (type != MathLink.RETURNPKT) {
-				throw new RuntimeException("This method can only be called on RETURNPKT resource.");
-			}
-			
-			StringBuilder result = new StringBuilder();
-			boolean build = false;
-			
-			for (int i = 0; i < value.length(); i++) {
-				if (!build) {
-					if (Character.isLetter(value.charAt(i))) {
-						build = true;
-						result.append(value.charAt(i));
-					}
-					continue;
-				}
-				
-				if (Character.isLetterOrDigit(value.charAt(i))) {
-					result.append(value.charAt(i));
-				} else {
-					break;
-				}
-			}
-			
-			return result.toString();
-		}
-		
 		public boolean isGraphics() {
 			if (type != MathLink.RETURNPKT) {
 				throw new RuntimeException("This method can only be called on RETURNPKT resource.");
 			}
 			
-			String function = getFunctionName();
-			if (function.equals("InputForm"))
+			Expr head = expr.head();
+			if (head.toString().equals("InputForm"))
 				return false;
 			
-			if (function.equals("Graphics"))
+			if (head.toString().equals("Graphics"))
 				return true;
 			
-			if (function.equals("Graphics3D"))
+			if (head.toString().equals("Graphics3D"))
 				return true;
 			
-			if (function.endsWith("Form"))
+			if (head.toString().endsWith("Form"))
 				return true;
+			
+			if (head.toString().equals("List")) {
+				Expr subhead = expr.part(1).head();
+				
+				if (subhead.toString().equals("InputForm"))
+					return false;
+				
+				if (subhead.toString().equals("Graphics"))
+					return true;
+				
+				if (subhead.toString().equals("Graphics3D"))
+					return true;
+				
+				if (subhead.toString().endsWith("Form"))
+					return true;
+			}
 			
 			return false;
 		}
@@ -359,21 +363,21 @@ public class Resources implements PacketListener {
 			if (type == -1) {
 				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
-				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <div class='content'>" + getValue() + "</div>");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.TEXTPKT) {
 				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <div class='content'>" + getValue() + "</div>");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.MESSAGEPKT) {
 				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <div class='content'>" + getValue() + "</div>");
 				result.append("</div>");
 			}
 			
@@ -393,7 +397,7 @@ public class Resources implements PacketListener {
 				
 				result.append("<div class='cell return" + cls + "'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
-				result.append("  <div class='content'>" + value + "</div>");
+				result.append("  <div class='content'>" + getValue() + "</div>");
 				result.append("</div>");
 			}
 			
