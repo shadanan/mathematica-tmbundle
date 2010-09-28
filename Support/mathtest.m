@@ -8,11 +8,18 @@ Plot[{Sin[x] E^(-x/4), Sin[x], E^(-x/4)}, {x, 0, 10}, Filling -> Axis]
 
 Table[Plot[Sin[x y] E^(-x/4), {x, 0, 10}, PlotRange -> {-1, 1}], {y, 0, 5, 0.1}]
 
+BarChart[{1, 2, 3}]
+
+MatrixForm[{{1,2,3},{2,3,4},{3,4,5}}]
+
 Pi
 Sqrt[4]
 x = 3;
 
 data = {};
 AppendTo[data, "some data"];
+data[[1, 0]]
 
 ?System`*
+
+TreeForm[a + b^2 + c^3 + d]

@@ -506,34 +506,22 @@ class MathMate(object):
                 pos += 1
                 continue
         
-            if c3 == "^:=":
-                scope.append("define")
+            if c3 in ("===", ">>>", "^:="):
                 if self.is_end_of_line(pos + 3):
-                    scope.append("start")
+                    scope += ("binop", "start")
                 current += " ", c3, " "
                 pos += 3
                 continue
 
-            if c3 in ("===", ">>>"):
-                current += " ", c3, " "
-                pos += 3
-                continue
-
-            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~"):
+            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~", ":=", "^="):
+                if self.is_end_of_line(pos + 2):
+                    scope += ("binop", "start")
                 current += " ", c2, " "
                 pos += 2
                 continue
 
             if c2 == "..":
                 current += c2, " "
-                pos += 2
-                continue
-
-            if c2 in (":=", "^="):
-                scope.append("define")
-                if self.is_end_of_line(pos + 2):
-                    scope.append("start")
-                current += " ", c2, " "
                 pos += 2
                 continue
 
@@ -574,7 +562,7 @@ class MathMate(object):
                 continue
         
             if c1 == "}":
-                if scope[-1] == "define":
+                if scope[-1] == "binop":
                     scope.pop()
                 scope.pop()
                 current += c1
@@ -588,19 +576,34 @@ class MathMate(object):
                 continue
         
             if c1 == ")":
-                # if scope[-1] == "define":
+                # if scope[-1] == "binop":
                 #     scope.pop()
                 scope.pop()
                 current += c1
                 pos += 1
                 continue
-        
-            if c1 in ("+", "*", "/", "^", "!", ">", "<", "|", "?"):
+            
+            if c1 == "!":
+                current += c1, " "
+                pos += 1
+                continue
+                
+            if c1 == "?":
+                current += c1
+                pos += 1
+                continue
+            
+            if c1 in ("+", "*", "/", "^", ">", "<", "|", "="):
+                if self.is_end_of_line(pos + 1):
+                    scope += ("binop", "start")
                 current += " ", c1, " "
                 pos += 1
                 continue
             
             if c1 == "-":
+                if self.is_end_of_line(pos + 1):
+                    scope += ("binop", "start")
+                    
                 if self.get_prev_non_space_char(pos-1) not in (None, "{", "(", "[", ","):
                     current += " ", c1, " "
                 else:
@@ -613,25 +616,15 @@ class MathMate(object):
                 pos += 1
                 continue
             
-            if c1 == "=":
-                scope.append("define")
-                if self.is_end_of_line(pos + 1):
-                    scope.append("start")
-                current += " ", c1, " "
-                pos += 1
-                continue
-        
             if c1 == ",":
-                if scope[-1] == "define":
+                if scope[-1] == "binop":
                     scope.pop()
                 current += c1, " "
                 pos += 1
                 continue
 
             if c1 == ";":
-                if scope[-1] == "define":
-                    scope.pop()
-                if scope[-1] == "start":
+                if scope[-1] == "binop":
                     scope.pop()
                 if scope[-1] == "root":
                     scope.pop()
@@ -640,7 +633,7 @@ class MathMate(object):
                 continue
 
             if c1 == "\n":
-                if scope[-1] == "define":
+                if scope[-1] == "binop":
                     scope.pop()
                 if scope[-1] == "start":
                     scope.pop()
