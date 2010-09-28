@@ -143,7 +143,7 @@ class MathMate(object):
         words = response.split(" ")
         return (line, response, words, comment)
     
-    def execute(self):
+    def execute(self, force_image = False):
         sock = self.connect()
         
         statements = []
@@ -172,7 +172,10 @@ class MathMate(object):
             if state == 1:
                 if response == "TMJLink Okay":
                     statement = statements.pop(0).rstrip()
-                    sock.send("eval %d\n" % len(statement))
+                    if force_image:
+                        sock.send("evali %d\n" % len(statement))
+                    else:
+                        sock.send("eval %d\n" % len(statement))
                     sock.send(statement)
                     
                     if len(statements) == 0:
@@ -720,6 +723,10 @@ def main():
     
     if command == "execute":
         mm.execute()
+        return
+    
+    if command == "image":
+        mm.execute(True)
         return
     
     if command == "clear":

@@ -120,6 +120,32 @@ public class Resources implements PacketListener {
 		kernelLink.discardAnswer();
 		
 		if (query.trim().charAt(query.trim().length()-1) != ';') {
+			// Log the output as fullform text
+			String result = kernelLink.evaluateToInputForm("MathMate`lastOutput", 120);
+			Resource textResource = new Resource(MathLink.RETURNPKT, result);
+			if (textResource.isGraphics()) {
+				// Log the output as an image
+				byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
+				if (data != null)
+					resources.add(new Resource(MathLink.DISPLAYPKT, data));
+				textResource.subdue();
+			}
+			resources.add(textResource);
+		}
+		
+		// Done with this. Move on...
+		kernelLink.newPacket();
+		currentCount++;
+	}
+	
+	public void evaluateToImage(String query) throws MathLinkException, IOException {
+		// Log the input
+		resources.add(new Resource(query));
+		
+		kernelLink.evaluate("MathMate`lastOutput = " + query);
+		kernelLink.discardAnswer();
+		
+		if (query.trim().charAt(query.trim().length()-1) != ';') {
 			// Log the output as an image
 			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
 			if (data != null)
@@ -127,8 +153,10 @@ public class Resources implements PacketListener {
 			
 			// Log the output as fullform text
 			String result = kernelLink.evaluateToInputForm("MathMate`lastOutput", 120);
-			if (result != null)
-				resources.add(new Resource(MathLink.RETURNPKT, result));
+			Resource textResource = new Resource(MathLink.RETURNPKT, result);
+			resources.add(textResource);
+			if (data != null)
+				textResource.subdue();
 		}
 		
 		// Done with this. Move on...
@@ -219,27 +247,35 @@ public class Resources implements PacketListener {
 		private int type;
 		private String value;
 		private int count;
+		private boolean subdue;
 		
 		public Resource(String value) {
 			this.type = -1;
 			this.value = value;
 			this.count = currentCount;
+			this.subdue = false;
 		}
 		
 		public Resource(int type, String value) {
 			this.type = type;
 			this.value = value;
 			this.count = currentCount;
+			this.subdue = false;
 		}
 		
 		public Resource(int type, byte[] data) throws IOException {
 			this.type = type;
 			this.value = UUID.randomUUID().toString() + ".gif";
 			this.count = currentCount;
+			this.subdue = false;
 			
 			FileOutputStream fp = new FileOutputStream(getFilePointer());
 			fp.write(data);
 			fp.close();
+		}
+		
+		public void subdue() {
+			subdue = true;
 		}
 		
 		public int getType() {
@@ -256,6 +292,54 @@ public class Resources implements PacketListener {
 		
 		public File getFilePointer() {
 			return getNamedFile(value);
+		}
+		
+		private String getFunctionName() {
+			if (type != MathLink.RETURNPKT) {
+				throw new RuntimeException("This method can only be called on RETURNPKT resource.");
+			}
+			
+			StringBuilder result = new StringBuilder();
+			boolean build = false;
+			
+			for (int i = 0; i < value.length(); i++) {
+				if (!build) {
+					if (Character.isLetter(value.charAt(i))) {
+						build = true;
+						result.append(value.charAt(i));
+					}
+					continue;
+				}
+				
+				if (Character.isLetterOrDigit(value.charAt(i))) {
+					result.append(value.charAt(i));
+				} else {
+					break;
+				}
+			}
+			
+			return result.toString();
+		}
+		
+		public boolean isGraphics() {
+			if (type != MathLink.RETURNPKT) {
+				throw new RuntimeException("This method can only be called on RETURNPKT resource.");
+			}
+			
+			String function = getFunctionName();
+			if (function.equals("InputForm"))
+				return false;
+			
+			if (function.equals("Graphics"))
+				return true;
+			
+			if (function.equals("Graphics3D"))
+				return true;
+			
+			if (function.endsWith("Form"))
+				return true;
+			
+			return false;
 		}
 		
 		public void release() {
@@ -303,7 +387,11 @@ public class Resources implements PacketListener {
 			}
 			
 			if (type == MathLink.RETURNPKT) {
-				result.append("<div class='cell return'" + style + ">");
+				String cls = "";
+				if (subdue)
+					cls = " subdue";
+				
+				result.append("<div class='cell return" + cls + "'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>" + value + "</div>");
 				result.append("</div>");

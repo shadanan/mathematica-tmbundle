@@ -34,12 +34,12 @@ div.message div.margin, div.text div.margin {
   color: #b5511b;
 }
 
-div.return div.content {
+div.subdue div.content {
   color: #aaa;
   font-size: 11px;
 }
 
-div.return div.margin {
+div.subdue div.margin {
   color: #aaa;
 }
 
