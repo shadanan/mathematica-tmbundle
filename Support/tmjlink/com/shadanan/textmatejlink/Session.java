@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
+import com.wolfram.jlink.ExprFormatException;
 import com.wolfram.jlink.MathLinkException;
 
 public class Session extends Thread {
@@ -238,6 +239,9 @@ public class Session extends Thread {
 						String suggestions = resources.getSuggestions();
 						out.println("TMJLink Suggestions " + suggestions);
 					} catch (MathLinkException e) {
+						out.println("TMJLink Exception -- " + e.getMessage());
+						e.printStackTrace();
+					} catch (ExprFormatException e) {
 						out.println("TMJLink Exception -- " + e.getMessage());
 						e.printStackTrace();
 					}

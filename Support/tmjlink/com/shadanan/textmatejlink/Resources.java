@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import com.wolfram.jlink.Expr;
+import com.wolfram.jlink.ExprFormatException;
 import com.wolfram.jlink.KernelLink;
 import com.wolfram.jlink.MathLink;
 import com.wolfram.jlink.MathLinkException;
@@ -27,18 +28,12 @@ public class Resources implements PacketListener {
 	
 	private ArrayList<Resources.Resource> resources = null;
 	private String resourceView = null;
-	private ArrayList<String> loadedContexts = null;
 	
 	public Resources(String sessionId, String cacheFolder, String[] mlargs) throws MathLinkException, IOException {
 		this.sessionId = sessionId;
 		this.cacheFolder = cacheFolder;
 		this.mlargs = mlargs;
 		this.resources = new ArrayList<Resources.Resource>();
-		this.loadedContexts = new ArrayList<String>();
-		
-		// Set the default loaded contexts
-		loadedContexts.add("System");
-		loadedContexts.add("Global");
 		
 		// Allocate the kernel link and register packet listener
 		kernelLink = MathLinkFactory.createKernelLink(mlargs);
@@ -119,16 +114,24 @@ public class Resources implements PacketListener {
 		}
 	}
 	
-	public String getSuggestions() throws MathLinkException {
+	public String getSuggestions() throws MathLinkException, ExprFormatException {
 		StringBuilder result = new StringBuilder();
 		result.append("[");
 		
-		for (String context : loadedContexts) {
-			kernelLink.evaluate("Names[\"" + context + "`*\"]");
+		kernelLink.evaluate("$ContextPath");
+		kernelLink.waitForAnswer();
+		Expr contexts = kernelLink.getExpr();
+		
+		for (int j = 1; j <= contexts.length(); j++) {
+			String context = contexts.part(j).asString();
+			kernelLink.evaluate("Names[\"" + context + "*\"]");
 			kernelLink.waitForAnswer();
-			Expr systemExpr = kernelLink.getExpr();
-			for (int i = 1; i <= systemExpr.length(); i++) {
-				result.append(systemExpr.part(i).toString());
+			Expr symbols = kernelLink.getExpr();
+			
+			for (int i = 1; i <= symbols.length(); i++) {
+				result.append('"');
+				result.append(symbols.part(i).asString());
+				result.append('"');
 				result.append(",");
 			}
 		}
@@ -319,10 +322,63 @@ public class Resources implements PacketListener {
 			return type;
 		}
 		
-		public String getValue() {
-			if (value != null)
-				return value;
-			return expr.toString();
+		public String getHtmlEscapedValue() {
+			StringBuilder sb = new StringBuilder();
+			String base = value == null ? expr.toString() : value;
+			
+			for (int i = 0; i < base.length(); i++) {
+				char c = base.charAt(i);
+				switch (c) {
+					case '<': sb.append("&lt;"); break;
+					case '>': sb.append("&gt;"); break;
+					case '&': sb.append("&amp;"); break;
+					case '"': sb.append("&quot;"); break;
+					case 'à': sb.append("&agrave;"); break;
+					case 'À': sb.append("&Agrave;"); break;
+					case 'â': sb.append("&acirc;"); break;
+					case 'Â': sb.append("&Acirc;"); break;
+					case 'ä': sb.append("&auml;"); break;
+					case 'Ä': sb.append("&Auml;"); break;
+					case 'å': sb.append("&aring;"); break;
+					case 'Å': sb.append("&Aring;"); break;
+					case 'æ': sb.append("&aelig;"); break;
+					case 'Æ': sb.append("&AElig;"); break;
+					case 'ç': sb.append("&ccedil;"); break;
+					case 'Ç': sb.append("&Ccedil;"); break;
+					case 'é': sb.append("&eacute;"); break;
+					case 'É': sb.append("&Eacute;"); break;
+					case 'è': sb.append("&egrave;"); break;
+					case 'È': sb.append("&Egrave;"); break;
+					case 'ê': sb.append("&ecirc;"); break;
+					case 'Ê': sb.append("&Ecirc;"); break;
+					case 'ë': sb.append("&euml;"); break;
+					case 'Ë': sb.append("&Euml;"); break;
+					case 'ï': sb.append("&iuml;"); break;
+					case 'Ï': sb.append("&Iuml;"); break;
+					case 'ô': sb.append("&ocirc;"); break;
+					case 'Ô': sb.append("&Ocirc;"); break;
+					case 'ö': sb.append("&ouml;"); break;
+					case 'Ö': sb.append("&Ouml;"); break;
+					case 'ø': sb.append("&oslash;"); break;
+					case 'Ø': sb.append("&Oslash;"); break;
+					case 'ß': sb.append("&szlig;"); break;
+					case 'ù': sb.append("&ugrave;"); break;
+					case 'Ù': sb.append("&Ugrave;"); break;         
+					case 'û': sb.append("&ucirc;"); break;         
+					case 'Û': sb.append("&Ucirc;"); break;
+					case 'ü': sb.append("&uuml;"); break;
+					case 'Ü': sb.append("&Uuml;"); break;
+					case '®': sb.append("&reg;"); break;         
+					case '©': sb.append("&copy;"); break;   
+					case '€': sb.append("&euro;"); break;
+					// be carefull with this one (non-breaking whitee space)
+					// case ' ': sb.append("&nbsp;"); break;
+					// case '\n': sb.append("<br />"); break;
+					default:  sb.append(c); break;
+				}
+			}
+			
+			return sb.toString();
 		}
 		
 		public int getCount() {
@@ -387,21 +443,21 @@ public class Resources implements PacketListener {
 			if (type == -1) {
 				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.TEXTPKT) {
 				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.MESSAGEPKT) {
 				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
 				result.append("</div>");
 			}
 			
@@ -421,7 +477,7 @@ public class Resources implements PacketListener {
 				
 				result.append("<div class='cell return" + cls + "'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
 				result.append("</div>");
 			}
 			
