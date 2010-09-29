@@ -55,6 +55,9 @@ h4. Snippets
  * Map (map ->|)
  * Select (select ->|)
  * While (while ->|)
+ 
+ * We always need: more snippets
+
 
 h4. Other (Commands, Indentation, etc.)
 
@@ -65,6 +68,8 @@ h4. Other (Commands, Indentation, etc.)
  * Reformat current statement / selection (control + Q)
  * Preview current statement / selection in tool tip (control + shift + enter)
 
+ * Command completion (option + escape)
+
  * Execute current statement / selection (shift + enter)
  * Clear mathmate session (command + shift + >)
  * Quit mathmate kernel (command + shift + control + >)
@@ -73,8 +78,4 @@ h4. Other (Commands, Indentation, etc.)
      At this point, you should use this command to restart the kernel (you will lose previous kernel state).
  * Shutdown mathmate backend (command + shift + option + >)
  
-h3. Next on the list...
-
- * Add more snippets (Function, etc.)
- * Command completion (via option + escape)
  * Better handling of Mathematica kernel crashes
