@@ -620,10 +620,24 @@ class MathMate(object):
                 pos += 3
                 continue
 
-            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "@@", "<>", ">>", "/@", "/;", "//", "~~", ":=", "^="):
+            if c3 == "@@@":
+                if self.is_end_of_line(pos + 3):
+                    scope += ("binop", "start")
+                current += c3
+                pos += 3
+                continue
+
+            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "<>", ">>", "/@", "/;", "//", "~~", ":=", "^="):
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
                 current += " ", c2, " "
+                pos += 2
+                continue
+            
+            if c2 == "@@":
+                if self.is_end_of_line(pos + 2):
+                    scope += ("binop", "start")
+                current += c2
                 pos += 2
                 continue
 
