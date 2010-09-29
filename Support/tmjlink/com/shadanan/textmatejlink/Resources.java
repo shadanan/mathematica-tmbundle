@@ -27,12 +27,18 @@ public class Resources implements PacketListener {
 	
 	private ArrayList<Resources.Resource> resources = null;
 	private String resourceView = null;
+	private ArrayList<String> loadedContexts = null;
 	
 	public Resources(String sessionId, String cacheFolder, String[] mlargs) throws MathLinkException, IOException {
 		this.sessionId = sessionId;
 		this.cacheFolder = cacheFolder;
 		this.mlargs = mlargs;
 		this.resources = new ArrayList<Resources.Resource>();
+		this.loadedContexts = new ArrayList<String>();
+		
+		// Set the default loaded contexts
+		loadedContexts.add("System");
+		loadedContexts.add("Global");
 		
 		// Allocate the kernel link and register packet listener
 		kernelLink = MathLinkFactory.createKernelLink(mlargs);
@@ -111,6 +117,24 @@ public class Resources implements PacketListener {
 			resource.release();
 			iterator.remove();
 		}
+	}
+	
+	public String getSuggestions() throws MathLinkException {
+		StringBuilder result = new StringBuilder();
+		result.append("[");
+		
+		for (String context : loadedContexts) {
+			kernelLink.evaluate("Names[\"" + context + "`*\"]");
+			kernelLink.waitForAnswer();
+			Expr systemExpr = kernelLink.getExpr();
+			for (int i = 1; i <= systemExpr.length(); i++) {
+				result.append(systemExpr.part(i).toString());
+				result.append(",");
+			}
+		}
+		
+		result.append("]");
+		return result.toString();
 	}
 	
 	public void evaluate(String query) throws MathLinkException, IOException {

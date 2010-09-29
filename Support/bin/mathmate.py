@@ -7,6 +7,7 @@ import socket
 import shutil
 import subprocess
 import traceback
+import plistlib
 from optparse import OptionParser
 
 class MathMate(object):
@@ -382,6 +383,61 @@ class MathMate(object):
 
         return "Session Reset"
 
+    def get_symbols(self):
+        sock = self.connect()
+
+        state = 0
+        while True:
+            line, response, words, comment = self.read(sock)
+
+            if state == 0:
+                if response == "TMJLink Status OK":
+                    sock.send("sessid %s\n" % self.sessid)
+                    state = 1
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 1:
+                if response == "TMJLink Okay":
+                    sock.send("suggest\n")
+                    state = 2
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 2:
+                if words[0] == "TMJLink" and words[1] == "Suggestions":
+                    result = eval(words[2])
+                    sock.send("quit\n")
+                    state = 3
+                    continue
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            if state == 3:
+                if response == "TMJLink Okay":
+                    sock.close()
+                    break
+
+                if response == "TMJLink Exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+
+            raise Exception("Invalid state: " + state)
+
+        return result
+
     def get_pos(self, line, column):
         line_index = 1
         line_pos = 0
@@ -393,7 +449,9 @@ class MathMate(object):
             if char == "\n":
                 line_index += 1
                 line_pos = pos + 1
-    
+        
+        return len(self.doc)
+        
     def get_line_col(self, posq):
         line_index = 1
         line_pos = 0
@@ -748,7 +806,7 @@ class MathMate(object):
 
     def show(self):
         result = []
-        result.append("Cursor: (Line: %d, Index: %d, Tree: %s)" % (self.tmln, self.tmli, self.parse_tree_level))
+        result.append("Cursor: (Line: %d, Index: %d, Pos: %s, Tree: %s)" % (self.tmln, self.tmli, self.tmcursor, self.parse_tree_level))
 
         if self.selected_text is None:
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
@@ -768,6 +826,41 @@ class MathMate(object):
                 result.append("")
 
         return "\n".join(result)
+    
+    def suggest(self):
+        # Get currently typed function
+        fnname = []
+        vfcs = string.ascii_letters + string.digits + "$"
+        pos = self.tmcursor - 1
+        
+        while pos >= 0:
+            if self.doc[pos] not in vfcs:
+                break
+            fnname.insert(0, self.doc[pos])
+            pos -= 1
+        
+        while len(fnname) > 0 and fnname[0] in string.digits:
+            fnname.pop(0)
+        
+        fnname = "".join(fnname)
+        
+        suggestions = filter(lambda x: x != "?" and x.startswith(fnname), self.get_symbols())
+        
+        if len(suggestions) == 0:
+            self.exit_show_tool_tip("No suggestions.")
+        
+        data = {}
+        data['suggestions'] = map(lambda x: {'display': x}, suggestions)
+        
+        command = [os.environ.get('DIALOG'), "popup", "--alreadyTyped", fnname]
+        proc = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc.stdin.write(plistlib.writePlistToString(data))
+        proc.stdin.close()
+        
+        out = proc.stdout.read()
+        if out != "":
+            self.exit_show_tool_tip(out)
+        self.exit_discard()
 
 def main():
     parser = OptionParser()
@@ -797,17 +890,15 @@ def main():
     
         if command == "reformat":
             mm.exit_replace_text(mm.reformat())
-    
+        
         if command == "complete":
-            command = [os.environ.get('DIALOG'), "popup"]
-            subprocess.call(command)
-            mm.exit_show_tool_tip(command)
+            mm.suggest()
             
     except Exception:
         stacktrace = traceback.format_exc()
         mm.exit_show_tool_tip(stacktrace)
     
-    print "Command not recognized: %s" % command
+    mm.exit_show_tool_tip("Command not recognized: %s" % command)
 
 if __name__ == '__main__':
     main()

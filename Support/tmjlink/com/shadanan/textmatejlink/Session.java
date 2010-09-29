@@ -233,6 +233,17 @@ public class Session extends Thread {
 					continue;
 				}
 				
+				if (command.equals("suggest")) {
+					try {
+						String suggestions = resources.getSuggestions();
+						out.println("TMJLink Suggestions " + suggestions);
+					} catch (MathLinkException e) {
+						out.println("TMJLink Exception -- " + e.getMessage());
+						e.printStackTrace();
+					}
+					continue;
+				}
+				
 				out.println("TMJLink InvalidCommand -- State: " + state + ", Command: " + command);
 				continue;
 			}
