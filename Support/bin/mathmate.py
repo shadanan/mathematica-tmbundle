@@ -48,6 +48,15 @@ def exit_create_new_document(out = None):
         print out
     sys.exit(207)
 
+def return_focus_to_textmate():
+    osascript = """
+        tell application "TextMate"
+        	activate
+        	tell application "System Events" to keystroke "`" using {command down, shift}
+        end tell
+    """
+    # subprocess.call(["osascript", "-e", osascript])
+
 class MathMate(object):
     def __init__(self, input_file = None, process_entire_document = False):
         self.cacheFolder = '/tmp/tmjlink'
@@ -974,12 +983,14 @@ def main():
         if command == "inline":
             mm = MathMate(input_file)
             mm.inline(force_image=options.force_image)
+            return_focus_to_textmate()
             exit_show_html()
         
         if command == "execute":
             mm = MathMate(input_file, process_entire_document=True)
             mm.reset()
             mm.inline()
+            return_focus_to_textmate()
             exit_show_html()
     
         if command == "clear":
