@@ -129,8 +129,6 @@ class MathMate(object):
         if os.path.exists(self.cacheFolder):
            shutil.rmtree(self.cacheFolder) 
         os.mkdir(self.cacheFolder, 0777)
-        for sfile in ("jquery-1.4.2.min.js", "layout.html.erb", "tmjlink.css", "header_bg.gif"):
-            os.symlink(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "web", sfile), os.path.join(self.cacheFolder, sfile))
         
         # Launch TextMateJLink
         textmate_pid = self.get_textmate_pid()

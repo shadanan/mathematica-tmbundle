@@ -1,6 +1,5 @@
 package com.shadanan.textmatejlink;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -197,13 +196,13 @@ public class Session extends Thread {
 				
 				if (command.equals("execute")) {
 					readsize = Integer.parseInt(args);
-					state = 4;
+					state = 2;
 					continue;
 				}
 				
 				if (command.equals("image")) {
 					readsize = Integer.parseInt(args);
-					state = 5;
+					state = 3;
 					continue;
 				}
 				
@@ -241,17 +240,6 @@ public class Session extends Thread {
 					continue;
 				}
 				
-				if (command.equals("show")) {
-					try {
-						File file = resources.renderToFile();
-						send("filesaved " + file.getAbsolutePath());
-					} catch (IOException e) {
-						send("exception -- " + e.getMessage());
-						e.printStackTrace();
-					}
-					continue;
-				}
-				
 				if (command.equals("suggest")) {
 					try {
 						String suggestions = resources.getSuggestions();
@@ -270,7 +258,7 @@ public class Session extends Thread {
 				continue;
 			}
 			
-			if (state == 4) {
+			if (state == 2) {
 				try {
 					String renderedHtml = resources.evaluate(data);
 					send("inline " + (renderedHtml.length() + 1));
@@ -286,7 +274,7 @@ public class Session extends Thread {
 				continue;
 			}
 			
-			if (state == 5) {
+			if (state == 3) {
 				try {
 					String renderedHtml = resources.evaluateToImage(data);
 					send("inline " + (renderedHtml.length() + 1));

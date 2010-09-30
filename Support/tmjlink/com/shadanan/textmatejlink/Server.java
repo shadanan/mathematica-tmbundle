@@ -152,8 +152,7 @@ public class Server extends Thread {
 		System.out.println("==== Allocated Resources ====");
 		for (Entry<String, Resources> entry : resourcesMap.entrySet()) {
 			System.out.println("Session ID: " + entry.getKey() + ", " + 
-					"Resource Count: " + entry.getValue().getSize() + ", " +
-					"Current View: " + entry.getValue().getResourceView());
+					"Resource Count: " + entry.getValue().getSize());
 		}
 		System.out.println("=============================");
 	}

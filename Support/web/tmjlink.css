@@ -7,7 +7,7 @@ body {
 }
 
 div.header {
-  background: url("/tmp/tmjlink/header_bg.gif") repeat-x scroll 0 -3px transparent;
+  background: url("header_bg.gif") repeat-x scroll 0 -3px transparent;
   border-top-width: 3px;
   border-top-color: #dc0200;
   border-top-style: solid;

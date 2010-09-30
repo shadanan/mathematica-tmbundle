@@ -2,7 +2,6 @@ package com.shadanan.textmatejlink;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -24,9 +23,7 @@ public class Resources implements PacketListener {
 	private KernelLink kernelLink = null;
 	private int currentCount = 0;
 	private String[] mlargs = null;
-	
 	private ArrayList<Resources.Resource> resources = null;
-	private String resourceView = null;
 	
 	public Resources(String sessionId, String cacheFolder, String[] mlargs) throws MathLinkException, IOException {
 		this.sessionId = sessionId;
@@ -65,10 +62,6 @@ public class Resources implements PacketListener {
 		return resources.size();
 	}
 	
-	public String getResourceView() {
-		return resourceView;
-	}
-	
 	public File getSessionFolder() {
 		return new File(cacheFolder + "/" + sessionId);
 	}
@@ -100,10 +93,6 @@ public class Resources implements PacketListener {
 	}
 	
 	public void release() {
-		// Delete the resource view
-		File resourceViewFp = getNamedFile(resourceView);
-		if (resourceViewFp.exists()) resourceViewFp.delete();
-		
 		// Delete resources allocated
 		Iterator<Resource> iterator = resources.iterator();
 		while (iterator.hasNext()) {
@@ -285,21 +274,6 @@ public class Resources implements PacketListener {
 		}
 		
 		return content.toString();
-	}
-	
-	public File renderToFile() throws IOException {
-		if (resourceView != null) {
-			File resourceViewFile = getNamedFile(resourceView);
-			if (resourceViewFile.exists()) 
-				resourceViewFile.delete();
-		}
-		
-		resourceView = UUID.randomUUID().toString() + ".html";
-		FileWriter fp = new FileWriter(getNamedFile(resourceView));
-		fp.write(render());
-		fp.close();
-		
-		return getNamedFile(resourceView);
 	}
 	
 	class Resource {
