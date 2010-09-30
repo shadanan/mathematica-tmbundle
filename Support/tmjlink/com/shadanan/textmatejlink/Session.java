@@ -12,6 +12,9 @@ import com.wolfram.jlink.MathLinkException;
 
 public class Session extends Thread {
 	private Socket socket = null;
+	private PrintWriter out = null;
+	private InputStreamReader in = null;
+	
 	private Server server = null;
 	private boolean running = false;
 	private Resources resources = null;
@@ -110,10 +113,12 @@ public class Session extends Thread {
 		return null;
 	}
 	
+	private void send(String reply) {
+		System.out.println("To " + socket.getRemoteSocketAddress() + ": " + reply);
+		out.println(reply);
+	}
+	
 	public void run() {
-		PrintWriter out = null;
-		InputStreamReader in = null;
-		
 		try {
 			in = new InputStreamReader(socket.getInputStream());
 			out = new PrintWriter(socket.getOutputStream(), true);
@@ -124,7 +129,7 @@ public class Session extends Thread {
 		
 		int state = 0;
 		int readsize = -1;
-		out.println("TMJLink Status OK");
+		send("okay");
 		
 		while (running && server.isRunning()) {
 			String data = null;
@@ -159,7 +164,7 @@ public class Session extends Thread {
 			
 			if (state == 0) {
 				if (command.equals("quit")) {
-					out.println("TMJLink Okay -- Good Bye");
+					send("okay -- Good Bye");
 					running = false;
 					continue;
 				}
@@ -167,57 +172,70 @@ public class Session extends Thread {
 				if (command.equals("sessid")) {
 					try {
 						setSessionId(args);
-						out.println("TMJLink Okay -- Session ID set to: " + resources.getSessionId());
+						send("okay -- Session ID set to: " + resources.getSessionId());
 						state = 1;
 					} catch (IOException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					} catch (MathLinkException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					}
 					continue;
 				}
 				
-				out.println("TMJLink InvalidCommand -- State: " + state + ", Command: " + command);
+				send("exception -- Invalid command (" + state + "): " + command);
 				continue;
 			}
 			
 			if (state == 1) {
 				if (command.equals("quit")) {
-					out.println("TMJLink Okay -- Good Bye");
+					send("okay -- Good Bye");
 					running = false;
 					continue;
 				}
 				
-				if (command.equals("eval")) {
+				if (command.equals("execute")) {
 					readsize = Integer.parseInt(args);
-					state = 2;
+					state = 4;
 					continue;
 				}
 				
-				if (command.equals("evali")) {
+				if (command.equals("image")) {
 					readsize = Integer.parseInt(args);
-					state = 3;
+					state = 5;
+					continue;
+				}
+				
+				if (command.equals("header")) {
+					try {
+						String renderedHtml = resources.render();
+						send("inline " + (renderedHtml.length() + 1));
+						send(renderedHtml);
+						send("okay");
+					} catch (Exception e) {
+						send("exception -- " + e.getMessage());
+						e.printStackTrace();
+					}
 					continue;
 				}
 				
 				if (command.equals("clear")) {
 					int resourceSize = resources.getSize();
 					resources.release();
-					out.println("TMJLink Okay -- Resources released: " + resourceSize);
+					send("okay -- Resources released: " + resourceSize);
 					continue;
 				}
 				
 				if (command.equals("reset")) {
 					try {
 						resetResources();
-						out.println("TMJLink Okay -- All resources reset");
+						send("okay -- All resources reset");
 					} catch (MathLinkException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					} catch (IOException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					}
 					continue;
@@ -225,10 +243,10 @@ public class Session extends Thread {
 				
 				if (command.equals("show")) {
 					try {
-						File file = resources.render();
-						out.println("TMJLink FileSaved " + file.getAbsolutePath());
+						File file = resources.renderToFile();
+						send("filesaved " + file.getAbsolutePath());
 					} catch (IOException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					}
 					continue;
@@ -237,27 +255,29 @@ public class Session extends Thread {
 				if (command.equals("suggest")) {
 					try {
 						String suggestions = resources.getSuggestions();
-						out.println("TMJLink Suggestions " + suggestions);
+						send("suggestions " + suggestions);
 					} catch (MathLinkException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					} catch (ExprFormatException e) {
-						out.println("TMJLink Exception -- " + e.getMessage());
+						send("exception -- " + e.getMessage());
 						e.printStackTrace();
 					}
 					continue;
 				}
 				
-				out.println("TMJLink InvalidCommand -- State: " + state + ", Command: " + command);
+				send("exception -- Invalid command (" + state + "): " + command);
 				continue;
 			}
 			
-			if (state == 2) {
+			if (state == 4) {
 				try {
-					resources.evaluate(data);
-					out.println("TMJLink Okay");
+					String renderedHtml = resources.evaluate(data);
+					send("inline " + (renderedHtml.length() + 1));
+					send(renderedHtml);
+					send("okay");
 				} catch (Exception e) {
-					out.println("TMJLink Exception -- " + e.getMessage());
+					send("exception -- " + e.getMessage());
 					e.printStackTrace();
 				}
 				
@@ -266,12 +286,14 @@ public class Session extends Thread {
 				continue;
 			}
 			
-			if (state == 3) {
+			if (state == 5) {
 				try {
-					resources.evaluateToImage(data);
-					out.println("TMJLink Okay");
+					String renderedHtml = resources.evaluateToImage(data);
+					send("inline " + (renderedHtml.length() + 1));
+					send(renderedHtml);
+					send("okay");
 				} catch (Exception e) {
-					out.println("TMJLink Exception -- " + e.getMessage());
+					send("exception -- " + e.getMessage());
 					e.printStackTrace();
 				}
 				
@@ -280,7 +302,7 @@ public class Session extends Thread {
 				continue;
 			}
 			
-			out.println("TMJLink InvalidCommand -- State: " + state + ", Command: " + command);
+			send("exception -- Invalid command (" + state + "): " + command);
 		}
 		
 		System.out.println("Closing connection: " + socket.getRemoteSocketAddress());

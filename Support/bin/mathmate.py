@@ -10,13 +10,57 @@ import traceback
 import plistlib
 from optparse import OptionParser
 
+def exit_discard():
+    sys.exit(200)
+
+def exit_replace_text(out = None):
+    if out is not None:
+        print out
+    sys.exit(201)
+
+def exit_replace_document(out = None):
+    if out is not None:
+        print out
+    sys.exit(202)
+
+def exit_insert_text(out = None):
+    if out is not None:
+        print out
+    sys.exit(203)
+
+def exit_insert_snippet(out = None):
+    if out is not None:
+        print out
+    sys.exit(204)
+
+def exit_show_html(out = None):
+    if out is not None:
+        print out
+    sys.exit(205)
+
+def exit_show_tool_tip(out = None):
+    if out is not None:
+        print out
+    sys.exit(206)
+
+def exit_create_new_document(out = None):
+    if out is not None:
+        print out
+    sys.exit(207)
+
 class MathMate(object):
-    def __init__(self):
+    def __init__(self, input_file = None, process_entire_document = False):
         self.cacheFolder = '/tmp/tmjlink'
         self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
         
         self.parse_tree_level = None
-        self.doc = sys.stdin.read()
+        
+        if input_file is None:
+            self.doc = sys.stdin.read()
+        else:
+            fp = open(input_file, 'r')
+            self.doc = fp.read()
+            fp.close()
         
         self.indent_size = int(os.environ['TM_TAB_SIZE'])
         if os.environ.get('TM_SOFT_TABS') == "YES":
@@ -28,52 +72,15 @@ class MathMate(object):
         self.tmli = int(os.environ.get('TM_LINE_INDEX'))
         self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
+        self.process_entire_document = process_entire_document
         self.statements = self.parse(self.doc)
-        
+            
         sessid = os.path.split(os.environ.get('TM_FILEPATH', 'mathmate-default'))[-1]
         if sessid.endswith(".m"):
             self.sessid = sessid[:-2]
         else:
             self.sessid = sessid
     
-    def exit_discard(self):
-        sys.exit(200)
-
-    def exit_replace_text(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(201)
-
-    def exit_replace_document(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(202)
-
-    def exit_insert_text(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(203)
-
-    def exit_insert_snippet(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(204)
-
-    def exit_show_html(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(205)
-
-    def exit_show_tool_tip(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(206)
-
-    def exit_create_new_document(self, out = None):
-        if out is not None:
-            print out
-        sys.exit(207)
-
     def shutdown(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -139,7 +146,22 @@ class MathMate(object):
         pidfp = open(os.path.join(self.cacheFolder, "tmjlink.pid"), 'w')
         pidfp.write(str(proc.pid))
         pidfp.close()
+    
+    def readtotal(self, sock, count):
+        result = []
+        total_read = 0
         
+        while total_read != count:
+            buff = sock.recv(count - total_read)
+            
+            if buff == "":
+                raise Exception("The server quit unexpectedly.")
+                
+            result.append(buff)
+            total_read += len(buff)
+        
+        return "".join(result)
+    
     def readline(self, sock):
         result = []
         while True:
@@ -193,88 +215,147 @@ class MathMate(object):
         words = response.split(" ")
         return (line, response, words, comment)
     
-    def execute(self, force_image = False):
-        sock = self.connect()
+    def inline(self, force_image = False):
+        # Output header (stylesheet, js, etc)
+        sys.stdout.write("""
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+            "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
         
+          <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+            <head>
+              <title>TextMate Mathematica Output</title>
+        
+              <link rel="stylesheet" href="file://%(tm_bundle_support)s/web/tmjlink.css" type="text/css" media="screen" charset="utf-8">
+              <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
+            </head>
+            <body>
+              <div class="header">
+                <div class="text">
+                  <span class="purple">TextMate</span><span class="white">Mathematica</span>
+                  <br style="clear:both" />
+                </div>
+              </div>
+        """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT')})
+        sys.stdout.flush()
+        
+        sock = self.connect()
+
         statements = []
-        if self.selected_text is not None:
+        if self.selected_text is not None or self.process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 statements.append(current_statement)
         else:
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             statements.append(current_statement)
-        
+
         state = 0
+        readsize = None
         while True:
-            line, response, words, comment = self.read(sock)
-            
+            if readsize is not None:
+                content = self.readtotal(sock, readsize)
+            else:
+                line, response, words, comment = self.read(sock)
+
             if state == 0:
-                if response == "TMJLink Status OK":
+                if response == "okay":
                     sock.send("sessid %s\n" % self.sessid)
                     state = 1
                     continue
-            
-                if response == "TMJLink Exception":
+
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
-                
+            
             if state == 1:
-                if response == "TMJLink Okay":
-                    statement = statements.pop(0).rstrip()
-                    if force_image:
-                        sock.send("evali %d\n" % len(statement))
-                    else:
-                        sock.send("eval %d\n" % len(statement))
-                    sock.send(statement)
-                    
-                    if len(statements) == 0:
-                        state = 2
-                        
+                if response == "okay":
+                    sock.send("header\n")
+                    state = 3
                     continue
-                        
-                if response == "TMJLink Exception":
+                    
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
             
             if state == 2:
-                if response == "TMJLink Okay":
-                    sock.send("show\n")
+                if response == "okay":
+                    if len(statements) == 0:
+                        sock.send("quit\n")
+                        state = 5
+                        continue
+                    
+                    statement = statements.pop(0).rstrip()
+                    if force_image:
+                        sock.send("image %d\n" % len(statement))
+                    else:
+                        sock.send("execute %d\n" % len(statement))
+                    sock.send(statement)
                     state = 3
                     continue
-            
-                if response == "TMJLink Exception":
+
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
-                
+            
             if state == 3:
-                if words[0] == "TMJLink" and words[1] == "FileSaved":
-                    output_html = words[2]
-                    sock.send("quit\n")
+                if words[0] == "inline":
+                    readsize = int(words[1])
                     state = 4
                     continue
-                
-                if response == "TMJLink Exception":
+                    
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
             
             if state == 4:
-                if response == "TMJLink Okay":
+                sys.stdout.write(content)
+                sys.stdout.flush()
+                readsize = None
+                state = 2
+                continue
+            
+            if state == 5:
+                if response == "okay":
                     sock.close()
                     break
-            
-                if response == "TMJLink Exception":
+
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
-            
+
             raise Exception("Invalid state: " + state)
+
+        # Footer (closing tags, etc)
+        sys.stdout.write("""
+              <script type="text/javascript" charset="utf-8">
+                $(window).load(function() {
+                  $(window).scrollTop($(document).height());
+                });
         
-        return "<meta http-equiv='Refresh' content='0;URL=file://%s'>" % output_html
-    
+                $('#white_space .value').click(function() {
+                  if ($(this).html() == "Normal") {
+                    $(this).html("Pre");
+                    $('div.cell div.content').css('white-space', 'pre');
+                  } else {
+                    $(this).html("Normal");
+                    $('div.cell div.content').css('white-space', 'normal');
+                  }
+                });
+        
+                function toggle(resource_id) {
+                  $('#resource_' + resource_id + ' .return').toggle();
+                }
+              </script>
+            </body>
+          </html>
+        """)
+        sys.stdout.flush()
+
     def clear(self):
         sock = self.connect()
         
@@ -283,44 +364,44 @@ class MathMate(object):
             line, response, words, comment = self.read(sock)
             
             if state == 0:
-                if response == "TMJLink Status OK":
+                if response == "okay":
                     sock.send("sessid %s\n" % self.sessid)
                     state = 1
                     continue
             
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
                 
             if state == 1:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.send("clear\n")
                     state = 2
                     continue
                         
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
             
             if state == 2:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.send("quit\n")
                     state = 3
                     continue
             
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
                 
             if state == 3:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.close()
                     break
             
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
@@ -337,44 +418,44 @@ class MathMate(object):
             line, response, words, comment = self.read(sock)
 
             if state == 0:
-                if response == "TMJLink Status OK":
+                if response == "okay":
                     sock.send("sessid %s\n" % self.sessid)
                     state = 1
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 1:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.send("reset\n")
                     state = 2
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 2:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.send("quit\n")
                     state = 3
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 3:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.close()
                     break
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
@@ -391,45 +472,45 @@ class MathMate(object):
             line, response, words, comment = self.read(sock)
 
             if state == 0:
-                if response == "TMJLink Status OK":
+                if response == "okay":
                     sock.send("sessid %s\n" % self.sessid)
                     state = 1
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 1:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.send("suggest\n")
                     state = 2
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 2:
-                if words[0] == "TMJLink" and words[1] == "Suggestions":
-                    result = eval(words[2])
+                if words[0] == "suggestions":
+                    result = eval(words[1])
                     sock.send("quit\n")
                     state = 3
                     continue
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
 
             if state == 3:
-                if response == "TMJLink Okay":
+                if response == "okay":
                     sock.close()
                     break
 
-                if response == "TMJLink Exception":
+                if response == "exception":
                     raise Exception("TextMateJLink Exception: " + comment)
 
                 raise Exception("Unexpected message from JLink server: " + line)
@@ -809,7 +890,7 @@ class MathMate(object):
         return self.statements[self.get_current_statement_index()]
     
     def reformat(self):
-        if self.selected_text is not None:
+        if self.selected_text is not None or self.process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 sys.stdout.write(reformatted_statement)
         else:
@@ -822,7 +903,7 @@ class MathMate(object):
         result = []
         result.append("Cursor: (Line: %d, Index: %d, Pos: %s, Tree: %s)" % (self.tmln, self.tmli, self.tmcursor, self.parse_tree_level))
 
-        if self.selected_text is None:
+        if self.selected_text is None and not self.process_entire_document:
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             ssln, ssli = self.get_line_col(ssp)
             esln, esli = self.get_line_col(esp)
@@ -861,7 +942,7 @@ class MathMate(object):
         suggestions = filter(lambda x: x != "?" and x.startswith(fnname), self.get_symbols())
         
         if len(suggestions) == 0:
-            self.exit_show_tool_tip("No suggestions.")
+            exit_show_tool_tip("No suggestions.")
         
         data = {}
         data['suggestions'] = map(lambda x: {'display': x}, suggestions)
@@ -873,46 +954,61 @@ class MathMate(object):
         
         out = proc.stdout.read()
         if out != "":
-            self.exit_show_tool_tip(out)
-        self.exit_discard()
+            exit_show_tool_tip(out)
+        exit_discard()
 
 def main():
     parser = OptionParser()
+    parser.add_option("-i", "--force_image", dest="force_image", default=False, action="store_true",
+                      help="Render everything as gif files.")
     (options, args) = parser.parse_args()
     command = args[0]
     
-    mm = MathMate()
+    input_file = None
+    if len(args) == 2:
+        input_file = args[1]
     
     try:
         if command == "show":
-            mm.exit_show_tool_tip(mm.show())
+            mm = MathMate(input_file)
+            exit_show_tool_tip(mm.show())
     
+        if command == "inline":
+            mm = MathMate(input_file)
+            mm.inline(force_image=options.force_image)
+            exit_show_html()
+        
         if command == "execute":
-            mm.exit_show_html(mm.execute())
-    
-        if command == "image":
-            mm.exit_show_html(mm.execute(True))
+            mm = MathMate(input_file, process_entire_document=True)
+            mm.reset()
+            mm.inline()
+            exit_show_html()
     
         if command == "clear":
-            mm.exit_show_tool_tip(mm.clear())
+            mm = MathMate(input_file)
+            exit_show_tool_tip(mm.clear())
     
         if command == "reset":
-            mm.exit_show_tool_tip(mm.reset())
+            mm = MathMate(input_file)
+            exit_show_tool_tip(mm.reset())
     
         if command == "shutdown":
-            mm.exit_show_tool_tip(mm.shutdown())
+            mm = MathMate(input_file)
+            exit_show_tool_tip(mm.shutdown())
     
         if command == "reformat":
-            mm.exit_replace_text(mm.reformat())
+            mm = MathMate(input_file)
+            exit_replace_text(mm.reformat())
         
         if command == "complete":
+            mm = MathMate(input_file)
             mm.suggest()
-            
+        
     except Exception:
         stacktrace = traceback.format_exc()
-        mm.exit_show_tool_tip(stacktrace)
+        exit_show_tool_tip(stacktrace)
     
-    mm.exit_show_tool_tip("Command not recognized: %s" % command)
+    exit_show_tool_tip("Command not recognized: %s" % command)
 
 if __name__ == '__main__':
     main()

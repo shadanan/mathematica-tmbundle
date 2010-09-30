@@ -5,7 +5,7 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" image</string>
+	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" inline --force_image</string>
 	<key>fallbackInput</key>
 	<string>document</string>
 	<key>input</key>

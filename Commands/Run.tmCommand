@@ -5,14 +5,13 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>#!/bin/sh
-math &lt; $TM_FILEPATH</string>
+	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" execute</string>
 	<key>input</key>
 	<string>document</string>
 	<key>keyEquivalent</key>
 	<string>@r</string>
 	<key>name</key>
-	<string>Run</string>
+	<string>Execute Document</string>
 	<key>output</key>
 	<string>showAsHTML</string>
 	<key>scope</key>

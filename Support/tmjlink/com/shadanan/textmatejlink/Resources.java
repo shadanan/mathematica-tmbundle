@@ -2,7 +2,6 @@ package com.shadanan.textmatejlink;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -140,13 +139,27 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
-	public void evaluate(String query) throws MathLinkException, IOException {
+	public String evaluate(String query) throws MathLinkException, IOException {
+		int currentResource = -1;
+		
+		StringBuilder cellgroup = new StringBuilder();
+		cellgroup.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
+		
 		// Log the input
-		resources.add(new Resource(query));
+		Resource input = new Resource(query); 
+		resources.add(input);
+		currentResource = resources.size();
+		cellgroup.append(input.render(true));
 		
 		kernelLink.evaluate("MathMate`lastOutput = " + query);
 		kernelLink.waitForAnswer();
 		Expr result = kernelLink.getExpr();
+		
+		// Append intermediate packets received by listener callback
+		while (currentResource < resources.size()) {
+			cellgroup.append(resources.get(currentResource).render(true));
+			currentResource++;
+		}
 		
 		if (query.trim().charAt(query.trim().length()-1) != ';') {
 			// Log the output as fullform text
@@ -154,9 +167,15 @@ public class Resources implements PacketListener {
 			if (textResource.isGraphics()) {
 				// Log the output as an image
 				byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
-				if (data != null)
-					resources.add(new Resource(MathLink.DISPLAYPKT, data));
+				if (data != null) {
+					Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
+					resources.add(graphicsResource);
+					cellgroup.append(graphicsResource.render(true));
+				}
 				textResource.subdue();
+				cellgroup.append(textResource.render(false));
+			} else {
+				cellgroup.append(textResource.render(true));
 			}
 			resources.add(textResource);
 		}
@@ -164,62 +183,64 @@ public class Resources implements PacketListener {
 		// Done with this. Move on...
 		kernelLink.newPacket();
 		currentCount++;
+		
+		cellgroup.append("</div>");
+		return cellgroup.toString();
 	}
 	
-	public void evaluateToImage(String query) throws MathLinkException, IOException {
+	public String evaluateToImage(String query) throws MathLinkException, IOException {
+		int currentResource = -1;
+		
+		StringBuilder cellgroup = new StringBuilder();
+		cellgroup.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
+		
 		// Log the input
-		resources.add(new Resource(query));
+		Resource input = new Resource(query); 
+		resources.add(input);
+		currentResource = resources.size();
+		cellgroup.append(input.render(true));
 		
 		kernelLink.evaluate("MathMate`lastOutput = " + query);
 		kernelLink.waitForAnswer();
 		Expr result = kernelLink.getExpr();
 		
+		// Append intermediate packets received by listener callback
+		while (currentResource < resources.size()) {
+			cellgroup.append(resources.get(currentResource).render(true));
+			currentResource++;
+		}
+		
 		if (query.trim().charAt(query.trim().length()-1) != ';') {
-			// Log the output as an image
-			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
-			if (data != null)
-				resources.add(new Resource(MathLink.DISPLAYPKT, data));
-			
 			// Log the output as fullform text
 			Resource textResource = new Resource(MathLink.RETURNPKT, result);
-			resources.add(textResource);
-			if (data != null)
+			
+			// Log the output as an image
+			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
+			if (data != null) {
+				Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
+				resources.add(graphicsResource);
+				cellgroup.append(graphicsResource.render(true));
 				textResource.subdue();
+				cellgroup.append(textResource.render(false));
+			} else {
+				cellgroup.append(textResource.render(true));
+			}
+			
+			resources.add(textResource);
 		}
 		
 		// Done with this. Move on...
 		kernelLink.newPacket();
 		currentCount++;
+		
+		cellgroup.append("</div>");
+		return cellgroup.toString();
 	}
 	
-	private String applyLayout(String content) throws IOException {
-		StringBuilder result = new StringBuilder();
-		FileReader layout = new FileReader(cacheFolder + "/layout.html.erb");
-		
-		int charsRead;
-		char[] buff = new char[1024];
-		do {
-			charsRead = layout.read(buff);
-			if (charsRead != -1) 
-				result.append(buff, 0, charsRead);
-		} while (charsRead != -1);
-		
-		String yieldToken = "<%= yield %>";
-		int start = result.indexOf(yieldToken);
-		result.replace(start, start + yieldToken.length(), content);
-		return result.toString();
-	}
-	
-	public File render() throws IOException {
+	public String render() {
 		boolean renderedDisplay = false;
 		int currentCount = -1;
 		StringBuilder content = new StringBuilder();
-		
-		if (resourceView != null) {
-			File resourceViewFile = getNamedFile(resourceView);
-			if (resourceViewFile.exists()) 
-				resourceViewFile.delete();
-		}
 		
 		// Render session id div
 		content.append("<div id='status_bar'>");
@@ -263,9 +284,19 @@ public class Resources implements PacketListener {
 			content.append("</div>");
 		}
 		
+		return content.toString();
+	}
+	
+	public File renderToFile() throws IOException {
+		if (resourceView != null) {
+			File resourceViewFile = getNamedFile(resourceView);
+			if (resourceViewFile.exists()) 
+				resourceViewFile.delete();
+		}
+		
 		resourceView = UUID.randomUUID().toString() + ".html";
 		FileWriter fp = new FileWriter(getNamedFile(resourceView));
-		fp.write(applyLayout(content.toString()));
+		fp.write(render());
 		fp.close();
 		
 		return getNamedFile(resourceView);
@@ -465,7 +496,7 @@ public class Resources implements PacketListener {
 				result.append("<div class='cell display'" + style + ">");
 				result.append("  <div class='margin'>Out[" + count + "] := </div>");
 				result.append("  <div class='content'>");
-				result.append("    <img src='" + getFilePointer() + "' onclick='toggle(" + count + ")' />");
+				result.append("    <img src='file://" + getFilePointer() + "' onclick='toggle(" + count + ")' />");
 				result.append("  </div>");
 				result.append("</div>");
 			}
