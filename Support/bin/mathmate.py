@@ -246,97 +246,102 @@ class MathMate(object):
         """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT')})
         sys.stdout.flush()
         
-        sock = self.connect()
+        try:
+            sock = self.connect()
 
-        statements = []
-        if self.selected_text is not None or self.process_entire_document:
-            for ssp, esp, reformatted_statement, current_statement in self.statements:
-                statements.append(current_statement)
-        else:
-            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-            statements.append(current_statement)
-
-        state = 0
-        readsize = None
-        while True:
-            if readsize is not None:
-                content = self.readtotal(sock, readsize)
+            statements = []
+            if self.selected_text is not None or self.process_entire_document:
+                for ssp, esp, reformatted_statement, current_statement in self.statements:
+                    statements.append(current_statement)
             else:
-                line, response, words, comment = self.read(sock)
+                ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+                statements.append(current_statement)
 
-            if state == 0:
-                if response == "okay":
-                    sock.send("sessid %s\n" % self.sessid)
-                    state = 1
-                    continue
+            state = 0
+            readsize = None
+            while True:
+                if readsize is not None:
+                    content = self.readtotal(sock, readsize)
+                else:
+                    line, response, words, comment = self.read(sock)
 
-                if response == "exception":
-                    raise Exception("TextMateJLink Exception: " + comment)
+                if state == 0:
+                    if response == "okay":
+                        sock.send("sessid %s\n" % self.sessid)
+                        state = 1
+                        continue
 
-                raise Exception("Unexpected message from JLink server: " + line)
+                    if response == "exception":
+                        raise Exception("TextMateJLink Exception: " + comment)
+
+                    raise Exception("Unexpected message from JLink server: " + line)
             
-            if state == 1:
-                if response == "okay":
-                    sock.send("header\n")
-                    state = 3
-                    continue
-                    
-                if response == "exception":
-                    raise Exception("TextMateJLink Exception: " + comment)
-
-                raise Exception("Unexpected message from JLink server: " + line)
-            
-            if state == 2:
-                if response == "okay":
-                    if len(statements) == 0:
-                        sock.send("quit\n")
-                        state = 5
+                if state == 1:
+                    if response == "okay":
+                        sock.send("header\n")
+                        state = 3
                         continue
                     
-                    statement = statements.pop(0).rstrip()
-                    if force_image:
-                        sock.send("image %d\n" % len(statement))
-                    else:
-                        sock.send("execute %d\n" % len(statement))
-                    sock.send(statement)
-                    state = 3
-                    continue
+                    if response == "exception":
+                        raise Exception("TextMateJLink Exception: " + comment)
 
-                if response == "exception":
-                    raise Exception("TextMateJLink Exception: " + comment)
-
-                raise Exception("Unexpected message from JLink server: " + line)
+                    raise Exception("Unexpected message from JLink server: " + line)
             
-            if state == 3:
-                if words[0] == "inline":
-                    readsize = int(words[1])
-                    state = 4
-                    continue
+                if state == 2:
+                    if response == "okay":
+                        if len(statements) == 0:
+                            sock.send("quit\n")
+                            state = 5
+                            continue
                     
-                if response == "exception":
-                    raise Exception("TextMateJLink Exception: " + comment)
+                        statement = statements.pop(0).rstrip()
+                        if force_image:
+                            sock.send("image %d\n" % len(statement))
+                        else:
+                            sock.send("execute %d\n" % len(statement))
+                        sock.send(statement)
+                        state = 3
+                        continue
 
-                raise Exception("Unexpected message from JLink server: " + line)
+                    if response == "exception":
+                        raise Exception("TextMateJLink Exception: " + comment)
+
+                    raise Exception("Unexpected message from JLink server: " + line)
             
-            if state == 4:
-                sys.stdout.write(content)
-                sys.stdout.flush()
-                readsize = None
-                state = 2
-                continue
+                if state == 3:
+                    if words[0] == "inline":
+                        readsize = int(words[1])
+                        state = 4
+                        continue
+                    
+                    if response == "exception":
+                        raise Exception("TextMateJLink Exception: " + comment)
+
+                    raise Exception("Unexpected message from JLink server: " + line)
             
-            if state == 5:
-                if response == "okay":
-                    sock.close()
-                    break
+                if state == 4:
+                    sys.stdout.write(content)
+                    sys.stdout.flush()
+                    readsize = None
+                    state = 2
+                    continue
+            
+                if state == 5:
+                    if response == "okay":
+                        sock.close()
+                        break
 
-                if response == "exception":
-                    raise Exception("TextMateJLink Exception: " + comment)
+                    if response == "exception":
+                        raise Exception("TextMateJLink Exception: " + comment)
 
-                raise Exception("Unexpected message from JLink server: " + line)
+                    raise Exception("Unexpected message from JLink server: " + line)
 
-            raise Exception("Invalid state: " + state)
-
+                raise Exception("Invalid state: " + state)
+            
+        except Exception:
+            sys.stdout.write('<div class="exception">%s</div>' % traceback.format_exc())
+            sys.stdout.flush()
+            
         # Footer (closing tags, etc)
         sys.stdout.write("""
               <script type="text/javascript" charset="utf-8">

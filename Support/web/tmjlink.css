@@ -49,6 +49,16 @@ div.content {
   margin-right: 5px;
 }
 
+div.exception {
+  margin: 1em;
+  border: 1px solid #888;
+  background-color: white;
+  padding: 1em;
+  color: #a00;
+  white-space: pre;
+  overflow-x: auto;
+}
+
 div.cellgroup {
   margin: 1em;
   border: 1px solid #888;
