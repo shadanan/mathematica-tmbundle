@@ -23,6 +23,7 @@ div.margin {
   font-size: 10px;
   margin-top: 1px;
   color: #675ac0;
+  margin-right: 5px;
 }
 
 div.message div.content, div.text div.content {
@@ -44,7 +45,8 @@ div.subdue div.margin {
 }
 
 div.content {
-  margin-left: 75px;
+  overflow-x: auto;
+  margin-right: 5px;
 }
 
 div.cellgroup {
