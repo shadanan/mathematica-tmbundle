@@ -413,6 +413,9 @@ public class Resources implements PacketListener {
 				return true;
 			
 			if (head.toString().equals("List")) {
+				if (expr.length() == 0)
+					return false;
+				
 				Expr subhead = expr.part(1).head();
 				
 				if (subhead.toString().equals("InputForm"))
