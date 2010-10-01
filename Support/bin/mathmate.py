@@ -15,37 +15,37 @@ def exit_discard():
 
 def exit_replace_text(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(201)
 
 def exit_replace_document(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(202)
 
 def exit_insert_text(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(203)
 
 def exit_insert_snippet(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(204)
 
 def exit_show_html(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(205)
 
 def exit_show_tool_tip(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(206)
 
 def exit_create_new_document(out = None):
     if out is not None:
-        print out
+        sys.stdout.write(out)
     sys.exit(207)
 
 def return_focus_to_textmate():
@@ -897,21 +897,28 @@ class MathMate(object):
         return self.statements[self.get_current_statement_index()]
     
     def reformat(self):
-        result = []
-        
         if self.selected_text is not None or self.process_entire_document:
+            result = []
+            
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 result.append(reformatted_statement)
+            
+            if "".join(result) == self.doc:
+                exit_show_tool_tip("No reformat required.")
+            else:
+                exit_replace_text("".join(result))
         else:
+            result = []
+            
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             result.append(self.doc[0:ssp])
             result.append(reformatted_statement)
             result.append(self.doc[esp:])
-        
-        if "".join(result) == self.doc:
-            exit_show_tool_tip("No reformat required.")
-        else:
-            exit_replace_document("".join(result))
+            
+            if "".join(result) == self.doc:
+                exit_show_tool_tip("No reformat required.")
+            else:
+                exit_replace_document("".join(result))
 
     def show(self):
         result = []
