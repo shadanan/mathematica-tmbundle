@@ -897,14 +897,21 @@ class MathMate(object):
         return self.statements[self.get_current_statement_index()]
     
     def reformat(self):
+        result = []
+        
         if self.selected_text is not None or self.process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
-                sys.stdout.write(reformatted_statement)
+                result.append(reformatted_statement)
         else:
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-            sys.stdout.write(self.doc[0:ssp])
-            sys.stdout.write(reformatted_statement)
-            sys.stdout.write(self.doc[esp:])
+            result.append(self.doc[0:ssp])
+            result.append(reformatted_statement)
+            result.append(self.doc[esp:])
+        
+        if "".join(result) == self.doc:
+            exit_show_tool_tip("No reformat required.")
+        else:
+            exit_replace_document("".join(result))
 
     def show(self):
         result = []
@@ -1007,7 +1014,7 @@ def main():
     
         if command == "reformat":
             mm = MathMate(input_file)
-            exit_replace_text(mm.reformat())
+            mm.reformat()
         
         if command == "complete":
             mm = MathMate(input_file)
