@@ -1,5 +1,6 @@
-Plot[Sin[x], {x, -5, 5}]
 
+Plot[Sin[x], {x, -5, 5}]
+ 
 Plot3D[Sin[x] Sin[y], {x, -5, 5}, {y, -5, 5}]
 
 Plot[Sin[x] E^(-x/4), {x, 0, 10}, Filling -> Axis]
@@ -31,3 +32,5 @@ a =
     4 + 
       5] 4
 b = 4
+Pi
+a
