@@ -288,12 +288,19 @@ class MathMate(object):
             
                 if state == 2:
                     if response == "okay":
-                        if len(statements) == 0:
+                        statement = None
+                        
+                        while len(statements) > 0:
+                            statement = statements.pop(0).rstrip()
+                            if statement != "":
+                                break
+                            statement = None
+                        
+                        if statement is None:
                             sock.send("quit\n")
                             state = 5
                             continue
-                    
-                        statement = statements.pop(0).rstrip()
+                            
                         if force_image:
                             sock.send("image %d\n" % len(statement))
                         else:
