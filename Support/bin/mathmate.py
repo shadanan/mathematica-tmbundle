@@ -8,7 +8,6 @@ import shutil
 import subprocess
 import traceback
 import plistlib
-from optparse import OptionParser
 
 def exit_discard():
     sys.exit(200)
@@ -982,61 +981,3 @@ class MathMate(object):
         if out != "":
             exit_show_tool_tip(out)
         exit_discard()
-
-def main():
-    parser = OptionParser()
-    parser.add_option("-i", "--force_image", dest="force_image", default=False, action="store_true",
-                      help="Render everything as gif files.")
-    (options, args) = parser.parse_args()
-    command = args[0]
-    
-    input_file = None
-    if len(args) == 2:
-        input_file = args[1]
-    
-    try:
-        if command == "show":
-            mm = MathMate(input_file)
-            exit_show_tool_tip(mm.show())
-    
-        if command == "inline":
-            mm = MathMate(input_file)
-            mm.inline(force_image=options.force_image)
-            return_focus_to_textmate()
-            exit_show_html()
-        
-        if command == "execute":
-            mm = MathMate(input_file, process_entire_document=True)
-            mm.reset()
-            mm.inline()
-            return_focus_to_textmate()
-            exit_show_html()
-    
-        if command == "clear":
-            mm = MathMate(input_file)
-            exit_show_tool_tip(mm.clear())
-    
-        if command == "reset":
-            mm = MathMate(input_file)
-            exit_show_tool_tip(mm.reset())
-    
-        if command == "shutdown":
-            mm = MathMate(input_file)
-            exit_show_tool_tip(mm.shutdown())
-    
-        if command == "reformat":
-            mm = MathMate(input_file)
-            mm.reformat()
-        
-        if command == "complete":
-            mm = MathMate(input_file)
-            mm.suggest()
-        
-    except Exception:
-        stacktrace = traceback.format_exc()
-        exit_show_tool_tip(stacktrace)
-    
-    exit_show_tool_tip("Command not recognized: %s" % command)
-
-if __name__ == '__main__':
-    main()
