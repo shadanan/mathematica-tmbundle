@@ -601,6 +601,7 @@ class MathMate(object):
         ss_pos = 0
         current = []
         scope = []
+        do_indent = True
         
         if initial_indent_level is None:
             initial_indent_level = self.count_indents(block)
@@ -624,58 +625,34 @@ class MathMate(object):
                 self.parse_tree_level = ".".join(scope)
 
             if len(scope) == 0:
-                if c1 != "\n" and nnsc is not None:
-                    if current != []:
-                        statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
-                        current = []
-
-                    ss_pos = pos
-                    scope.append("root")
+                # Skip white space after a statement. Set flag if we see a new line.
+                if c1 in (" ", "\t", "\n"):
+                    # Preserve lines between statements
+                    if c1 == "\n":
+                        do_indent = True
+                        current += c1
                     
-                    indent_level = len(scope) + initial_indent_level - 1
-                    if nnsc in ("]", "}", ")"):
-                        current += (self.indent * (indent_level - 1))
-                    else:
-                        current += (self.indent * indent_level)
-                    
-                    while block[pos] in (" ", "\t"):
-                        pos += 1
+                    pos += 1
                     continue
                 
-                if c1 in (" ", "\t") and nnsc is not None:
-                    ss_pos = pos
-                    scope.append("root")
+                # New statement token encountered. Save current statement.
+                if current != []:
+                    # Two statements on the same line. Add a space between them.
+                    if do_indent is False:
+                        current += " "
                     
-                    indent_level = len(scope) + initial_indent_level - 1
-                    if nnsc in ("]", "}", ")"):
-                        current += (self.indent * (indent_level - 1))
-                    else:
-                        current += (self.indent * indent_level)
-                    
-                    while block[pos] in (" ", "\t"):
-                        pos += 1
-                    continue
-                    
-                if c1 not in (" ", "\t", "\n"):
-                    if current != []:
-                        statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
-                        current = []
-
-                    ss_pos = pos
-                    scope.append("root")
-
-                    indent_level = len(scope) + initial_indent_level - 1
-                    if nnsc in ("]", "}", ")"):
-                        current += (self.indent * (indent_level - 1))
-                    else:
-                        current += (self.indent * indent_level)
-
-                    while block[pos] in (" ", "\t"):
-                        pos += 1
-                    continue
-
-                current += c1
-                pos += 1
+                    # Save statement and reset buffer
+                    statements.append((ss_pos, pos, "".join(current), block[ss_pos:pos]))
+                    current = []
+                
+                ss_pos = pos
+                scope.append("root")
+                
+                # Add indentation if current is on a new line (do_indent is True).
+                if do_indent is True:
+                    current += (self.indent * initial_indent_level)
+                
+                # Do not advance cursor
                 continue
 
             if scope[-1] == "string":
@@ -869,6 +846,7 @@ class MathMate(object):
                 while scope[-1] == "binop":
                     scope.pop()
                 if scope[-1] == "root":
+                    do_indent = False
                     scope.pop()
                 current += c1
                 pos += 1
@@ -880,6 +858,7 @@ class MathMate(object):
                 if scope[-1] == "start":
                     scope.pop()
                 if scope[-1] == "root":
+                    do_indent = True
                     scope.pop()
                 current += c1
                 pos += 1

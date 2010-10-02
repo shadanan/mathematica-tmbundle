@@ -1,6 +1,6 @@
 
 Plot[Sin[x], {x, -5, 5}]
- 
+
 Plot3D[Sin[x] Sin[y], {x, -5, 5}, {y, -5, 5}]
 
 Plot[Sin[x] E^(-x/4), {x, 0, 10}, Filling -> Axis]
@@ -21,8 +21,6 @@ data = {};
 AppendTo[data, "some data"];
 data[[1, 0]]
 
-?System`*
-
 Names["System`*"]
 
 TreeForm[a + b^2 + c^3 + d]
@@ -31,6 +29,5 @@ a =
   N[
     4 + 
       5] 4
-b = 4
-Pi
+b = 4; Pi
 a
