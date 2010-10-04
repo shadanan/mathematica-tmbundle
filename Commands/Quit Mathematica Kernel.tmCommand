@@ -23,7 +23,7 @@ except Exception:
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^@&gt;</string>
+	<string>^@.</string>
 	<key>name</key>
 	<string>Reset Mathematica Session</string>
 	<key>output</key>

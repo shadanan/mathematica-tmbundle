@@ -14,8 +14,8 @@ sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
 try:
-	mm = MathMate()
-	exit_show_tool_tip(mm.shutdown())
+	mm = MathMate(process_entire_document = True)
+	mm.reformat()
 except Exception:
 	stacktrace = traceback.format_exc()
 	exit_show_tool_tip(stacktrace)
@@ -23,14 +23,14 @@ except Exception:
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^@&gt;</string>
+	<string>^Q</string>
 	<key>name</key>
-	<string>Shutdown Mathematica Server</string>
+	<string>Reformat Document</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>replaceSelectedText</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>A959D1A2-92FA-43AA-A1C6-E64CD2164413</string>
+	<string>D4B4F85F-466C-4613-97CD-E6B6E9A7B3C0</string>
 </dict>
 </plist>
