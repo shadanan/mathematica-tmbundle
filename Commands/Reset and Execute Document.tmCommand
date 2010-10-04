@@ -8,29 +8,25 @@
 	<string>#!/usr/bin/env python
 import os
 import sys
-import traceback
 
 sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
-try:
-	mm = MathMate()
-	exit_show_tool_tip(mm.reset())
-except Exception:
-	stacktrace = traceback.format_exc()
-	exit_show_tool_tip(stacktrace)
+mm = MathMate(process_entire_document=True)
+mm.reset()
+mm.inline()
 </string>
 	<key>input</key>
-	<string>selection</string>
+	<string>document</string>
 	<key>keyEquivalent</key>
-	<string>^@&gt;</string>
+	<string>@R</string>
 	<key>name</key>
-	<string>Reset Mathematica Session</string>
+	<string>Reset and Execute Document</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>showAsHTML</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>52B988B9-9E89-44C5-B258-4EE497894729</string>
+	<string>46C008C0-AEA9-4726-935C-F7EE8270C0C4</string>
 </dict>
 </plist>

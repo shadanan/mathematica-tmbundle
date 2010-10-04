@@ -5,7 +5,21 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" reformat</string>
+	<string>#!/usr/bin/env python
+import os
+import sys
+import traceback
+
+sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
+from mathmate import *
+
+try:
+	mm = MathMate()
+	mm.reformat()
+except Exception:
+	stacktrace = traceback.format_exc()
+	exit_show_tool_tip(stacktrace)
+</string>
 	<key>fallbackInput</key>
 	<string>document</string>
 	<key>input</key>

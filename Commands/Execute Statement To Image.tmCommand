@@ -5,7 +5,16 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>/usr/bin/env python "$TM_BUNDLE_SUPPORT/bin/mathmate.py" inline --force_image</string>
+	<string>#!/usr/bin/env python
+import os
+import sys
+
+sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
+from mathmate import *
+
+mm = MathMate()
+mm.inline(force_image=True)
+</string>
 	<key>fallbackInput</key>
 	<string>document</string>
 	<key>input</key>
