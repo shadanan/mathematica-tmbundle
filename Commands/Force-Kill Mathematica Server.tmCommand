@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>nop</string>
+	<key>command</key>
+	<string>#!/usr/bin/env python
+import os
+import sys
+import traceback
+
+sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
+from mathmate import *
+
+try:
+	mm = MathMate()
+	exit_show_tool_tip(mm.kill())
+except Exception:
+	stacktrace = traceback.format_exc()
+	exit_show_tool_tip(stacktrace)
+</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>~@&gt;</string>
+	<key>name</key>
+	<string>Force-Kill Mathematica Server</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>source.mathematica</string>
+	<key>uuid</key>
+	<string>743E7223-2DBB-40B0-85E8-7B6FDFBCA134</string>
+</dict>
+</plist>

@@ -89,18 +89,32 @@ class MathMate(object):
         else:
             self.sessid = sessid
     
-    def shutdown(self):
+    def signal_tmjlink(self, signal = 1):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
             try:
                 pidfp = open(pidfile, 'r')
                 pid = int(pidfp.read())
                 pidfp.close()
-                os.kill(pid, 1)
-                return "TextMateJLink Server Shutdown"
+                os.kill(pid, signal)
+                return True
             except:
                 pass
-        return "TextMateJLink Server is not Running"
+        return False
+        
+    def shutdown(self):
+        result = self.signal_tmjlink(1)
+        if result is True:
+            return "TextMateJLink Server Shutdown"
+        else:
+            return "TextMateJLink Server is not Running"
+    
+    def kill(self):
+        result = self.signal_tmjlink(9)
+        if result is True:
+            return "TextMateJLink Server Killed"
+        else:
+            return "TextMateJLink Server is not Running"
     
     def is_tmjlink_alive(self):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
@@ -135,7 +149,7 @@ class MathMate(object):
         classpath.append("/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar")
         
         if os.path.exists(self.cacheFolder):
-           shutil.rmtree(self.cacheFolder) 
+            shutil.rmtree(self.cacheFolder) 
         os.mkdir(self.cacheFolder, 0777)
         
         # Launch TextMateJLink
