@@ -50,8 +50,8 @@ def exit_create_new_document(out = None):
 def return_focus_to_textmate():
     osascript = """
         tell application "TextMate"
-        	activate
-        	tell application "System Events" to keystroke "`" using {command down, shift}
+          activate
+          tell application "System Events" to keystroke "`" using {command down, shift}
         end tell
     """
     # subprocess.call(["osascript", "-e", osascript])
@@ -248,6 +248,22 @@ class MathMate(object):
         
               <link rel="stylesheet" href="file://%(tm_bundle_support)s/web/tmjlink.css" type="text/css" media="screen" charset="utf-8">
               <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
+
+              <script type="text/javascript" charset="utf-8">
+                $(window).load(function() {
+                  $(window).scrollTop($(document).height());
+                });
+        
+                function doScroll() {
+                  if ($('#auto_scroll .value').html() == "On") {
+                    $(window).scrollTop($(document).height());
+                  }
+                }
+        
+                function toggle(resource_id) {
+                  $('#resource_' + resource_id + ' .return').toggle();
+                }
+              </script>
             </head>
             <body>
               <div class="header">
@@ -256,7 +272,44 @@ class MathMate(object):
                   <br style="clear:both" />
                 </div>
               </div>
-        """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT')})
+              
+              <div id="status_bar">
+                <div id="session_id" class="field_label">
+                  <span class="label">Session ID:</span>
+                  <span class="value">%(session_id)s</span>
+                </div>
+              
+                <div id="white_space" class="field_label">
+                  <span class="label">White Space:</span>
+                  <span class="value">Normal</span>
+                </div>
+              
+                <div id="auto_scroll" class="field_label">
+                  <span class="label">Auto-Scroll:</span>
+                  <span class="value">On</span>
+                </div>
+              </div>
+            
+              <script type="text/javascript">
+                $('#white_space .value').click(function() {
+                  if ($(this).html() == "Normal") {
+                    $(this).html("Pre");
+                    $('div.cell div.content').css('white-space', 'pre');
+                  } else {
+                    $(this).html("Normal");
+                    $('div.cell div.content').css('white-space', 'normal');
+                  }
+                });
+                
+                $('#auto_scroll .value').click(function() {
+                  if ($(this).html() == "On") {
+                    $(this).html("Off");
+                  } else {
+                    $(this).html("On");
+                  }
+                });
+              </script>
+        """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), "session_id": self.sessid})
         sys.stdout.flush()
         
         try:
@@ -341,6 +394,7 @@ class MathMate(object):
             
                 if state == 4:
                     sys.stdout.write(content)
+                    sys.stdout.write('<script type="text/javascript" charset="utf-8">doScroll();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2
@@ -364,25 +418,6 @@ class MathMate(object):
             
         # Footer (closing tags, etc)
         sys.stdout.write("""
-              <script type="text/javascript" charset="utf-8">
-                $(window).load(function() {
-                  $(window).scrollTop($(document).height());
-                });
-        
-                $('#white_space .value').click(function() {
-                  if ($(this).html() == "Normal") {
-                    $(this).html("Pre");
-                    $('div.cell div.content').css('white-space', 'pre');
-                  } else {
-                    $(this).html("Normal");
-                    $('div.cell div.content').css('white-space', 'normal');
-                  }
-                });
-        
-                function toggle(resource_id) {
-                  $('#resource_' + resource_id + ' .return').toggle();
-                }
-              </script>
             </body>
           </html>
         """)

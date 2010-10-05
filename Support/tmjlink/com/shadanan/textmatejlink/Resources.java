@@ -231,18 +231,6 @@ public class Resources implements PacketListener {
 		int currentCount = -1;
 		StringBuilder content = new StringBuilder();
 		
-		// Render session id div
-		content.append("<div id='status_bar'>");
-		content.append("  <div id='session_id'>");
-		content.append("    <span class='label'>Session ID:</span>");
-		content.append("    <span class='value'>" + sessionId + "</span>");
-		content.append("  </div>");
-		content.append("  <div id='white_space'>");
-		content.append("    <span class='label'>White Space:</span>");
-		content.append("    <span class='value'>Normal</span>");
-		content.append("  </div>");
-		content.append("</div>");
-		
 		for (Resource resource : resources) {
 			if (currentCount == -1) {
 				currentCount = resource.getCount();

@@ -104,3 +104,7 @@ div.header div.text span.white {
 #white_space .value {
   cursor: pointer;
 }
+
+#auto_scroll .value {
+  cursor: pointer;
+}
