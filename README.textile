@@ -7,7 +7,7 @@ Mathematica is a computational software program used in scientific, engineering,
 mathematical fields and other areas of technical computing. It is created by 
 "Wolfram Research":http://www.wolfram.com/.
 
-This bundle allows TextMate to understand Mathematica .m files. 
+This bundle allows TextMate to understand Mathematica .m files.
 
 It was created by David Howell and is being maintained by David Howell and Shad Sharma.
 
@@ -26,7 +26,7 @@ Clone the bundle's repository using git:
 By default, TextMate interprets .m files as Objective-C. You will have to switch the
 language to Mathematica in order to activate the bundle.
 
-h3. Stuff That Works (for the most part...)
+h3. Stuff That Works
 
 This TextMate bundle is a side project for us and still has a far way to go. It is,
 however, being actively developed. 
@@ -56,9 +56,6 @@ h4. Snippets
  * Select (select ->|)
  * While (while ->|)
  
- * We always need: more snippets
-
-
 h4. Other (Commands, Indentation, etc.)
 
  * Removed indentation rules. They caused more problems than they fixed.
@@ -66,16 +63,19 @@ h4. Other (Commands, Indentation, etc.)
  * Block comments (command + /)
  
  * Reformat current statement / selection (control + Q)
+ * Reformat current document (control + shift + Q)
  * Preview current statement / selection in tool tip (control + shift + enter)
 
  * Command completion (option + escape)
 
  * Execute current statement / selection (shift + enter)
- * Clear mathmate session (command + shift + >)
- * Quit mathmate kernel (command + shift + control + >)
+ * Execute current document (command + R)
+ * Reset session and execute current document (command + shift + R)
+ 
+ * Clear mathmate session (command + option + .)
+ * Quit mathmate kernel (command + control + .)
    * If Mathematica crashes, an exception will be displayed in the MathMate output as follows:
      Connected MathLink program has closed the link, but there might still be data underway.
      At this point, you should use this command to restart the kernel (you will lose previous kernel state).
- * Shutdown mathmate backend (command + shift + option + >)
- 
- * Better handling of Mathematica kernel crashes
+ * Shutdown mathmate backend (command + shift + control + .)
+ * Kill mathmate backend -- in case it freezes (command + option + shift + .)

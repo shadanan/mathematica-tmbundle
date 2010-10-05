@@ -25,7 +25,7 @@ except Exception:
 	<key>keyEquivalent</key>
 	<string>~@&gt;</string>
 	<key>name</key>
-	<string>Force-Kill Mathematica Server</string>
+	<string>Kill Mathematica Server</string>
 	<key>output</key>
 	<string>showAsTooltip</string>
 	<key>scope</key>
