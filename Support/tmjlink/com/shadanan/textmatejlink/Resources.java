@@ -181,55 +181,6 @@ public class Resources implements PacketListener {
 		return cellgroup.toString();
 	}
 	
-	public String evaluateToImage(String query) throws MathLinkException, IOException {
-		int currentResource = -1;
-		
-		StringBuilder cellgroup = new StringBuilder();
-		cellgroup.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
-		
-		// Log the input
-		Resource input = new Resource(query); 
-		resources.add(input);
-		currentResource = resources.size();
-		cellgroup.append(input.render(true));
-		
-		kernelLink.evaluate("MathMate`lastOutput = " + query);
-		kernelLink.waitForAnswer();
-		Expr result = kernelLink.getExpr();
-		
-		// Append intermediate packets received by listener callback
-		while (currentResource < resources.size()) {
-			cellgroup.append(resources.get(currentResource).render(true));
-			currentResource++;
-		}
-		
-		if (query.trim().charAt(query.trim().length()-1) != ';') {
-			// Log the output as fullform text
-			Resource textResource = new Resource(MathLink.RETURNPKT, result);
-			
-			// Log the output as an image
-			byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
-			if (data != null) {
-				Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
-				resources.add(graphicsResource);
-				cellgroup.append(graphicsResource.render(true));
-				textResource.subdue();
-				cellgroup.append(textResource.render(false));
-			} else {
-				cellgroup.append(textResource.render(true));
-			}
-			
-			resources.add(textResource);
-		}
-		
-		// Done with this. Move on...
-		kernelLink.newPacket();
-		currentCount++;
-		
-		cellgroup.append("</div>");
-		return cellgroup.toString();
-	}
-	
 	public String render() {
 		boolean renderedDisplay = false;
 		int currentCount = -1;
