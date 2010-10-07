@@ -158,7 +158,7 @@ public class Resources implements PacketListener {
 			byte[] data = null;
 			
 			if (evalToImage || textResource.isGraphics())
-				data = kernelLink.evaluateToImage("%", 0, 0);
+				data = kernelLink.evaluateToImage(result, 0, 0);
 			
 			if (data != null) {
 				Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
