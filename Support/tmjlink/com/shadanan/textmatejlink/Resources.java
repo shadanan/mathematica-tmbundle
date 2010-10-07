@@ -18,6 +18,8 @@ import com.wolfram.jlink.PacketArrivedEvent;
 import com.wolfram.jlink.PacketListener;
 
 public class Resources implements PacketListener {
+	public static final Expr NULLEXPR = new Expr(Expr.SYMBOL, "Null");
+	
 	private String sessionId = null;
 	private String cacheFolder = null;
 	private KernelLink kernelLink = null;
@@ -128,7 +130,7 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
-	public String evaluate(String query) throws MathLinkException, IOException {
+	public String evaluate(String query, boolean evalToImage) throws MathLinkException, IOException {
 		int currentResource = -1;
 		
 		StringBuilder cellgroup = new StringBuilder();
@@ -140,7 +142,7 @@ public class Resources implements PacketListener {
 		currentResource = resources.size();
 		cellgroup.append(input.render(true));
 		
-		kernelLink.evaluate("MathMate`lastOutput = " + query);
+		kernelLink.evaluate(query);
 		kernelLink.waitForAnswer();
 		Expr result = kernelLink.getExpr();
 		
@@ -150,22 +152,24 @@ public class Resources implements PacketListener {
 			currentResource++;
 		}
 		
-		if (query.trim().charAt(query.trim().length()-1) != ';') {
+		if (!result.equals(NULLEXPR)) {
 			// Log the output as fullform text
 			Resource textResource = new Resource(MathLink.RETURNPKT, result);
-			if (textResource.isGraphics()) {
-				// Log the output as an image
-				byte[] data = kernelLink.evaluateToImage("MathMate`lastOutput", 0, 0);
-				if (data != null) {
-					Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
-					resources.add(graphicsResource);
-					cellgroup.append(graphicsResource.render(true));
-				}
+			byte[] data = null;
+			
+			if (evalToImage || textResource.isGraphics())
+				data = kernelLink.evaluateToImage("%", 0, 0);
+			
+			if (data != null) {
+				Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
+				resources.add(graphicsResource);
+				cellgroup.append(graphicsResource.render(true));
 				textResource.subdue();
 				cellgroup.append(textResource.render(false));
 			} else {
 				cellgroup.append(textResource.render(true));
 			}
+			
 			resources.add(textResource);
 		}
 		

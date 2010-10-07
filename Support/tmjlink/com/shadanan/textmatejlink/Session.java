@@ -260,7 +260,7 @@ public class Session extends Thread {
 			
 			if (state == 2) {
 				try {
-					String renderedHtml = resources.evaluate(data);
+					String renderedHtml = resources.evaluate(data, false);
 					send("inline " + (renderedHtml.length() + 1));
 					send(renderedHtml);
 					send("okay");
@@ -276,7 +276,7 @@ public class Session extends Thread {
 			
 			if (state == 3) {
 				try {
-					String renderedHtml = resources.evaluateToImage(data);
+					String renderedHtml = resources.evaluate(data, true);
 					send("inline " + (renderedHtml.length() + 1));
 					send(renderedHtml);
 					send("okay");
