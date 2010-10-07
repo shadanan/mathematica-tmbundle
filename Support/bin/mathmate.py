@@ -658,6 +658,7 @@ class MathMate(object):
         current = []
         scope = []
         do_indent = True
+        vsc = string.ascii_letters + string.digits
         
         if initial_indent_level is None:
             initial_indent_level = self.count_indents(block)
@@ -750,7 +751,6 @@ class MathMate(object):
                 continue
 
             if c1 in (" ", "\t"):
-                vsc = string.ascii_letters + string.digits
                 if pc is not None and nnsc is not None and pc in (vsc + "]})") and nnsc in vsc:
                     current += " "
                 pos += 1
@@ -790,6 +790,9 @@ class MathMate(object):
                 continue
 
             if c2 == "(*":
+                pnsc = self.get_prev_non_space_char(pos-1)
+                if pnsc is not None and pnsc in vsc:
+                    current += " "
                 scope.append("comment")
                 current += c2
                 pos += 2
