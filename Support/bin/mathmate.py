@@ -57,7 +57,7 @@ def return_focus_to_textmate():
     # subprocess.call(["osascript", "-e", osascript])
 
 class MathMate(object):
-    def __init__(self, input_file = None, process_entire_document = False):
+    def __init__(self, input_file = None, process_entire_document = False, process_up_to_cursor = False):
         self.cacheFolder = '/tmp/tmjlink'
         self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
         
@@ -81,6 +81,7 @@ class MathMate(object):
         self.tmcursor = self.get_pos(self.tmln, self.tmli)
         self.selected_text = os.environ.get('TM_SELECTED_TEXT')
         self.process_entire_document = process_entire_document
+        self.process_up_to_cursor = process_up_to_cursor
         self.statements = self.parse(self.doc)
             
         sessid = os.path.split(os.environ.get('TM_FILEPATH', 'mathmate-default'))[-1]
@@ -316,7 +317,11 @@ class MathMate(object):
             sock = self.connect()
 
             statements = []
-            if self.selected_text is not None or self.process_entire_document:
+            if self.process_up_to_cursor:
+                for ssp, esp, reformatted_statement, current_statement in self.statements:
+                    if ssp < self.tmcursor:
+                        statements.append(current_statement)
+            elif self.selected_text is not None or self.process_entire_document:
                 for ssp, esp, reformatted_statement, current_statement in self.statements:
                     statements.append(current_statement)
             else:
@@ -770,7 +775,8 @@ class MathMate(object):
                 pos += 3
                 continue
 
-            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "<>", ">>", "/@", "/;", "//", "~~", ":=", "^="):
+            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "<>", ">>", 
+                      "/@", "/;", "//", "~~", ":=", "^=", "+=", "-=", "*=", "/="):
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
                 current += " ", c2, " "
@@ -780,6 +786,11 @@ class MathMate(object):
             if c2 == "@@":
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
+                current += c2
+                pos += 2
+                continue
+            
+            if c2 in ("++", "--"):
                 current += c2
                 pos += 2
                 continue
@@ -957,40 +968,45 @@ class MathMate(object):
         return self.statements[self.get_current_statement_index()]
     
     def reformat(self):
-        if self.selected_text is not None or self.process_entire_document:
-            result = []
-            
+        result = []
+        
+        if self.process_up_to_cursor:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                if ssp < self.tmcursor:
+                    result.append(reformatted_statement)
+                    
+        elif self.selected_text is not None or self.process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 result.append(reformatted_statement)
-            
-            if "".join(result) == self.doc:
-                exit_show_tool_tip("No reformat required.")
-            else:
-                exit_replace_text("".join(result))
+                
         else:
-            result = []
-            
             ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
             result.append(self.doc[0:ssp])
             result.append(reformatted_statement)
             result.append(self.doc[esp:])
             
-            if "".join(result) == self.doc:
-                exit_show_tool_tip("No reformat required.")
-            else:
-                exit_replace_document("".join(result))
+        if "".join(result) == self.doc:
+            exit_show_tool_tip("No reformat required.")
+        else:
+            exit_replace_document("".join(result))
 
     def show(self):
         result = []
         result.append("Cursor: (Line: %d, Index: %d, Pos: %s, Tree: %s)" % (self.tmln, self.tmli, self.tmcursor, self.parse_tree_level))
 
-        if self.selected_text is None and not self.process_entire_document:
-            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-            ssln, ssli = self.get_line_col(ssp)
-            esln, esli = self.get_line_col(esp)
-            result.append("Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli))
-            result.append(reformatted_statement)
-        else:
+        if self.process_up_to_cursor:
+            for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
+                if ssp < self.tmcursor:
+                    ssln, ssli = self.get_line_col(ssp)
+                    esln, esli = self.get_line_col(esp)
+                    result.append("Statement %d Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (index, ssln, ssli, esln, esli))
+                    if len(reformatted_statement.strip()) != 0:
+                        result.append(reformatted_statement.rstrip())
+                    else:
+                        result.append("*** Empty Statement ***")
+                    result.append("")
+            
+        elif self.selected_text is not None or self.process_entire_document:
             for index, (ssp, esp, reformatted_statement, current_statement) in enumerate(self.statements):
                 ssln, ssli = self.get_line_col(ssp)
                 esln, esli = self.get_line_col(esp)
@@ -1000,6 +1016,13 @@ class MathMate(object):
                 else:
                     result.append("*** Empty Statement ***")
                 result.append("")
+                
+        else:
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            ssln, ssli = self.get_line_col(ssp)
+            esln, esli = self.get_line_col(esp)
+            result.append("Statement Boundaries: (Line: %d, Index: %d) -> (Line: %d, Index: %d)" % (ssln, ssli, esln, esli))
+            result.append(reformatted_statement)
 
         return "\n".join(result)
     
@@ -1024,6 +1047,9 @@ class MathMate(object):
         
         if len(suggestions) == 0:
             exit_show_tool_tip("No suggestions.")
+        
+        if len(suggestions) == 1:
+            exit_insert_text(suggestions[0][len(fnname):])
         
         data = {}
         data['suggestions'] = map(lambda x: {'display': x}, suggestions)

@@ -343,6 +343,13 @@ public class Resources implements PacketListener {
 			}
 			
 			Expr head = expr.head();
+			if (head.toString().equals("List")) {
+				if (expr.length() == 0)
+					return false;
+				else
+					head = expr.part(1).head();
+			}
+
 			if (head.toString().equals("InputForm"))
 				return false;
 			
@@ -352,27 +359,11 @@ public class Resources implements PacketListener {
 			if (head.toString().equals("Graphics3D"))
 				return true;
 			
-			if (head.toString().endsWith("Form"))
+			if (head.toString().equals("Labeled"))
 				return true;
 			
-			if (head.toString().equals("List")) {
-				if (expr.length() == 0)
-					return false;
-				
-				Expr subhead = expr.part(1).head();
-				
-				if (subhead.toString().equals("InputForm"))
-					return false;
-				
-				if (subhead.toString().equals("Graphics"))
-					return true;
-				
-				if (subhead.toString().equals("Graphics3D"))
-					return true;
-				
-				if (subhead.toString().endsWith("Form"))
-					return true;
-			}
+			if (head.toString().endsWith("Form"))
+				return true;
 			
 			return false;
 		}

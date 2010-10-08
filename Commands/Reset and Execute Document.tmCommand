@@ -12,7 +12,7 @@ import sys
 sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
-mm = MathMate(process_entire_document=True)
+mm = MathMate(process_up_to_cursor=True)
 mm.reset()
 mm.inline()
 </string>
@@ -21,7 +21,7 @@ mm.inline()
 	<key>keyEquivalent</key>
 	<string>@R</string>
 	<key>name</key>
-	<string>Reset and Execute Document</string>
+	<string>Execute Document up to Cursor</string>
 	<key>output</key>
 	<string>showAsHTML</string>
 	<key>scope</key>

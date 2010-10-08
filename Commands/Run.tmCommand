@@ -13,6 +13,7 @@ sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
 mm = MathMate(process_entire_document=True)
+mm.reset()
 mm.inline()
 </string>
 	<key>input</key>

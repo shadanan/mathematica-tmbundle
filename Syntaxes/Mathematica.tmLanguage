@@ -79,6 +79,42 @@
 		</dict>
 		<dict>
 			<key>match</key>
+			<string>\+\+</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.increment_by_one</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>--</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.decrement_by_one</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\+=</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.increment</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>-=</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.decrement</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\*=</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.self_multiply</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>/=</string>
+			<key>name</key>
+			<string>keyword.operator.arithmetic.self_divide</string>
+		</dict>
+		<dict>
+			<key>match</key>
 			<string>:=</string>
 			<key>name</key>
 			<string>keyword.operator.assignment.set_delayed</string>
