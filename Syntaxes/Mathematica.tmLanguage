@@ -386,6 +386,12 @@
 					<key>name</key>
 					<string>keyword.operator.mathematica.set</string>
 				</dict>
+				<dict>
+					<key>match</key>
+					<string>'</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.derivative</string>
+				</dict>
 			</array>
 		</dict>
 		<key>builtin_symbols</key>
