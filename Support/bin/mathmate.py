@@ -249,22 +249,6 @@ class MathMate(object):
         
               <link rel="stylesheet" href="file://%(tm_bundle_support)s/web/tmjlink.css" type="text/css" media="screen" charset="utf-8">
               <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
-
-              <script type="text/javascript" charset="utf-8">
-                $(window).load(function() {
-                  $(window).scrollTop($(document).height());
-                });
-        
-                function doScroll() {
-                  if ($('#auto_scroll .value').html() == "On") {
-                    $(window).scrollTop($(document).height());
-                  }
-                }
-        
-                function toggle(resource_id) {
-                  $('#resource_' + resource_id + ' .return').toggle();
-                }
-              </script>
             </head>
             <body>
               <div class="header">
@@ -279,19 +263,45 @@ class MathMate(object):
                   <span class="label">Session ID:</span>
                   <span class="value">%(session_id)s</span>
                 </div>
+                
+                <div class="toggles">
+                  <div id="white_space" class="field_label">
+                    <span class="label">White Space:</span>
+                    <span class="value">Normal</span>
+                  </div>
               
-                <div id="white_space" class="field_label">
-                  <span class="label">White Space:</span>
-                  <span class="value">Normal</span>
+                  <div id="auto_scroll" class="field_label">
+                    <span class="label">Auto-Scroll:</span>
+                    <span class="value">On</span>
+                  </div>
+                  
+                  <div id="show_times" class="field_label">
+                    <span class="label">Execution Times:</span>
+                    <span class="value">Hidden</span>
+                  </div>
                 </div>
-              
-                <div id="auto_scroll" class="field_label">
-                  <span class="label">Auto-Scroll:</span>
-                  <span class="value">On</span>
-                </div>
+                
+                <br style="clear: both" />
               </div>
             
               <script type="text/javascript">
+                // Set up auto scroll
+                $(window).load(function() {
+                  $(window).scrollTop($(document).height());
+                });
+      
+                function doScroll() {
+                  if ($('#auto_scroll .value').html() == "On") {
+                    $(window).scrollTop($(document).height());
+                  }
+                }
+                
+                // Toggle text on graphics (only last execution)
+                function toggle(resource_id) {
+                  $('#resource_' + resource_id + ' .return').toggle();
+                }
+                
+                // Activate the buttons
                 $('#white_space .value').click(function() {
                   if ($(this).html() == "Normal") {
                     $(this).html("Pre");
@@ -307,6 +317,16 @@ class MathMate(object):
                     $(this).html("Off");
                   } else {
                     $(this).html("On");
+                  }
+                });
+                
+                $('#show_times .value').click(function() {
+                  if ($(this).html() == "Hidden") {
+                    $(this).html("Visible");
+                    $('.time').show();
+                  } else {
+                    $(this).html("Hidden");
+                    $('.time').hide();
                   }
                 });
               </script>

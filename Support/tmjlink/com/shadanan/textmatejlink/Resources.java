@@ -130,8 +130,27 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
+	private String commify(long number) {
+		StringBuilder result = new StringBuilder();
+		String num = String.valueOf(number);
+		
+		int pos = num.length();
+		while (pos >= 0) {
+			int start = pos - 3;
+			result.insert(0, num.substring(Math.max(start, 0), pos));
+			
+			pos = start;
+			if (pos >= 0) {
+				result.insert(0, ",");
+			}
+		}
+		
+		return result.toString();
+	}
+	
 	public String evaluate(String query, boolean evalToImage) throws MathLinkException, IOException {
 		int currentResource = -1;
+		long mark = System.currentTimeMillis();
 		
 		StringBuilder cellgroup = new StringBuilder();
 		cellgroup.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
@@ -140,7 +159,6 @@ public class Resources implements PacketListener {
 		Resource input = new Resource(query); 
 		resources.add(input);
 		currentResource = resources.size();
-		cellgroup.append(input.render(true));
 		
 		kernelLink.evaluate(query);
 		kernelLink.waitForAnswer();
@@ -178,6 +196,8 @@ public class Resources implements PacketListener {
 		currentCount++;
 		
 		cellgroup.append("</div>");
+		input.setTime(System.currentTimeMillis() - mark);
+		cellgroup.insert(cellgroup.indexOf(">") + 1, input.render(true));
 		return cellgroup.toString();
 	}
 	
@@ -203,9 +223,7 @@ public class Resources implements PacketListener {
 				renderedDisplay = true;
 				content.append(resource.render(true));
 			} else if (resource.type == MathLink.RETURNPKT) {
-				if (renderedDisplay)
-					content.append(resource.render(false));
-				else
+				if (!renderedDisplay)
 					content.append(resource.render(true));
 			} else {
 				content.append(resource.render(true));
@@ -225,6 +243,7 @@ public class Resources implements PacketListener {
 		private int count;
 		private boolean subdue;
 		private Expr expr;
+		private long time;
 		
 		public Resource(String value) {
 			this.type = -1;
@@ -232,6 +251,7 @@ public class Resources implements PacketListener {
 			this.count = currentCount;
 			this.subdue = false;
 			this.expr = null;
+			this.time = -1;
 		}
 		
 		public Resource(int type, Expr expr) {
@@ -240,6 +260,7 @@ public class Resources implements PacketListener {
 			this.count = currentCount;
 			this.subdue = false;
 			this.expr = expr;
+			this.time = -1;
 		}
 		
 		public Resource(int type, String value) {
@@ -248,6 +269,7 @@ public class Resources implements PacketListener {
 			this.count = currentCount;
 			this.subdue = false;
 			this.expr = null;
+			this.time = -1;
 		}
 		
 		public Resource(int type, byte[] data) throws IOException {
@@ -256,10 +278,15 @@ public class Resources implements PacketListener {
 			this.count = currentCount;
 			this.subdue = false;
 			this.expr = null;
+			this.time = -1;
 			
 			FileOutputStream fp = new FileOutputStream(getFilePointer());
 			fp.write(data);
 			fp.close();
+		}
+		
+		public void setTime(long time) {
+			this.time = time;
 		}
 		
 		public void subdue() {
@@ -382,6 +409,9 @@ public class Resources implements PacketListener {
 			if (!visible)
 				style = " style='display:none;'";
 			
+			if (time != -1)
+				result.append("<div class='time'>" + commify(time) + "ms</div>");
+
 			if (type == -1) {
 				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
