@@ -289,13 +289,25 @@ class MathMate(object):
                 $(window).load(function() {
                   $(window).scrollTop($(document).height());
                 });
-      
-                function doScroll() {
+                
+                function finishedStatementCallback() {
+                  if ($('#white_space .value').html() == "Pre") {
+                    $('div.cell div.content').css('white-space', 'pre');
+                  } else {
+                    $('div.cell div.content').css('white-space', 'normal');
+                  }
+                  
+                  if ($('#show_times .value').html() == "Visible") {
+                    $('.time').show();
+                  } else {
+                    $('.time').hide();
+                  }
+                
                   if ($('#auto_scroll .value').html() == "On") {
                     $(window).scrollTop($(document).height());
                   }
                 }
-                
+      
                 // Toggle text on graphics (only last execution)
                 function toggle(resource_id) {
                   $('#resource_' + resource_id + ' .return').toggle();
@@ -419,7 +431,7 @@ class MathMate(object):
             
                 if state == 4:
                     sys.stdout.write(content)
-                    sys.stdout.write('<script type="text/javascript" charset="utf-8">doScroll();</script>')
+                    sys.stdout.write('<script>finishedStatementCallback();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2

@@ -135,14 +135,12 @@ public class Resources implements PacketListener {
 		String num = String.valueOf(number);
 		
 		int pos = num.length();
-		while (pos >= 0) {
+		while (pos > 0) {
 			int start = pos - 3;
 			result.insert(0, num.substring(Math.max(start, 0), pos));
-			
-			pos = start;
-			if (pos >= 0) {
+			if (start > 0)
 				result.insert(0, ",");
-			}
+			pos = start;
 		}
 		
 		return result.toString();
