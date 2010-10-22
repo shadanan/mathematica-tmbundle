@@ -8,9 +8,9 @@
 		<string>nb</string>
 	</array>
 	<key>foldingStartMarker</key>
-	<string></string>
+	<string>\[\s*$</string>
 	<key>foldingStopMarker</key>
-	<string></string>
+	<string>^\s*\]</string>
 	<key>keyEquivalent</key>
 	<string>^~M</string>
 	<key>name</key>
@@ -43,6 +43,10 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#emptyfunction</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#function</string>
 		</dict>
 		<dict>
@@ -52,6 +56,10 @@
 		<dict>
 			<key>include</key>
 			<string>#comment</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#named_pattern</string>
 		</dict>
 		<dict>
 			<key>match</key>
@@ -347,9 +355,34 @@
 		<key>constant</key>
 		<dict>
 			<key>match</key>
-			<string>\b(True|False|Null|Automatic|All)\b</string>
+			<string>\b(True|False|Null|Automatic|All|None|Infinity)\b</string>
 			<key>name</key>
 			<string>constant.language.mathematica</string>
+		</dict>
+		<key>emptyfunction</key>
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function.empty.mathematica</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.function.empty.begin.mathematica</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>meta.scope.between_empty_brackets</string>
+				</dict>
+			</dict>
+			<key>match</key>
+			<string>([a-zA-Z$][a-zA-Z0-9$]*)(\[)(\])</string>
+			<key>name</key>
+			<string>meta.structure.function.empty.mathematica</string>
 		</dict>
 		<key>function</key>
 		<dict>
@@ -385,6 +418,10 @@
 				<dict>
 					<key>include</key>
 					<string>$self</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>meta.scope.any.mathematica</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -435,9 +472,9 @@
 		<key>named_pattern</key>
 		<dict>
 			<key>match</key>
-			<string>[a-zA-Z$][a-zA-Z0-9$]*_</string>
+			<string>[a-zA-Z$][a-zA-Z0-9$]*_([a-zA-Z$])*\b</string>
 			<key>name</key>
-			<string>variable.parameter.named_pattern.mathematica</string>
+			<string>variable.named_pattern.mathematica</string>
 		</dict>
 		<key>number</key>
 		<dict>
@@ -445,16 +482,6 @@
 			<string>\b(\d+(\.\d*)?)</string>
 			<key>name</key>
 			<string>constant.numeric.mathematica</string>
-		</dict>
-		<key>patterns</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#named_pattern</string>
-				</dict>
-			</array>
 		</dict>
 		<key>sqlstring</key>
 		<dict>
@@ -503,7 +530,7 @@
 		<key>symbol</key>
 		<dict>
 			<key>match</key>
-			<string>[a-zA-Z$][a-zA-Z0-9$]*</string>
+			<string>[a-zA-Z$][a-zA-Z0-9$]*\b</string>
 			<key>name</key>
 			<string>variable.symbol.mathematica</string>
 		</dict>
