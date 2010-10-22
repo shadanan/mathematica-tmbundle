@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>content</key>
+	<string>
+	$0
+</string>
+	<key>keyEquivalent</key>
+	<string></string>
+	<key>name</key>
+	<string>Special: indent after empty bracket</string>
+	<key>scope</key>
+	<string>meta.scope.between_empty_brackets</string>
+	<key>uuid</key>
+	<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
+</dict>
+</plist>
