@@ -9,9 +9,9 @@
 	<key>settings</key>
 	<dict>
 		<key>decreaseIndentPattern</key>
-		<string>\}|\]</string>
+		<string>^([^\[\]]*\][^\[\]]*(\[[^\[\]]*\])*|^[^\{\}]*\}[^\{\}]*)$</string>
 		<key>increaseIndentPattern</key>
-		<string>[\{|\[]$</string>
+		<string>^(.*\[|.*\{)$</string>
 	</dict>
 	<key>uuid</key>
 	<string>757637DD-7736-4D13-9CE7-6A449124FE06</string>
