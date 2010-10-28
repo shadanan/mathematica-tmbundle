@@ -382,7 +382,7 @@ class MathMate(object):
                 if state == 1:
                     if response == "okay":
                         sock.send("header\n")
-                        state = 3
+                        state = 2
                         continue
                     
                     if response == "exception":
@@ -402,7 +402,7 @@ class MathMate(object):
                         
                         if statement is None:
                             sock.send("quit\n")
-                            state = 5
+                            state = 4
                             continue
                             
                         if force_image:
@@ -410,6 +410,10 @@ class MathMate(object):
                         else:
                             sock.send("execute %d\n" % len(statement))
                         sock.send(statement)
+                        continue
+
+                    if words[0] == "inline":
+                        readsize = int(words[1])
                         state = 3
                         continue
 
@@ -419,26 +423,15 @@ class MathMate(object):
                     raise Exception("Unexpected message from JLink server: " + line)
             
                 if state == 3:
-                    if words[0] == "inline":
-                        readsize = int(words[1])
-                        state = 4
-                        continue
-                    
-                    if response == "exception":
-                        raise Exception("TextMateJLink Exception: " + comment)
-
-                    raise Exception("Unexpected message from JLink server: " + line)
-            
-                if state == 4:
                     sys.stdout.write(content)
-                    sys.stdout.write('<script>finishedStatementCallback();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2
                     continue
             
-                if state == 5:
+                if state == 4:
                     if response == "okay":
+                        sys.stdout.write('<script>finishedStatementCallback();</script>')
                         sock.close()
                         break
 
