@@ -42,6 +42,7 @@ h4. Language Features
  * Strings (@"Hello World!"@)
  * Symbols (@thisIsASymbol@)
  * Named patterns (@x_@)
+ * Indentation rules (added by stschiff)
 
 h4. Snippets
 
@@ -58,7 +59,6 @@ h4. Snippets
  
 h4. Other (Commands, Indentation, etc.)
 
- * Removed indentation rules. They caused more problems than they fixed.
  * Documentation for Current Word (control + H)
  * Block comments (command + /)
  
@@ -72,6 +72,11 @@ h4. Other (Commands, Indentation, etc.)
  * Execute current document (command + R)
  * Reset session and execute current document (command + shift + R)
  
+ * Toggle display of execution times on and off
+ * Toogle HTML output between "normal" and "pre"
+ * Toggle auto scroll on and off
+ * Toggles are saved using Mac OS X "defaults" under com.wolfram.mathmate namespace
+ 
  * Clear mathmate session (command + option + .)
  * Quit mathmate kernel (command + control + .)
    * If Mathematica crashes, an exception will be displayed in the MathMate output as follows:
@@ -79,3 +84,4 @@ h4. Other (Commands, Indentation, etc.)
      At this point, you should use this command to restart the kernel (you will lose previous kernel state).
  * Shutdown mathmate backend (command + shift + control + .)
  * Kill mathmate backend -- in case it freezes (command + option + shift + .)
+ 
