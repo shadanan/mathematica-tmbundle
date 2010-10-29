@@ -89,7 +89,7 @@ class MathMate(object):
             self.sessid = sessid[:-2]
         else:
             self.sessid = sessid
-    
+
     def signal_tmjlink(self, signal = 1):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -236,6 +236,13 @@ class MathMate(object):
         words = response.split(" ")
         return (line, response, words, comment)
     
+    def read_default(self, key, default = None):
+        proc = subprocess.Popen(["defaults", "read", "com.wolfram.mathmate", key], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = proc.wait()
+        if exit_code != 0:
+            return default
+        return proc.stdout.read().strip()
+    
     def inline(self, force_image = False):
         # Output header (stylesheet, js, etc)
         sys.stdout.write("""
@@ -267,17 +274,17 @@ class MathMate(object):
                 <div class="toggles">
                   <div id="white_space" class="field_label">
                     <span class="label">White Space:</span>
-                    <span class="value">Normal</span>
+                    <span class="value">%(white_space)s</span>
                   </div>
               
                   <div id="auto_scroll" class="field_label">
                     <span class="label">Auto-Scroll:</span>
-                    <span class="value">On</span>
+                    <span class="value">%(auto_scroll)s</span>
                   </div>
                   
                   <div id="show_times" class="field_label">
                     <span class="label">Execution Times:</span>
-                    <span class="value">Hidden</span>
+                    <span class="value">%(show_times)s</span>
                   </div>
                 </div>
                 
@@ -318,17 +325,21 @@ class MathMate(object):
                   if ($(this).html() == "Normal") {
                     $(this).html("Pre");
                     $('div.cell div.content').css('white-space', 'pre');
+                    TextMate.system("defaults write com.wolfram.mathmate white_space Pre");
                   } else {
                     $(this).html("Normal");
                     $('div.cell div.content').css('white-space', 'normal');
+                    TextMate.system("defaults write com.wolfram.mathmate white_space Normal");
                   }
                 });
                 
                 $('#auto_scroll .value').click(function() {
                   if ($(this).html() == "On") {
                     $(this).html("Off");
+                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll Off");
                   } else {
                     $(this).html("On");
+                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll On");
                   }
                 });
                 
@@ -336,13 +347,19 @@ class MathMate(object):
                   if ($(this).html() == "Hidden") {
                     $(this).html("Visible");
                     $('.time').show();
+                    TextMate.system("defaults write com.wolfram.mathmate show_times Visible");
                   } else {
                     $(this).html("Hidden");
                     $('.time').hide();
+                    TextMate.system("defaults write com.wolfram.mathmate show_times Hidden");
                   }
                 });
               </script>
-        """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), "session_id": self.sessid})
+        """ % {"session_id": self.sessid,
+               "tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), 
+               "white_space": self.read_default("white_space", "Normal"),
+               "auto_scroll": self.read_default("auto_scroll", "On"),
+               "show_times": self.read_default("show_times", "Hidden")})
         sys.stdout.flush()
         
         try:
