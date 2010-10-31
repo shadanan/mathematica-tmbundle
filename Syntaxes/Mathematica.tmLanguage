@@ -59,7 +59,7 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#functionDef</string>
+			<string>#emptyfunction</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -434,7 +434,7 @@
 				</dict>
 			</dict>
 			<key>match</key>
-			<string>([a-zA-Z][a-zA-Z0-9]*)(\[)(\])</string>
+			<string>([a-zA-Z$][a-zA-Z0-9$]*)(\[)(\])</string>
 			<key>name</key>
 			<string>meta.structure.function.empty.mathematica</string>
 		</dict>
@@ -484,26 +484,6 @@
 					<string>punctuation.separator.list.mathematica</string>
 				</dict>
 			</array>
-		</dict>
-		<key>functionDef</key>
-		<dict>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>entity.name.functionDef.mathematica</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.definition.functionDef.begin.mathematica</string>
-				</dict>
-			</dict>
-			<key>match</key>
-			<string>^([a-zA-Z][a-zA-Z0-9]*)(\[)(\s*[a-zA-Z][a-zA-Z0-9]*_(\s*,\s*[a-zA-Z][a-zA-Z0-9]*_)*)(\])</string>
-			<key>name</key>
-			<string>meta.structure.functionDef.mathematica</string>
 		</dict>
 		<key>list</key>
 		<dict>
