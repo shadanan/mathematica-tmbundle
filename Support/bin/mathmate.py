@@ -89,7 +89,7 @@ class MathMate(object):
             self.sessid = sessid[:-2]
         else:
             self.sessid = sessid
-    
+
     def signal_tmjlink(self, signal = 1):
         pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
         if os.path.exists(pidfile):
@@ -236,6 +236,13 @@ class MathMate(object):
         words = response.split(" ")
         return (line, response, words, comment)
     
+    def read_default(self, key, default = None):
+        proc = subprocess.Popen(["defaults", "read", "com.wolfram.mathmate", key], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        exit_code = proc.wait()
+        if exit_code != 0:
+            return default
+        return proc.stdout.read().strip()
+    
     def inline(self, force_image = False):
         # Output header (stylesheet, js, etc)
         sys.stdout.write("""
@@ -267,17 +274,17 @@ class MathMate(object):
                 <div class="toggles">
                   <div id="white_space" class="field_label">
                     <span class="label">White Space:</span>
-                    <span class="value">Normal</span>
+                    <span class="value">%(white_space)s</span>
                   </div>
               
                   <div id="auto_scroll" class="field_label">
                     <span class="label">Auto-Scroll:</span>
-                    <span class="value">On</span>
+                    <span class="value">%(auto_scroll)s</span>
                   </div>
                   
                   <div id="show_times" class="field_label">
                     <span class="label">Execution Times:</span>
-                    <span class="value">Hidden</span>
+                    <span class="value">%(show_times)s</span>
                   </div>
                 </div>
                 
@@ -318,17 +325,21 @@ class MathMate(object):
                   if ($(this).html() == "Normal") {
                     $(this).html("Pre");
                     $('div.cell div.content').css('white-space', 'pre');
+                    TextMate.system("defaults write com.wolfram.mathmate white_space Pre");
                   } else {
                     $(this).html("Normal");
                     $('div.cell div.content').css('white-space', 'normal');
+                    TextMate.system("defaults write com.wolfram.mathmate white_space Normal");
                   }
                 });
                 
                 $('#auto_scroll .value').click(function() {
                   if ($(this).html() == "On") {
                     $(this).html("Off");
+                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll Off");
                   } else {
                     $(this).html("On");
+                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll On");
                   }
                 });
                 
@@ -336,13 +347,19 @@ class MathMate(object):
                   if ($(this).html() == "Hidden") {
                     $(this).html("Visible");
                     $('.time').show();
+                    TextMate.system("defaults write com.wolfram.mathmate show_times Visible");
                   } else {
                     $(this).html("Hidden");
                     $('.time').hide();
+                    TextMate.system("defaults write com.wolfram.mathmate show_times Hidden");
                   }
                 });
               </script>
-        """ % {"tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), "session_id": self.sessid})
+        """ % {"session_id": self.sessid,
+               "tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), 
+               "white_space": self.read_default("white_space", "Normal"),
+               "auto_scroll": self.read_default("auto_scroll", "On"),
+               "show_times": self.read_default("show_times", "Hidden")})
         sys.stdout.flush()
         
         try:
@@ -382,7 +399,7 @@ class MathMate(object):
                 if state == 1:
                     if response == "okay":
                         sock.send("header\n")
-                        state = 3
+                        state = 2
                         continue
                     
                     if response == "exception":
@@ -402,7 +419,7 @@ class MathMate(object):
                         
                         if statement is None:
                             sock.send("quit\n")
-                            state = 5
+                            state = 4
                             continue
                             
                         if force_image:
@@ -410,6 +427,10 @@ class MathMate(object):
                         else:
                             sock.send("execute %d\n" % len(statement))
                         sock.send(statement)
+                        continue
+
+                    if words[0] == "inline":
+                        readsize = int(words[1])
                         state = 3
                         continue
 
@@ -419,26 +440,15 @@ class MathMate(object):
                     raise Exception("Unexpected message from JLink server: " + line)
             
                 if state == 3:
-                    if words[0] == "inline":
-                        readsize = int(words[1])
-                        state = 4
-                        continue
-                    
-                    if response == "exception":
-                        raise Exception("TextMateJLink Exception: " + comment)
-
-                    raise Exception("Unexpected message from JLink server: " + line)
-            
-                if state == 4:
                     sys.stdout.write(content)
-                    sys.stdout.write('<script>finishedStatementCallback();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2
                     continue
             
-                if state == 5:
+                if state == 4:
                     if response == "okay":
+                        sys.stdout.write('<script>finishedStatementCallback();</script>')
                         sock.close()
                         break
 
@@ -925,7 +935,7 @@ class MathMate(object):
                 if self.is_end_of_line(pos + 1):
                     scope += ("binop", "start")
                     
-                if self.get_prev_non_space_char(pos-1) not in (None, "{", "(", "[", ","):
+                if self.get_prev_non_space_char(pos-1) not in (None, ";", "{", "(", "[", ","):
                     current += " ", c1, " "
                 else:
                     current += c1

@@ -112,6 +112,11 @@ public class Session extends Thread {
 		return null;
 	}
 	
+	public void sendInline(String data) {
+		send("inline " + (data.length() + 1));
+		send(data);
+	}
+	
 	private void send(String reply) {
 		System.out.println("To " + socket.getRemoteSocketAddress() + ": " + reply);
 		out.println(reply);
@@ -260,9 +265,7 @@ public class Session extends Thread {
 			
 			if (state == 2) {
 				try {
-					String renderedHtml = resources.evaluate(data, false);
-					send("inline " + (renderedHtml.length() + 1));
-					send(renderedHtml);
+					resources.evaluate(data, false, this);
 					send("okay");
 				} catch (Exception e) {
 					send("exception -- " + e.getMessage());
@@ -276,9 +279,7 @@ public class Session extends Thread {
 			
 			if (state == 3) {
 				try {
-					String renderedHtml = resources.evaluate(data, true);
-					send("inline " + (renderedHtml.length() + 1));
-					send(renderedHtml);
+					resources.evaluate(data, true, this);
 					send("okay");
 				} catch (Exception e) {
 					send("exception -- " + e.getMessage());

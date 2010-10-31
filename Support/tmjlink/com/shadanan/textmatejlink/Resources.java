@@ -146,17 +146,17 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
-	public String evaluate(String query, boolean evalToImage) throws MathLinkException, IOException {
+	public void evaluate(String query, boolean evalToImage, Session session) throws MathLinkException, IOException {
 		int currentResource = -1;
 		long mark = System.currentTimeMillis();
 		
-		StringBuilder cellgroup = new StringBuilder();
-		cellgroup.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
+		session.sendInline("<div id='resource_" + currentCount + "' class='cellgroup'>");
 		
 		// Log the input
 		Resource input = new Resource(query); 
 		resources.add(input);
 		currentResource = resources.size();
+		session.sendInline(input.render(true));
 		
 		kernelLink.evaluate(query);
 		kernelLink.waitForAnswer();
@@ -164,7 +164,7 @@ public class Resources implements PacketListener {
 		
 		// Append intermediate packets received by listener callback
 		while (currentResource < resources.size()) {
-			cellgroup.append(resources.get(currentResource).render(true));
+			session.sendInline(resources.get(currentResource).render(true));
 			currentResource++;
 		}
 		
@@ -179,11 +179,11 @@ public class Resources implements PacketListener {
 			if (data != null) {
 				Resource graphicsResource = new Resource(MathLink.DISPLAYPKT, data);
 				resources.add(graphicsResource);
-				cellgroup.append(graphicsResource.render(true));
+				session.sendInline(graphicsResource.render(true));
 				textResource.subdue();
-				cellgroup.append(textResource.render(false));
+				session.sendInline(textResource.render(false));
 			} else {
-				cellgroup.append(textResource.render(true));
+				session.sendInline(textResource.render(true));
 			}
 			
 			resources.add(textResource);
@@ -193,24 +193,30 @@ public class Resources implements PacketListener {
 		kernelLink.newPacket();
 		currentCount++;
 		
-		cellgroup.append("</div>");
 		input.setTime(System.currentTimeMillis() - mark);
-		cellgroup.insert(cellgroup.indexOf(">") + 1, input.render(true));
-		return cellgroup.toString();
+		session.sendInline("<div class='time'>" + commify(input.getTime()) + "ms</div></div>");
 	}
 	
 	public String render() {
 		boolean renderedDisplay = false;
 		int currentCount = -1;
+		long executeTime = -1;
 		StringBuilder content = new StringBuilder();
 		
 		for (Resource resource : resources) {
 			if (currentCount == -1) {
+				executeTime = -1;
 				currentCount = resource.getCount();
 				content.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
 			}
 			
+			if (resource.getTime() != -1)
+				executeTime = resource.getTime();
+
 			if (resource.getCount() != currentCount) {
+				if (executeTime != -1)
+					content.append("<div class='time'>" + commify(executeTime) + "ms</div>");
+				
 				content.append("</div>");
 				currentCount = resource.getCount();
 				content.append("<div id='resource_" + currentCount + "' class='cellgroup'>");
@@ -229,6 +235,8 @@ public class Resources implements PacketListener {
 		}
 		
 		if (currentCount != -1) {
+			if (executeTime != -1)
+				content.append("<div class='time'>" + commify(executeTime) + "ms</div>");
 			content.append("</div>");
 		}
 		
@@ -285,6 +293,10 @@ public class Resources implements PacketListener {
 		
 		public void setTime(long time) {
 			this.time = time;
+		}
+		
+		public long getTime() {
+			return time;
 		}
 		
 		public void subdue() {
@@ -407,9 +419,6 @@ public class Resources implements PacketListener {
 			if (!visible)
 				style = " style='display:none;'";
 			
-			if (time != -1)
-				result.append("<div class='time'>" + commify(time) + "ms</div>");
-
 			if (type == -1) {
 				result.append("<div class='cell input'" + style + ">");
 				result.append("  <div class='margin'>In[" + count + "] := </div>");
