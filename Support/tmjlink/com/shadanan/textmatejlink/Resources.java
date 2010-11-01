@@ -26,8 +26,10 @@ public class Resources implements PacketListener {
 	private int currentCount = 0;
 	private String[] mlargs = null;
 	private ArrayList<Resources.Resource> resources = null;
+	private Session session;
 	
-	public Resources(String sessionId, String cacheFolder, String[] mlargs) throws MathLinkException, IOException {
+	public Resources(String sessionId, String cacheFolder, String[] mlargs) 
+			throws MathLinkException, IOException {
 		this.sessionId = sessionId;
 		this.cacheFolder = cacheFolder;
 		this.mlargs = mlargs;
@@ -147,26 +149,19 @@ public class Resources implements PacketListener {
 	}
 	
 	public void evaluate(String query, boolean evalToImage, Session session) throws MathLinkException, IOException {
-		int currentResource = -1;
 		long mark = System.currentTimeMillis();
+		this.session = session;
 		
 		session.sendInline("<div id='resource_" + currentCount + "' class='cellgroup'>");
 		
 		// Log the input
 		Resource input = new Resource(query); 
 		resources.add(input);
-		currentResource = resources.size();
 		session.sendInline(input.render(true));
 		
 		kernelLink.evaluate(query);
 		kernelLink.waitForAnswer();
 		Expr result = kernelLink.getExpr();
-		
-		// Append intermediate packets received by listener callback
-		while (currentResource < resources.size()) {
-			session.sendInline(resources.get(currentResource).render(true));
-			currentResource++;
-		}
 		
 		if (!result.equals(NULLEXPR)) {
 			// Log the output as fullform text
@@ -468,11 +463,15 @@ public class Resources implements PacketListener {
 		KernelLink ml = (KernelLink)evt.getSource();
 		
 		if (evt.getPktType() == MathLink.TEXTPKT) {
-			resources.add(new Resource(evt.getPktType(), ml.getString()));
+			Resource resource = new Resource(evt.getPktType(), ml.getString()); 
+			resources.add(resource);
+			session.sendInline(resource.render(true));
 		}
 		
 		if (evt.getPktType() == MathLink.MESSAGEPKT) {
-			resources.add(new Resource(evt.getPktType(), ml.getString()));
+			Resource resource = new Resource(evt.getPktType(), ml.getString());
+			resources.add(resource);
+			session.sendInline(resource.render(true));
 		}
 		
 		for (Field field : MathLink.class.getFields()) {
