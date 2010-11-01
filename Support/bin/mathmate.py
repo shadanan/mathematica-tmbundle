@@ -244,6 +244,14 @@ class MathMate(object):
         return proc.stdout.read().strip()
     
     def inline(self, force_image = False):
+        auto_scroll = self.read_default("auto_scroll", "On")
+        
+        white_space = self.read_default("white_space", "Normal")
+        white_space_mode = "pre" if white_space == "Pre" else "normal"
+        
+        show_times = self.read_default("show_times", "Hidden")
+        show_times_mode = "block" if show_times == "Visible" else "none"
+        
         # Output header (stylesheet, js, etc)
         sys.stdout.write("""
           <?xml version="1.0" encoding="UTF-8"?>
@@ -255,6 +263,15 @@ class MathMate(object):
               <title>TextMate Mathematica Output</title>
         
               <link rel="stylesheet" href="file://%(tm_bundle_support)s/web/tmjlink.css" type="text/css" media="screen" charset="utf-8">
+              <style type="text/css">
+                div.time {
+                  display: %(show_times_mode)s;
+                }
+                
+                div.cell div.content {
+                  white-space: %(white_space_mode)s
+                }
+              </style>
               <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
             </head>
             <body>
@@ -298,18 +315,6 @@ class MathMate(object):
                 });
                 
                 function finishedStatementCallback() {
-                  if ($('#white_space .value').html() == "Pre") {
-                    $('div.cell div.content').css('white-space', 'pre');
-                  } else {
-                    $('div.cell div.content').css('white-space', 'normal');
-                  }
-                  
-                  if ($('#show_times .value').html() == "Visible") {
-                    $('.time').show();
-                  } else {
-                    $('.time').hide();
-                  }
-                
                   if ($('#auto_scroll .value').html() == "On") {
                     $(window).scrollTop($(document).height());
                   }
@@ -357,9 +362,11 @@ class MathMate(object):
               </script>
         """ % {"session_id": self.sessid,
                "tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), 
-               "white_space": self.read_default("white_space", "Normal"),
-               "auto_scroll": self.read_default("auto_scroll", "On"),
-               "show_times": self.read_default("show_times", "Hidden")})
+               "auto_scroll": auto_scroll,
+               "show_times": show_times,
+               "show_times_mode": show_times_mode,
+               "white_space": white_space,
+               "white_space_mode": white_space_mode})
         sys.stdout.flush()
         
         try:
@@ -441,6 +448,7 @@ class MathMate(object):
             
                 if state == 3:
                     sys.stdout.write(content)
+                    sys.stdout.write('<script>finishedStatementCallback();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2
@@ -448,7 +456,6 @@ class MathMate(object):
             
                 if state == 4:
                     if response == "okay":
-                        sys.stdout.write('<script>finishedStatementCallback();</script>')
                         sock.close()
                         break
 
