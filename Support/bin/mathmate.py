@@ -244,8 +244,6 @@ class MathMate(object):
         return proc.stdout.read().strip()
     
     def inline(self, force_image = False):
-        auto_scroll = self.read_default("auto_scroll", "On")
-        
         white_space = self.read_default("white_space", "Normal")
         white_space_mode = "pre" if white_space == "Pre" else "normal"
         
@@ -261,8 +259,10 @@ class MathMate(object):
           <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
             <head>
               <title>TextMate Mathematica Output</title>
-        
+              
+              <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
               <link rel="stylesheet" href="file://%(tm_bundle_support)s/web/tmjlink.css" type="text/css" media="screen" charset="utf-8">
+              
               <style type="text/css">
                 div.time {
                   display: %(show_times_mode)s;
@@ -272,7 +272,60 @@ class MathMate(object):
                   white-space: %(white_space_mode)s
                 }
               </style>
-              <script type="text/javascript" src="file://%(tm_bundle_support)s/web/jquery-1.4.2.min.js" charset="utf-8"></script>
+
+              <script type="text/javascript">
+                var autoscroll = true;
+                
+                // Toggle text on graphics (only last execution)
+                function toggle(resource_id) {
+                  $('#resource_' + resource_id + ' .return').toggle();
+                }
+                
+                function scrolled() {
+                  var currentBottom = $(window).scrollTop() + $(window).height();
+                  if (currentBottom == $(document).height()) {
+                    autoscroll = true;
+                  } else {
+                    autoscroll = false;
+                  }
+                }
+                
+                function doAutoScroll() {
+                  if (autoscroll) {
+                    $(window).scrollTop($(document).height() - $(window).height());
+                  }
+                  setTimeout("doAutoScroll()", 100);
+                }
+
+                window.onscroll = scrolled;
+                setTimeout("doAutoScroll()", 100);
+                
+                $(document).ready(function () {
+                  $('#white_space .value').click(function() {
+                    if ($(this).html() == "Normal") {
+                      $(this).html("Pre");
+                      $('div.cell div.content').css('white-space', 'pre');
+                      TextMate.system("defaults write com.wolfram.mathmate white_space Pre");
+                    } else {
+                      $(this).html("Normal");
+                      $('div.cell div.content').css('white-space', 'normal');
+                      TextMate.system("defaults write com.wolfram.mathmate white_space Normal");
+                    }
+                  });
+                
+                  $('#show_times .value').click(function() {
+                    if ($(this).html() == "Hidden") {
+                      $(this).html("Visible");
+                      $('.time').show();
+                      TextMate.system("defaults write com.wolfram.mathmate show_times Visible");
+                    } else {
+                      $(this).html("Hidden");
+                      $('.time').hide();
+                      TextMate.system("defaults write com.wolfram.mathmate show_times Hidden");
+                    }
+                  });
+                });
+              </script>
             </head>
             <body>
               <div class="header">
@@ -294,11 +347,6 @@ class MathMate(object):
                     <span class="value">%(white_space)s</span>
                   </div>
               
-                  <div id="auto_scroll" class="field_label">
-                    <span class="label">Auto-Scroll:</span>
-                    <span class="value">%(auto_scroll)s</span>
-                  </div>
-                  
                   <div id="show_times" class="field_label">
                     <span class="label">Execution Times:</span>
                     <span class="value">%(show_times)s</span>
@@ -307,62 +355,8 @@ class MathMate(object):
                 
                 <br style="clear: both" />
               </div>
-            
-              <script type="text/javascript">
-                // Set up auto scroll
-                $(window).load(function() {
-                  $(window).scrollTop($(document).height());
-                });
-                
-                function finishedStatementCallback() {
-                  if ($('#auto_scroll .value').html() == "On") {
-                    $(window).scrollTop($(document).height());
-                  }
-                }
-      
-                // Toggle text on graphics (only last execution)
-                function toggle(resource_id) {
-                  $('#resource_' + resource_id + ' .return').toggle();
-                }
-                
-                // Activate the buttons
-                $('#white_space .value').click(function() {
-                  if ($(this).html() == "Normal") {
-                    $(this).html("Pre");
-                    $('div.cell div.content').css('white-space', 'pre');
-                    TextMate.system("defaults write com.wolfram.mathmate white_space Pre");
-                  } else {
-                    $(this).html("Normal");
-                    $('div.cell div.content').css('white-space', 'normal');
-                    TextMate.system("defaults write com.wolfram.mathmate white_space Normal");
-                  }
-                });
-                
-                $('#auto_scroll .value').click(function() {
-                  if ($(this).html() == "On") {
-                    $(this).html("Off");
-                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll Off");
-                  } else {
-                    $(this).html("On");
-                    TextMate.system("defaults write com.wolfram.mathmate auto_scroll On");
-                  }
-                });
-                
-                $('#show_times .value').click(function() {
-                  if ($(this).html() == "Hidden") {
-                    $(this).html("Visible");
-                    $('.time').show();
-                    TextMate.system("defaults write com.wolfram.mathmate show_times Visible");
-                  } else {
-                    $(this).html("Hidden");
-                    $('.time').hide();
-                    TextMate.system("defaults write com.wolfram.mathmate show_times Hidden");
-                  }
-                });
-              </script>
         """ % {"session_id": self.sessid,
                "tm_bundle_support": os.environ.get('TM_BUNDLE_SUPPORT'), 
-               "auto_scroll": auto_scroll,
                "show_times": show_times,
                "show_times_mode": show_times_mode,
                "white_space": white_space,
@@ -448,7 +442,6 @@ class MathMate(object):
             
                 if state == 3:
                     sys.stdout.write(content)
-                    sys.stdout.write('<script>finishedStatementCallback();</script>')
                     sys.stdout.flush()
                     readsize = None
                     state = 2
