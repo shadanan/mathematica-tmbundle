@@ -14,6 +14,8 @@ It was created by David Howell and is being maintained by David Howell and Shad 
 Special thanks to Eric Wort whose invaluable help has saved this developer countless
 hours of random debugging.
 
+Also, many thanks to Stephan (stschiff), our newest contributor!
+
 h3. Installation
 
 Open up a terminal and navigate to the TextMate bundle folder:
