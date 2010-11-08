@@ -3,17 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>name</key>
-	<string>Indentation Rules</string>
+	<string>No Symbol List</string>
 	<key>scope</key>
-	<string>source.mathematica</string>
+	<string>entity.name.function.mathematica, meta.structure.function</string>
 	<key>settings</key>
 	<dict>
-		<key>decreaseIndentPattern</key>
-		<string>^([^\[\]]*\]|[^\{\}]*\})(;)?$</string>
-		<key>increaseIndentPattern</key>
-		<string>[\[\{]$</string>
+		<key>showInSymbolList</key>
+		<integer>0</integer>
 	</dict>
 	<key>uuid</key>
-	<string>757637DD-7736-4D13-9CE7-6A449124FE06</string>
+	<string>8D2A9CD2-B8C1-42CF-A2C0-AC71A7102068</string>
 </dict>
 </plist>
