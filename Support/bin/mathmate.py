@@ -243,7 +243,7 @@ class MathMate(object):
             return default
         return proc.stdout.read().strip()
     
-    def inline(self, force_image = False):
+    def inline(self, statements, force_image = False):
         white_space = self.read_default("white_space", "Normal")
         white_space_mode = "pre" if white_space == "Pre" else "normal"
         
@@ -366,18 +366,6 @@ class MathMate(object):
         try:
             sock = self.connect()
 
-            statements = []
-            if self.process_up_to_cursor:
-                for ssp, esp, reformatted_statement, current_statement in self.statements:
-                    if ssp < self.tmcursor:
-                        statements.append(current_statement)
-            elif self.selected_text is not None or self.process_entire_document:
-                for ssp, esp, reformatted_statement, current_statement in self.statements:
-                    statements.append(current_statement)
-            else:
-                ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-                statements.append(current_statement)
-
             state = 0
             readsize = None
             while True:
@@ -469,7 +457,78 @@ class MathMate(object):
           </html>
         """)
         sys.stdout.flush()
+    
+    def execute(self, command):
+        result = None
+        sock = self.connect()
+        
+        state = 0
+        readsize = None
+        while True:
+            if readsize is not None:
+                content = self.readtotal(sock, readsize)
+            else:
+                line, response, words, comment = self.read(sock)
+            
+            if state == 0:
+                if response == "okay":
+                    sock.send("sessid %s\n" % self.sessid)
+                    state = 1
+                    continue
+            
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
 
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 1:
+                if response == "okay":
+                    sock.send("intexec %d\n" % len(command))
+                    sock.send(command)
+                    state = 2
+                    continue
+                        
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            if state == 2:
+                if response == "okay":
+                    sock.send("quit\n")
+                    state = 4
+                    continue
+
+                if words[0] == "inline":
+                    readsize = int(words[1])
+                    state = 3
+                    continue
+
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 3:
+                result = content
+                readsize = None
+                state = 2
+                continue
+            
+            if state == 4:
+                if response == "okay":
+                    sock.close()
+                    break
+
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            raise Exception("Invalid state: " + state)
+        
+        return result
+    
     def clear(self):
         sock = self.connect()
         
@@ -1009,15 +1068,33 @@ class MathMate(object):
     def get_current_statement(self):
         return self.statements[self.get_current_statement_index()]
     
-    def reformat(self):
+    def get_current_statements(self, process_entire_document = False, process_up_to_cursor = False):
+        statements = []
+        
+        if process_up_to_cursor:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                if ssp < self.tmcursor:
+                    statements.append(current_statement)
+        
+        elif self.selected_text is not None or process_entire_document:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                statements.append(current_statement)
+        
+        else:
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            statements.append(current_statement)
+            
+        return statements
+        
+    def reformat(self, process_entire_document = False, process_up_to_cursor = False):
         result = []
         
-        if self.process_up_to_cursor:
+        if process_up_to_cursor:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 if ssp < self.tmcursor:
                     result.append(reformatted_statement)
                     
-        elif self.selected_text is not None or self.process_entire_document:
+        elif self.selected_text is not None or process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 result.append(reformatted_statement)
                 

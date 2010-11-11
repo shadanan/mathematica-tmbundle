@@ -13,7 +13,8 @@ sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
 mm = MathMate()
-mm.inline()
+statements = mm.get_current_statements()
+mm.inline(statements)
 </string>
 	<key>fallbackInput</key>
 	<string>document</string>
@@ -22,7 +23,7 @@ mm.inline()
 	<key>keyEquivalent</key>
 	<string>$</string>
 	<key>name</key>
-	<string>Execute Statement</string>
+	<string>Execute Statements</string>
 	<key>output</key>
 	<string>showAsHTML</string>
 	<key>scope</key>

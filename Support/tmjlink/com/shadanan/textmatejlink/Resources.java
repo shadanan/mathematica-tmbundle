@@ -148,7 +148,18 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
-	public void evaluate(String query, boolean evalToImage, Session session) throws MathLinkException, IOException {
+	public String evaluate(String query) throws MathLinkException, IOException {
+		kernelLink.evaluate(query);
+		kernelLink.waitForAnswer();
+		Expr result = kernelLink.getExpr();
+		kernelLink.newPacket();
+		if (!result.equals(NULLEXPR))
+			return result.toString();
+		return null;
+	}
+	
+	public void evaluate(String query, boolean evalToImage, Session session) 
+			throws MathLinkException, IOException {
 		long mark = System.currentTimeMillis();
 		this.session = session;
 		
@@ -300,6 +311,10 @@ public class Resources implements PacketListener {
 		
 		public int getType() {
 			return type;
+		}
+		
+		public String getValue() {
+			return value == null ? expr.toString() : value;
 		}
 		
 		public String getHtmlEscapedValue() {

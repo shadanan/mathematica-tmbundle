@@ -13,16 +13,15 @@ sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
 mm = MathMate()
-mm.inline(force_image=True)
+statements = mm.get_current_statements()
+mm.inline(statements, force_image=True)
 </string>
 	<key>fallbackInput</key>
 	<string>document</string>
 	<key>input</key>
 	<string>selection</string>
-	<key>keyEquivalent</key>
-	<string>~</string>
 	<key>name</key>
-	<string>Execute Statement To Image</string>
+	<string>Execute Statements To Image</string>
 	<key>output</key>
 	<string>showAsHTML</string>
 	<key>scope</key>

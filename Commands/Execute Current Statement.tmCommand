@@ -15,22 +15,27 @@ from mathmate import *
 
 try:
 	mm = MathMate()
-	exit_show_tool_tip(mm.show())
+
+	statement = mm.get_current_statements()[-1]
+	result = mm.execute(statement)
+	if result is None:
+		exit_show_tool_tip("Statement Executed")
+	else:
+		exit_show_tool_tip(result)
 except Exception:
 	stacktrace = traceback.format_exc()
-	exit_show_tool_tip(stacktrace)
-</string>
+	exit_show_tool_tip(stacktrace)</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^$</string>
+	<string>~@</string>
 	<key>name</key>
-	<string>Show Statement Info</string>
+	<string>Execute Current Statement</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>replaceSelectedText</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>C2A3F7BE-18D5-4E79-B244-5382DA42CD46</string>
+	<string>7E45E0A2-DE64-4DAF-B403-8B8C88E15BF3</string>
 </dict>
 </plist>

@@ -15,22 +15,31 @@ from mathmate import *
 
 try:
 	mm = MathMate()
-	exit_show_tool_tip(mm.show())
+
+	if not mm.doc.isalnum():
+		exit_show_tool_tip("Invalid Symbol: %s" % mm.doc)
+
+	result = mm.execute(mm.doc)
+	if result is None:
+		exit_show_tool_tip("%s is Null" % mm.doc)
+	else:
+		exit_show_tool_tip("%s = %s" % (mm.doc, result))
 except Exception:
 	stacktrace = traceback.format_exc()
-	exit_show_tool_tip(stacktrace)
-</string>
+	exit_show_tool_tip(stacktrace)</string>
+	<key>fallbackInput</key>
+	<string>word</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^$</string>
+	<string>~@/</string>
 	<key>name</key>
-	<string>Show Statement Info</string>
+	<string>Show Symbol Value</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>discard</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>C2A3F7BE-18D5-4E79-B244-5382DA42CD46</string>
+	<string>1878BD6A-4151-4C77-9969-8E24FE275D6E</string>
 </dict>
 </plist>
