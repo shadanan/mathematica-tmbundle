@@ -63,6 +63,13 @@ class MathMate(object):
         
         self.parse_tree_level = None
         
+        self.tmjlink_pid = None
+        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
+        if os.path.exists(pidfile):
+            pidfp = open(pidfile, 'r')
+            self.tmjlink_pid = int(pidfp.read())
+            pidfp.close()
+        
         if input_file is None:
             self.doc = sys.stdin.read()
         else:
@@ -89,47 +96,17 @@ class MathMate(object):
             self.sessid = sessid[:-2]
         else:
             self.sessid = sessid
-
+    
     def signal_tmjlink(self, signal = 1):
-        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
-        if os.path.exists(pidfile):
-            try:
-                pidfp = open(pidfile, 'r')
-                pid = int(pidfp.read())
-                pidfp.close()
-                os.kill(pid, signal)
-                return True
-            except:
-                pass
+        try:
+            os.kill(self.tmjlink_pid, signal)
+            return True
+        except:
+            pass
         return False
         
-    def shutdown(self):
-        result = self.signal_tmjlink(1)
-        if result is True:
-            return "TextMateJLink Server Shutdown"
-        else:
-            return "TextMateJLink Server is not Running"
-    
-    def kill(self):
-        result = self.signal_tmjlink(9)
-        if result is True:
-            return "TextMateJLink Server Killed"
-        else:
-            return "TextMateJLink Server is not Running"
-    
     def is_tmjlink_alive(self):
-        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
-        if os.path.exists(pidfile):
-            try:
-                pidfp = open(pidfile, 'r')
-                pid = int(pidfp.read())
-                pidfp.close()
-                
-                os.kill(pid, 0)
-                return True
-            except:
-                pass
-        return False
+        return self.signal_tmjlink(0)
     
     def get_textmate_pid(self):
         current_pid = os.getpid()
