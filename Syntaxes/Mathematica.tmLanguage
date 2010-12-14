@@ -258,6 +258,12 @@
 				</dict>
 				<dict>
 					<key>match</key>
+					<string>/:</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.tag</string>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>//</string>
 					<key>name</key>
 					<string>keyword.operator.mathematica.postfix</string>
