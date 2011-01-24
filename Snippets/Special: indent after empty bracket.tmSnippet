@@ -11,7 +11,7 @@
 	<key>name</key>
 	<string>Special: indent after empty bracket</string>
 	<key>scope</key>
-	<string>meta.scope.between_empty_brackets</string>
+	<string>source.mathematica meta.scope.between_empty_brackets</string>
 	<key>uuid</key>
 	<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
 </dict>

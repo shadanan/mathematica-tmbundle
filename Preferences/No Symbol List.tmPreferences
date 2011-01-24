@@ -5,7 +5,7 @@
 	<key>name</key>
 	<string>No Symbol List</string>
 	<key>scope</key>
-	<string>entity.name.function.mathematica, meta.structure.function</string>
+	<string>entity.name.function.mathematica, source.mathematica meta.structure.function</string>
 	<key>settings</key>
 	<dict>
 		<key>showInSymbolList</key>
