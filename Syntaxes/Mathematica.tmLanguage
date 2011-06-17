@@ -198,6 +198,12 @@
 				</dict>
 				<dict>
 					<key>match</key>
+					<string>\.\.\.</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.repeated_null</string>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>\.\.</string>
 					<key>name</key>
 					<string>keyword.operator.mathematica.repeated</string>
@@ -225,6 +231,12 @@
 					<string>@{1,3}</string>
 					<key>name</key>
 					<string>keyword.operator.mathematica.apply</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>//@</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.map_all</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -363,6 +375,12 @@
 					<string>\?</string>
 					<key>name</key>
 					<string>keyword.operator.mathematica.pattern_test</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>=\.</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.unset</string>
 				</dict>
 				<dict>
 					<key>match</key>
