@@ -854,7 +854,7 @@ class MathMate(object):
                 continue
             
             if c3 == "...":
-                current += c3, " "
+                current += " ", c3
                 pos += 3
                 continue
 
@@ -879,7 +879,7 @@ class MathMate(object):
                 continue
 
             if c2 in ("..", "=."):
-                current += c2, " "
+                current += " ", c2
                 pos += 2
                 continue
 
