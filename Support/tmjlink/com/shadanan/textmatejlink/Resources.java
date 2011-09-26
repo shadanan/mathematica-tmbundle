@@ -409,6 +409,9 @@ public class Resources implements PacketListener {
 			if (head.toString().equals("Labeled"))
 				return true;
 			
+			if (head.toString().equals("Grid"))
+			  return true;
+			
 			if (head.toString().endsWith("Form"))
 				return true;
 			
@@ -474,7 +477,8 @@ public class Resources implements PacketListener {
 		}
 	}
 
-	public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
+	@Override
+  public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
 		KernelLink ml = (KernelLink)evt.getSource();
 		
 		if (evt.getPktType() == MathLink.TEXTPKT) {
