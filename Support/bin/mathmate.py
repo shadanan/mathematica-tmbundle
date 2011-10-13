@@ -849,7 +849,7 @@ class MathMate(object):
             if c3 == "@@@":
                 if self.is_end_of_line(pos + 3):
                     scope += ("binop", "start")
-                current += c3
+                current += " ", c3, " "
                 pos += 3
                 continue
             
@@ -869,7 +869,7 @@ class MathMate(object):
             if c2 == "@@":
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
-                current += c2
+                current += " ", c2, " "
                 pos += 2
                 continue
             
