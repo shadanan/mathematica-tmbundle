@@ -128,7 +128,13 @@
 					<key>match</key>
 					<string>===</string>
 					<key>name</key>
-					<string>keyword.operator.logical.equivalent</string>
+					<string>keyword.operator.logical.same</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>=!=</string>
+					<key>name</key>
+					<string>keyword.operator.logical.not_same</string>
 				</dict>
 				<dict>
 					<key>match</key>
