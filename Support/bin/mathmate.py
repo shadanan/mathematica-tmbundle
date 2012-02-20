@@ -59,6 +59,9 @@ def return_focus_to_textmate():
     # subprocess.call(["osascript", "-e", osascript])
 
 def is_valid_mathematica_symbol(symbol):
+    if len(symbol) == 0:
+        return False
+        
     for char in symbol:
         if char not in VALID_SYMBOL_CHARS:
             return False
