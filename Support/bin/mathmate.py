@@ -9,6 +9,8 @@ import subprocess
 import traceback
 import plistlib
 
+VALID_SYMBOL_CHARS = string.ascii_letters + string.digits + "$"
+
 def exit_discard():
     sys.exit(200)
 
@@ -55,6 +57,12 @@ def return_focus_to_textmate():
         end tell
     """
     # subprocess.call(["osascript", "-e", osascript])
+
+def is_valid_mathematica_symbol(symbol):
+    for char in symbol:
+        if char not in VALID_SYMBOL_CHARS:
+            return False
+    return True
 
 class MathMate(object):
     def __init__(self, input_file = None, process_entire_document = False, process_up_to_cursor = False):
@@ -873,7 +881,7 @@ class MathMate(object):
                 pos += 2
                 continue
             
-            if c2 in ("++", "--"):
+            if c2 in ("++", "--", "<<"):
                 current += c2
                 pos += 2
                 continue
@@ -1130,11 +1138,10 @@ class MathMate(object):
     def suggest(self):
         # Get currently typed function
         fnname = []
-        vfcs = string.ascii_letters + string.digits + "$"
         pos = self.tmcursor - 1
         
         while pos >= 0:
-            if self.doc[pos] not in vfcs:
+            if self.doc[pos] not in VALID_SYMBOL_CHARS:
                 break
             fnname.insert(0, self.doc[pos])
             pos -= 1
@@ -1164,10 +1171,21 @@ class MathMate(object):
         if out != "":
             exit_show_tool_tip(out)
         exit_discard()
-
-    def is_valid_mathematica_symbol(self):
-        valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$1234567890'
-        for c in self.doc:
-            if c not in valid_chars:
-                return False
-        return True
+    
+    def get_current_symbol(self):
+        if self.selected_text is not None:
+            return self.selected_text
+        
+        start = self.tmcursor
+        while start > 0:
+            if self.doc[start - 1] not in VALID_SYMBOL_CHARS:
+                break
+            start -= 1
+        
+        end = self.tmcursor
+        while end < len(self.doc):
+            if self.doc[end] not in VALID_SYMBOL_CHARS:
+                break
+            end += 1
+        
+        return self.doc[start:end]

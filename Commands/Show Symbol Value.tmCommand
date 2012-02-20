@@ -15,20 +15,21 @@ from mathmate import *
 
 try:
 	mm = MathMate()
+	
+	symbol = mm.get_current_symbol()
+	if not is_valid_mathematica_symbol(symbol):
+		exit_show_tool_tip("Invalid Symbol: %s" % symbol)
 
-	if not mm.is_valid_mathematica_symbol():
-		exit_show_tool_tip("Invalid Symbol: %s" % mm.doc)
-
-	result = mm.execute(mm.doc)
+	result = mm.execute(symbol)
 	if result is None:
-		exit_show_tool_tip("%s is Null" % mm.doc)
+		exit_show_tool_tip("%s is Null" % symbol)
 	else:
-		exit_show_tool_tip("%s = %s" % (mm.doc, result))
+		exit_show_tool_tip("%s = %s" % (symbol, result))
 except Exception:
 	stacktrace = traceback.format_exc()
 	exit_show_tool_tip(stacktrace)</string>
 	<key>fallbackInput</key>
-	<string>word</string>
+	<string>document</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>

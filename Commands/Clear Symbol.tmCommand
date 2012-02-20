@@ -16,10 +16,11 @@ from mathmate import *
 try:
 	mm = MathMate()
 
-	if not mm.doc.isalnum():
-		exit_show_tool_tip("Invalid Symbol: %s" % mm.doc)
+	symbol = mm.get_current_symbol()
+	if not is_valid_mathematica_symbol(symbol):
+		exit_show_tool_tip("Invalid Symbol: %s" % symbol)
 
-	result = mm.execute("Clear[%s]" % mm.doc)
+	result = mm.execute("Clear[%s]" % symbol)
 	if result is None:
 		exit_show_tool_tip("Symbol Cleared: %s" % mm.doc)
 	else:

@@ -15,20 +15,19 @@ from mathmate import *
 
 try:
 	mm = MathMate()
-	exit_show_tool_tip(mm.show())
+	exit_show_tool_tip(mm.get_current_symbol())
 except Exception:
 	stacktrace = traceback.format_exc()
-	exit_show_tool_tip(stacktrace)
-</string>
+	exit_show_tool_tip(stacktrace)</string>
 	<key>input</key>
 	<string>selection</string>
 	<key>name</key>
-	<string>Show Statement Info</string>
+	<string>Get Current Symbol</string>
 	<key>output</key>
-	<string>showAsTooltip</string>
+	<string>replaceSelectedText</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>C2A3F7BE-18D5-4E79-B244-5382DA42CD46</string>
+	<string>511CE7C9-9491-4F45-8A04-E9C142FA1CAC</string>
 </dict>
 </plist>
