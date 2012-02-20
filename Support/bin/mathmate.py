@@ -1164,3 +1164,10 @@ class MathMate(object):
         if out != "":
             exit_show_tool_tip(out)
         exit_discard()
+
+    def is_valid_mathematica_symbol(self):
+        valid_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$1234567890'
+        for c in self.doc:
+            if c not in valid_chars:
+                return False
+        return True

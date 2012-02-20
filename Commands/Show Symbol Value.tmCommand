@@ -16,7 +16,7 @@ from mathmate import *
 try:
 	mm = MathMate()
 
-	if not mm.doc.isalnum():
+	if not mm.is_valid_mathematica_symbol():
 		exit_show_tool_tip("Invalid Symbol: %s" % mm.doc)
 
 	result = mm.execute(mm.doc)
