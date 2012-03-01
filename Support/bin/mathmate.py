@@ -987,7 +987,7 @@ class MathMate(object):
                 if self.is_end_of_line(pos + 1):
                     scope += ("binop", "start")
                     
-                if self.get_prev_non_space_char(pos-1) not in (None, ";", "{", "(", "[", ","):
+                if self.get_prev_non_space_char(pos-1) not in (None, ";", "{", "(", "[", ",", "="):
                     current += " ", c1, " "
                 else:
                     current += c1
