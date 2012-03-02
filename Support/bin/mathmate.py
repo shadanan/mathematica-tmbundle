@@ -134,7 +134,7 @@ class MathMate(object):
             return
         
         classpath = []
-        classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink"))
+        classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink/dist/tmjlink.jar"))
         classpath.append("/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar")
         
         if os.path.exists(self.cacheFolder):
