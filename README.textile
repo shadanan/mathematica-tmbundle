@@ -23,7 +23,7 @@ Open up a terminal and navigate to the TextMate bundle folder:
 *NOTE*: You may need to create this folder first.
 
 Clone the bundle's repository using git:
-@$ git clone http://github.com/dehowell/mathematica-tmbundle.git Mathematica.tmbundle@
+@$ git clone http://github.com/shadanan/mathematica-tmbundle.git Mathematica.tmbundle@
 
 By default, TextMate interprets .m files as Objective-C. You will have to switch the
 language to Mathematica in order to activate the bundle.
