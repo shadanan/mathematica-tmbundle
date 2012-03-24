@@ -403,6 +403,9 @@ public class Resources implements PacketListener {
 			if (head.toString().equals("Graphics"))
 				return true;
 			
+			if (head.toString().equals("GraphicsRow"))
+				return true;
+			
 			if (head.toString().equals("Graphics3D"))
 				return true;
 			
@@ -410,6 +413,12 @@ public class Resources implements PacketListener {
 				return true;
 			
 			if (head.toString().equals("Grid"))
+			  return true;
+			
+			if (head.toString().equals("Row"))
+			  return true;
+			
+			if (head.toString().equals("Column"))
 			  return true;
 			
 			if (head.toString().endsWith("Form"))
