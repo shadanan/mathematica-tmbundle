@@ -8,9 +8,9 @@
 		<string>nb</string>
 	</array>
 	<key>foldingStartMarker</key>
-	<string>\[\s*$</string>
+	<string>Begin\[</string>
 	<key>foldingStopMarker</key>
-	<string>^\s*\]</string>
+	<string>End\[</string>
 	<key>keyEquivalent</key>
 	<string>^~M</string>
 	<key>name</key>
@@ -213,6 +213,12 @@
 					<string>\.\.</string>
 					<key>name</key>
 					<string>keyword.operator.mathematica.repeated</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>//\.</string>
+					<key>name</key>
+					<string>keyword.operator.mathematica.replace_repeated</string>
 				</dict>
 				<dict>
 					<key>match</key>

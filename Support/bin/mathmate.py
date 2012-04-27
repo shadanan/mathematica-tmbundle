@@ -850,7 +850,7 @@ class MathMate(object):
                 pos += 1
                 continue
         
-            if c3 in ("===", "=!=", ">>>", "^:=", "//@"):
+            if c3 in ("===", "=!=", ">>>", "^:=", "//@", "//."):
                 if self.is_end_of_line(pos + 3):
                     scope += ("binop", "start")
                 current += " ", c3, " "
