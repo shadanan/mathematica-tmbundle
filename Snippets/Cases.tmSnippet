@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>$3[$1$TM_SELECTED_TEXT$2]$0</string>
-	<key>keyEquivalent</key>
-	<string>[</string>
+	<string>Cases[${1:list}, ${2:{$3\}${4: /; ${5:{$6\}}}${7: ${8::&gt;} ${9:{$10\}}}}]$0</string>
 	<key>name</key>
-	<string>Wrap Selection in New Function</string>
+	<string>Cases</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>cases</string>
 	<key>uuid</key>
-	<string>F3A752B6-DD1D-45A9-B2B4-FBAD7D2DEA81</string>
+	<string>6EB64835-A8BC-4FF4-8336-C2E443E4273C</string>
 </dict>
 </plist>

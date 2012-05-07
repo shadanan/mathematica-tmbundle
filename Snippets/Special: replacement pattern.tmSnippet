@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>$3[$1$TM_SELECTED_TEXT$2]$0</string>
+	<string>$7 /. ${1:{$2\}} ${3:${4::&gt;} ${5:{$6\}}}$0</string>
 	<key>keyEquivalent</key>
-	<string>[</string>
+	<string>^/</string>
 	<key>name</key>
-	<string>Wrap Selection in New Function</string>
+	<string>Special: replacement pattern</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>F3A752B6-DD1D-45A9-B2B4-FBAD7D2DEA81</string>
+	<string>BD5D21AD-464C-45B4-BD0C-1B2DC7ECD13C</string>
 </dict>
 </plist>

@@ -3,14 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>$3[$1$TM_SELECTED_TEXT$2]$0</string>
+	<string>$1 -&gt; $2$0</string>
 	<key>keyEquivalent</key>
-	<string>[</string>
+	<string>^&gt;</string>
 	<key>name</key>
-	<string>Wrap Selection in New Function</string>
+	<string>Special: rule</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>r</string>
 	<key>uuid</key>
-	<string>F3A752B6-DD1D-45A9-B2B4-FBAD7D2DEA81</string>
+	<string>24F6EFA9-3C88-4212-8155-EE0A31C2E026</string>
 </dict>
 </plist>
