@@ -9,6 +9,8 @@ import subprocess
 import traceback
 import plistlib
 
+JLINK_JAR_PATH = "/Applications/Mathematica.app/Contents/SystemFiles/Links/JLink/JLink.jar"
+
 def exit_discard():
     sys.exit(200)
 
@@ -147,7 +149,7 @@ class MathMate(object):
         
         classpath = []
         classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink"))
-        classpath.append("/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar")
+        classpath.append(JLINK_JAR_PATH)
         
         if os.path.exists(self.cacheFolder):
             shutil.rmtree(self.cacheFolder) 
