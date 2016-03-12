@@ -9,7 +9,9 @@ import subprocess
 import traceback
 import plistlib
 
-JLINK_JAR_PATH = "/Applications/Mathematica.app/Contents/SystemFiles/Links/JLink/JLink.jar"
+MATHEMATICA_PATH = '/Applications/Mathematica.app'
+JLINK_JAR_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'JLink.jar']).strip()
+MATHKERNEL_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'MathKernel']).strip()
 
 def exit_discard():
     sys.exit(200)
@@ -61,7 +63,7 @@ def return_focus_to_textmate():
 class MathMate(object):
     def __init__(self, input_file = None, process_entire_document = False, process_up_to_cursor = False):
         self.cacheFolder = '/tmp/tmjlink'
-        self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
+        self.mlargs = ["-linkmode", "launch", "-linkname", MATHKERNEL_PATH, "-mathlink"]
         
         self.parse_tree_level = None
         
