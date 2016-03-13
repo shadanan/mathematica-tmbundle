@@ -13,6 +13,8 @@ MATHEMATICA_PATH = '/Applications/Mathematica.app'
 JLINK_JAR_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'JLink.jar']).strip()
 MATHKERNEL_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'MathKernel']).strip()
 
+VALID_SYMBOL_CHARS = string.ascii_letters + string.digits + "$"
+
 def exit_discard():
     sys.exit(200)
 
@@ -60,12 +62,28 @@ def return_focus_to_textmate():
     """
     # subprocess.call(["osascript", "-e", osascript])
 
+def is_valid_mathematica_symbol(symbol):
+    if len(symbol) == 0:
+        return False
+        
+    for char in symbol:
+        if char not in VALID_SYMBOL_CHARS:
+            return False
+    return True
+
 class MathMate(object):
     def __init__(self, input_file = None, process_entire_document = False, process_up_to_cursor = False):
         self.cacheFolder = '/tmp/tmjlink'
         self.mlargs = ["-linkmode", "launch", "-linkname", MATHKERNEL_PATH, "-mathlink"]
         
         self.parse_tree_level = None
+        
+        self.tmjlink_pid = None
+        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
+        if os.path.exists(pidfile):
+            pidfp = open(pidfile, 'r')
+            self.tmjlink_pid = int(pidfp.read())
+            pidfp.close()
         
         if input_file is None:
             self.doc = sys.stdin.read()
@@ -93,47 +111,17 @@ class MathMate(object):
             self.sessid = sessid[:-2]
         else:
             self.sessid = sessid
-
+    
     def signal_tmjlink(self, signal = 1):
-        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
-        if os.path.exists(pidfile):
-            try:
-                pidfp = open(pidfile, 'r')
-                pid = int(pidfp.read())
-                pidfp.close()
-                os.kill(pid, signal)
-                return True
-            except:
-                pass
+        try:
+            os.kill(self.tmjlink_pid, signal)
+            return True
+        except:
+            pass
         return False
         
-    def shutdown(self):
-        result = self.signal_tmjlink(1)
-        if result is True:
-            return "TextMateJLink Server Shutdown"
-        else:
-            return "TextMateJLink Server is not Running"
-    
-    def kill(self):
-        result = self.signal_tmjlink(9)
-        if result is True:
-            return "TextMateJLink Server Killed"
-        else:
-            return "TextMateJLink Server is not Running"
-    
     def is_tmjlink_alive(self):
-        pidfile = os.path.join(self.cacheFolder, "tmjlink.pid")
-        if os.path.exists(pidfile):
-            try:
-                pidfp = open(pidfile, 'r')
-                pid = int(pidfp.read())
-                pidfp.close()
-                
-                os.kill(pid, 0)
-                return True
-            except:
-                pass
-        return False
+        return self.signal_tmjlink(0)
     
     def get_textmate_pid(self):
         current_pid = os.getpid()
@@ -150,7 +138,7 @@ class MathMate(object):
             return
         
         classpath = []
-        classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink"))
+        classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink/dist/tmjlink.jar"))
         classpath.append(JLINK_JAR_PATH)
         
         if os.path.exists(self.cacheFolder):
@@ -247,7 +235,7 @@ class MathMate(object):
             return default
         return proc.stdout.read().strip()
     
-    def inline(self, force_image = False):
+    def inline(self, statements, force_image = False):
         white_space = self.read_default("white_space", "Normal")
         white_space_mode = "pre" if white_space == "Pre" else "normal"
         
@@ -370,18 +358,6 @@ class MathMate(object):
         try:
             sock = self.connect()
 
-            statements = []
-            if self.process_up_to_cursor:
-                for ssp, esp, reformatted_statement, current_statement in self.statements:
-                    if ssp < self.tmcursor:
-                        statements.append(current_statement)
-            elif self.selected_text is not None or self.process_entire_document:
-                for ssp, esp, reformatted_statement, current_statement in self.statements:
-                    statements.append(current_statement)
-            else:
-                ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
-                statements.append(current_statement)
-
             state = 0
             readsize = None
             while True:
@@ -473,7 +449,78 @@ class MathMate(object):
           </html>
         """)
         sys.stdout.flush()
+    
+    def execute(self, command):
+        result = None
+        sock = self.connect()
+        
+        state = 0
+        readsize = None
+        while True:
+            if readsize is not None:
+                content = self.readtotal(sock, readsize)
+            else:
+                line, response, words, comment = self.read(sock)
+            
+            if state == 0:
+                if response == "okay":
+                    sock.send("sessid %s\n" % self.sessid)
+                    state = 1
+                    continue
+            
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
 
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 1:
+                if response == "okay":
+                    sock.send("intexec %d\n" % len(command))
+                    sock.send(command)
+                    state = 2
+                    continue
+                        
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+            
+            if state == 2:
+                if response == "okay":
+                    sock.send("quit\n")
+                    state = 4
+                    continue
+
+                if words[0] == "inline":
+                    readsize = int(words[1])
+                    state = 3
+                    continue
+
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            if state == 3:
+                result = content
+                readsize = None
+                state = 2
+                continue
+            
+            if state == 4:
+                if response == "okay":
+                    sock.close()
+                    break
+
+                if response == "exception":
+                    raise Exception("TextMateJLink Exception: " + comment)
+
+                raise Exception("Unexpected message from JLink server: " + line)
+                
+            raise Exception("Invalid state: " + state)
+        
+        return result
+    
     def clear(self):
         sock = self.connect()
         
@@ -807,7 +854,7 @@ class MathMate(object):
                 pos += 1
                 continue
         
-            if c3 in ("===", ">>>", "^:="):
+            if c3 in ("===", "=!=", ">>>", "^:=", "//@", "//."):
                 if self.is_end_of_line(pos + 3):
                     scope += ("binop", "start")
                 current += " ", c3, " "
@@ -817,12 +864,17 @@ class MathMate(object):
             if c3 == "@@@":
                 if self.is_end_of_line(pos + 3):
                     scope += ("binop", "start")
-                current += c3
+                current += " ", c3, " "
+                pos += 3
+                continue
+            
+            if c3 == "...":
+                current += " ", c3
                 pos += 3
                 continue
 
-            if c2 in ("*^", "&&", "||", "==", ">=", "<=", ";;", "/.", "->", ":>", "<>", ">>", 
-                      "/@", "/;", "//", "~~", ":=", "^=", "+=", "-=", "*=", "/="):
+            if c2 in ("*^", "&&", "||", "==", "!=", ">=", "<=", ";;", "/.", "->", ":>", "<>", ">>", 
+                      "/@", "/;", "/:", "//", "~~", ":=", "^=", "+=", "-=", "*=", "/="):
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
                 current += " ", c2, " "
@@ -832,17 +884,17 @@ class MathMate(object):
             if c2 == "@@":
                 if self.is_end_of_line(pos + 2):
                     scope += ("binop", "start")
-                current += c2
+                current += " ", c2, " "
                 pos += 2
                 continue
             
-            if c2 in ("++", "--"):
+            if c2 in ("++", "--", "<<"):
                 current += c2
                 pos += 2
                 continue
 
-            if c2 == "..":
-                current += c2, " "
+            if c2 in ("..", "=."):
+                current += " ", c2
                 pos += 2
                 continue
 
@@ -939,7 +991,7 @@ class MathMate(object):
                 if self.is_end_of_line(pos + 1):
                     scope += ("binop", "start")
                     
-                if self.get_prev_non_space_char(pos-1) not in (None, ";", "{", "(", "[", ","):
+                if self.get_prev_non_space_char(pos-1) not in (None, ";", "{", "(", "[", ",", "="):
                     current += " ", c1, " "
                 else:
                     current += c1
@@ -1013,15 +1065,33 @@ class MathMate(object):
     def get_current_statement(self):
         return self.statements[self.get_current_statement_index()]
     
-    def reformat(self):
+    def get_current_statements(self, process_entire_document = False, process_up_to_cursor = False):
+        statements = []
+        
+        if process_up_to_cursor:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                if ssp < self.tmcursor:
+                    statements.append(current_statement)
+        
+        elif self.selected_text is not None or process_entire_document:
+            for ssp, esp, reformatted_statement, current_statement in self.statements:
+                statements.append(current_statement)
+        
+        else:
+            ssp, esp, reformatted_statement, current_statement = self.get_current_statement()
+            statements.append(current_statement)
+            
+        return statements
+        
+    def reformat(self, process_entire_document = False, process_up_to_cursor = False):
         result = []
         
-        if self.process_up_to_cursor:
+        if process_up_to_cursor:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 if ssp < self.tmcursor:
                     result.append(reformatted_statement)
                     
-        elif self.selected_text is not None or self.process_entire_document:
+        elif self.selected_text is not None or process_entire_document:
             for ssp, esp, reformatted_statement, current_statement in self.statements:
                 result.append(reformatted_statement)
                 
@@ -1075,11 +1145,10 @@ class MathMate(object):
     def suggest(self):
         # Get currently typed function
         fnname = []
-        vfcs = string.ascii_letters + string.digits + "$"
         pos = self.tmcursor - 1
         
         while pos >= 0:
-            if self.doc[pos] not in vfcs:
+            if self.doc[pos] not in VALID_SYMBOL_CHARS:
                 break
             fnname.insert(0, self.doc[pos])
             pos -= 1
@@ -1109,3 +1178,21 @@ class MathMate(object):
         if out != "":
             exit_show_tool_tip(out)
         exit_discard()
+    
+    def get_current_symbol(self):
+        if self.selected_text is not None:
+            return self.selected_text
+        
+        start = self.tmcursor
+        while start > 0:
+            if self.doc[start - 1] not in VALID_SYMBOL_CHARS:
+                break
+            start -= 1
+        
+        end = self.tmcursor
+        while end < len(self.doc):
+            if self.doc[end] not in VALID_SYMBOL_CHARS:
+                break
+            end += 1
+        
+        return self.doc[start:end]

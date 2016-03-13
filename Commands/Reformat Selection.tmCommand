@@ -24,8 +24,6 @@ except Exception:
 	<string>document</string>
 	<key>input</key>
 	<string>selection</string>
-	<key>keyEquivalent</key>
-	<string>^q</string>
 	<key>name</key>
 	<string>Reformat Statement / Selection</string>
 	<key>output</key>

@@ -8,25 +8,34 @@
 	<string>#!/usr/bin/env python
 import os
 import sys
+import traceback
 
 sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
-mm = MathMate()
-statements = mm.get_current_statements()
-mm.inline(statements, force_image=True)
-</string>
-	<key>fallbackInput</key>
-	<string>document</string>
+try:
+	mm = MathMate()
+
+	statement = mm.get_current_statements()[-1]
+	result = mm.execute(statement)
+	if result is None:
+		exit_show_tool_tip("Statement Executed")
+	else:
+		exit_show_tool_tip(result)
+except Exception:
+	stacktrace = traceback.format_exc()
+	exit_show_tool_tip(stacktrace)</string>
 	<key>input</key>
 	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>~@</string>
 	<key>name</key>
-	<string>Execute Statements To Image</string>
+	<string>Execute Current Statement</string>
 	<key>output</key>
-	<string>showAsHTML</string>
+	<string>replaceSelectedText</string>
 	<key>scope</key>
 	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>F27EF7A8-4569-47E1-AFEA-30594976247E</string>
+	<string>7E45E0A2-DE64-4DAF-B403-8B8C88E15BF3</string>
 </dict>
 </plist>

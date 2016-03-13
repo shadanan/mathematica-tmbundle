@@ -1,0 +1,36 @@
+<project name="tmjlink" default="dist" basedir=".">
+  <description>Build script for tmjlink</description>
+  
+  <!-- set global properties for this build -->
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="debug" description="sets properties for debugging">
+    <echo message="Building in debug mode..."/>
+    <property name="java.debug" value="true"/>
+  </target>
+  
+  <target name="compile" depends="init" description="compile the source">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" debug="${java.debug}" debuglevel="lines,vars,source"/>
+  </target>
+
+  <target name="dist" depends="compile" description="generate the distribution" >
+    <mkdir dir="${dist}"/>
+    <jar jarfile="${dist}/tmjlink.jar" basedir="${build}"/>
+  </target>
+
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+</project>

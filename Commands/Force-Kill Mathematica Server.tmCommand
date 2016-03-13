@@ -8,6 +8,7 @@
 	<string>#!/usr/bin/env python
 import os
 import sys
+import time
 import traceback
 
 sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
@@ -15,7 +16,13 @@ from mathmate import *
 
 try:
 	mm = MathMate()
-	exit_show_tool_tip(mm.kill())
+	if mm.signal_tmjlink(9):
+		for i in range(20):
+			if not mm.is_tmjlink_alive():
+				exit_show_tool_tip("TextMateJLink Server Killed")
+			time.sleep(0.1)
+		exit_show_tool_tip("TextMateJLink Server is not Responding!")
+	exit_show_tool_tip("TextMateJLink Server is not Running")
 except Exception:
 	stacktrace = traceback.format_exc()
 	exit_show_tool_tip(stacktrace)

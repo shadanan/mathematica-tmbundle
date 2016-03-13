@@ -22,10 +22,8 @@ except Exception:
 </string>
 	<key>input</key>
 	<string>selection</string>
-	<key>keyEquivalent</key>
-	<string>^$</string>
 	<key>name</key>
-	<string>Preview Statement</string>
+	<string>Show Statement Info</string>
 	<key>output</key>
 	<string>showAsTooltip</string>
 	<key>scope</key>

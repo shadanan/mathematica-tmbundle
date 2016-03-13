@@ -3,16 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>
-	$0
-</string>
+	<string>$7 /. ${1:{$2\}} ${3:${4::&gt;} ${5:{$6\}}}$0</string>
 	<key>keyEquivalent</key>
-	<string></string>
+	<string>^/</string>
 	<key>name</key>
-	<string>Special: indent after empty bracket</string>
+	<string>Special: replacement pattern</string>
 	<key>scope</key>
-	<string>source.mathematica meta.scope.between_empty_brackets</string>
+	<string>source.mathematica</string>
 	<key>uuid</key>
-	<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
+	<string>BD5D21AD-464C-45B4-BD0C-1B2DC7ECD13C</string>
 </dict>
 </plist>

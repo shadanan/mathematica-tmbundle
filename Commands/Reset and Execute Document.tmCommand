@@ -12,9 +12,9 @@ import sys
 sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
-mm = MathMate(process_up_to_cursor=True)
-mm.reset()
-mm.inline()
+mm = MathMate()
+statements = mm.get_current_statements(process_up_to_cursor=True)
+mm.inline(statements)
 </string>
 	<key>input</key>
 	<string>document</string>

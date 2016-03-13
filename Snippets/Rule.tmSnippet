@@ -3,16 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>
-	$0
-</string>
+	<string>$1 -&gt; $2$0</string>
 	<key>keyEquivalent</key>
-	<string></string>
+	<string>^&gt;</string>
 	<key>name</key>
-	<string>Special: indent after empty bracket</string>
+	<string>Special: rule</string>
 	<key>scope</key>
-	<string>source.mathematica meta.scope.between_empty_brackets</string>
+	<string>source.mathematica</string>
+	<key>tabTrigger</key>
+	<string>r</string>
 	<key>uuid</key>
-	<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
+	<string>24F6EFA9-3C88-4212-8155-EE0A31C2E026</string>
 </dict>
 </plist>

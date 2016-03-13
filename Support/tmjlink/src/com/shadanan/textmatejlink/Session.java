@@ -122,7 +122,8 @@ public class Session extends Thread {
 		out.println(reply);
 	}
 	
-	public void run() {
+	@Override
+  public void run() {
 		try {
 			in = new InputStreamReader(socket.getInputStream());
 			out = new PrintWriter(socket.getOutputStream(), true);
@@ -259,6 +260,12 @@ public class Session extends Thread {
 					continue;
 				}
 				
+				if (command.equals("intexec")) {
+					readsize = Integer.parseInt(args);
+					state = 4;
+					continue;
+				}
+				
 				send("exception -- Invalid command (" + state + "): " + command);
 				continue;
 			}
@@ -280,6 +287,21 @@ public class Session extends Thread {
 			if (state == 3) {
 				try {
 					resources.evaluate(data, true, this);
+					send("okay");
+				} catch (Exception e) {
+					send("exception -- " + e.getMessage());
+					e.printStackTrace();
+				}
+				
+				readsize = -1;
+				state = 1;
+				continue;
+			}
+			
+			if (state == 4) {
+				try {
+					String result = resources.evaluate(data);
+					if (result != null) sendInline(result);
 					send("okay");
 				} catch (Exception e) {
 					send("exception -- " + e.getMessage());

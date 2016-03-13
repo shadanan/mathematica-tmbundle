@@ -14,8 +14,8 @@ sys.path.append(os.path.join(os.environ["TM_BUNDLE_SUPPORT"], "bin"))
 from mathmate import *
 
 try:
-	mm = MathMate(process_entire_document = True)
-	mm.reformat()
+	mm = MathMate()
+	mm.reformat(process_entire_document=True)
 except Exception:
 	stacktrace = traceback.format_exc()
 	exit_show_tool_tip(stacktrace)
@@ -23,7 +23,7 @@ except Exception:
 	<key>input</key>
 	<string>selection</string>
 	<key>keyEquivalent</key>
-	<string>^Q</string>
+	<string>^q</string>
 	<key>name</key>
 	<string>Reformat Document</string>
 	<key>output</key>

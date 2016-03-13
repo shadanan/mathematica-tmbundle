@@ -148,7 +148,18 @@ public class Resources implements PacketListener {
 		return result.toString();
 	}
 	
-	public void evaluate(String query, boolean evalToImage, Session session) throws MathLinkException, IOException {
+	public String evaluate(String query) throws MathLinkException, IOException {
+		kernelLink.evaluate(query);
+		kernelLink.waitForAnswer();
+		Expr result = kernelLink.getExpr();
+		kernelLink.newPacket();
+		if (!result.equals(NULLEXPR))
+			return result.toString();
+		return null;
+	}
+	
+	public void evaluate(String query, boolean evalToImage, Session session) 
+			throws MathLinkException, IOException {
 		long mark = System.currentTimeMillis();
 		this.session = session;
 		
@@ -302,9 +313,21 @@ public class Resources implements PacketListener {
 			return type;
 		}
 		
+		public String getValue() {
+			return value == null ? expr.toString() : value;
+		}
+		
 		public String getHtmlEscapedValue() {
+		  return getHtmlEscapedValue(false);
+		}
+		
+		public String getHtmlEscapedValue(boolean autoTrim) {
 			StringBuilder sb = new StringBuilder();
 			String base = value == null ? expr.toString() : value;
+			
+			if (autoTrim) {
+	      base = base.replaceAll("\\\\\\n\\s\\n>\\s\\s", "");
+			}
 			
 			for (int i = 0; i < base.length(); i++) {
 				char c = base.charAt(i);
@@ -388,11 +411,23 @@ public class Resources implements PacketListener {
 			if (head.toString().equals("Graphics"))
 				return true;
 			
+			if (head.toString().equals("GraphicsRow"))
+				return true;
+			
 			if (head.toString().equals("Graphics3D"))
 				return true;
 			
 			if (head.toString().equals("Labeled"))
 				return true;
+			
+			if (head.toString().equals("Grid"))
+			  return true;
+			
+			if (head.toString().equals("Row"))
+			  return true;
+			
+			if (head.toString().equals("Column"))
+			  return true;
 			
 			if (head.toString().endsWith("Form"))
 				return true;
@@ -424,14 +459,14 @@ public class Resources implements PacketListener {
 			if (type == MathLink.TEXTPKT) {
 				result.append("<div class='cell text'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue(true) + "</div>");
 				result.append("</div>");
 			}
 			
 			if (type == MathLink.MESSAGEPKT) {
 				result.append("<div class='cell message'" + style + ">");
 				result.append("  <div class='margin'>Msg[" + count + "] := </div>");
-				result.append("  <div class='content'>" + getHtmlEscapedValue() + "</div>");
+				result.append("  <div class='content'>" + getHtmlEscapedValue(true) + "</div>");
 				result.append("</div>");
 			}
 			
@@ -459,7 +494,8 @@ public class Resources implements PacketListener {
 		}
 	}
 
-	public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
+	@Override
+  public boolean packetArrived(PacketArrivedEvent evt) throws MathLinkException {
 		KernelLink ml = (KernelLink)evt.getSource();
 		
 		if (evt.getPktType() == MathLink.TEXTPKT) {
@@ -489,5 +525,17 @@ public class Resources implements PacketListener {
 		}
 		
 		return true;
+	}
+	
+	public static void main(String args[]) {
+	  String data = "\"user_count_tablestats\" -> {\"chart\" -> \"user_count_tablestats.gif\", \"colors\"\\\n" +
+	                " \n" + 
+	                ">   -> {\"e63221\", \"5b0e04\", \"b04e00\", \"fac742\", \"a1a13f\", \"527b28\", \"4e977d\",\\\n" +
+                  " \n" + 
+                  ">   \"316f74\", \"549bbe\", \"104283\"}, \"labels\" -> {\"user base size\", \"verified\\\n" +
+                  " \n" + 
+                  ">   email\", \"trial users\"}}";
+	  data = data.replaceAll("\\\\\\n\\s\\n>\\s\\s", "");
+	  System.out.println(data);
 	}
 }

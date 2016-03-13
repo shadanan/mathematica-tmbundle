@@ -2,28 +2,88 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>description</key>
+	<string>Mathematica is a computational software program used in scientific, engineering, and 
+	mathematical fields and other areas of technical computing. It is created by 
+	&lt;a href="http://www.wolfram.com/"&gt;Wolfram Research&lt;/a&gt;.</string>
 	<key>mainMenu</key>
 	<dict>
+		<key>excludedItems</key>
+		<array>
+			<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
+		</array>
 		<key>items</key>
 		<array>
 			<string>00BE792F-880F-431B-8D39-14D92E4858F9</string>
-			<string>9C35A266-15F0-4CF2-ADDA-D7465902C713</string>
+			<string>46C008C0-AEA9-4726-935C-F7EE8270C0C4</string>
+			<string>------------------------------------</string>
+			<string>E36658BA-47F4-48D7-8485-F6435BB3816F</string>
+			<string>7E45E0A2-DE64-4DAF-B403-8B8C88E15BF3</string>
+			<string>F27EF7A8-4569-47E1-AFEA-30594976247E</string>
+			<string>------------------------------------</string>
+			<string>46DBC7E0-F6BA-4334-AC46-862C13E7B11E</string>
+			<string>------------------------------------</string>
+			<string>30C842E0-DB13-45B8-91FC-436D27165636</string>
+			<string>D4B4F85F-466C-4613-97CD-E6B6E9A7B3C0</string>
 			<string>075E04F0-0870-439A-862D-5740C5B8BA8A</string>
-			<string>81832602-4717-4BF4-AC23-A6A50C3A9F53</string>
-			<string>487A232C-890D-45EF-9257-FDACA29C14C6</string>
-			<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
-			<string>6CA3E70D-3D47-4DC0-850F-D2B442AD0E0E</string>
-			<string>8BD46A49-9C94-4F3E-A00E-BEE3E67237AC</string>
-			<string>C56D3AD8-6B64-4820-8FD5-731618B970B7</string>
-			<string>A5E129FE-158C-4AE8-A85C-39FFD7D8B3CB</string>
-			<string>7D0ADE91-1270-466A-8C90-2F80E5738B67</string>
-			<string>2FDEBA14-0EA0-432D-A862-AB2D56FF9BC1</string>
-			<string>FF5218AE-319D-4BE3-8841-F2C8E63CF148</string>
-			<string>966A4BB7-0925-427C-858A-FEFB3DB239E8</string>
-			<string>DF6EE342-1779-4386-B466-5D988C9D0029</string>
+			<string>9C35A266-15F0-4CF2-ADDA-D7465902C713</string>
+			<string>------------------------------------</string>
+			<string>1878BD6A-4151-4C77-9969-8E24FE275D6E</string>
+			<string>9DC5A951-5954-46E1-BB5B-A0885C14F6D4</string>
+			<string>2DFE1A2A-4C99-4CA5-9D3C-5EF324E34B19</string>
+			<string>------------------------------------</string>
+			<string>0B3B86CB-E5EA-4738-BDB2-9CED9EF2A3FA</string>
 		</array>
 		<key>submenus</key>
-		<dict/>
+		<dict>
+			<key>0B3B86CB-E5EA-4738-BDB2-9CED9EF2A3FA</key>
+			<dict>
+				<key>items</key>
+				<array>
+					<string>C2A3F7BE-18D5-4E79-B244-5382DA42CD46</string>
+					<string>511CE7C9-9491-4F45-8A04-E9C142FA1CAC</string>
+				</array>
+				<key>name</key>
+				<string>Debug</string>
+			</dict>
+			<key>30C842E0-DB13-45B8-91FC-436D27165636</key>
+			<dict>
+				<key>items</key>
+				<array>
+					<string>487A232C-890D-45EF-9257-FDACA29C14C6</string>
+					<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
+					<string>6CA3E70D-3D47-4DC0-850F-D2B442AD0E0E</string>
+					<string>------------------------------------</string>
+					<string>8BD46A49-9C94-4F3E-A00E-BEE3E67237AC</string>
+					<string>C56D3AD8-6B64-4820-8FD5-731618B970B7</string>
+					<string>DF6EE342-1779-4386-B466-5D988C9D0029</string>
+					<string>------------------------------------</string>
+					<string>A5E129FE-158C-4AE8-A85C-39FFD7D8B3CB</string>
+					<string>7D0ADE91-1270-466A-8C90-2F80E5738B67</string>
+					<string>2FDEBA14-0EA0-432D-A862-AB2D56FF9BC1</string>
+					<string>------------------------------------</string>
+					<string>966A4BB7-0925-427C-858A-FEFB3DB239E8</string>
+					<string>FF5218AE-319D-4BE3-8841-F2C8E63CF148</string>
+					<string>81832602-4717-4BF4-AC23-A6A50C3A9F53</string>
+					<string>F3A752B6-DD1D-45A9-B2B4-FBAD7D2DEA81</string>
+				</array>
+				<key>name</key>
+				<string>Snippets</string>
+			</dict>
+			<key>46DBC7E0-F6BA-4334-AC46-862C13E7B11E</key>
+			<dict>
+				<key>items</key>
+				<array>
+					<string>A959D1A2-92FA-43AA-A1C6-E64CD2164413</string>
+					<string>743E7223-2DBB-40B0-85E8-7B6FDFBCA134</string>
+					<string>------------------------------------</string>
+					<string>52B988B9-9E89-44C5-B258-4EE497894729</string>
+					<string>1ED7059A-3BF7-47A8-92A1-249EAFC60A72</string>
+				</array>
+				<key>name</key>
+				<string>Server</string>
+			</dict>
+		</dict>
 	</dict>
 	<key>name</key>
 	<string>Mathematica</string>
@@ -31,6 +91,10 @@
 	<array>
 		<string>9C35A266-15F0-4CF2-ADDA-D7465902C713</string>
 		<string>2DFE1A2A-4C99-4CA5-9D3C-5EF324E34B19</string>
+		<string>511CE7C9-9491-4F45-8A04-E9C142FA1CAC</string>
+		<string>9DC5A951-5954-46E1-BB5B-A0885C14F6D4</string>
+		<string>1878BD6A-4151-4C77-9969-8E24FE275D6E</string>
+		<string>7E45E0A2-DE64-4DAF-B403-8B8C88E15BF3</string>
 		<string>00BE792F-880F-431B-8D39-14D92E4858F9</string>
 		<string>46C008C0-AEA9-4726-935C-F7EE8270C0C4</string>
 		<string>E36658BA-47F4-48D7-8485-F6435BB3816F</string>
@@ -40,8 +104,8 @@
 		<string>52B988B9-9E89-44C5-B258-4EE497894729</string>
 		<string>A959D1A2-92FA-43AA-A1C6-E64CD2164413</string>
 		<string>743E7223-2DBB-40B0-85E8-7B6FDFBCA134</string>
-		<string>075E04F0-0870-439A-862D-5740C5B8BA8A</string>
 		<string>D4B4F85F-466C-4613-97CD-E6B6E9A7B3C0</string>
+		<string>075E04F0-0870-439A-862D-5740C5B8BA8A</string>
 		<string>81832602-4717-4BF4-AC23-A6A50C3A9F53</string>
 		<string>8D99CF66-0D81-4182-80B0-419932BACE19</string>
 		<string>6CA3E70D-3D47-4DC0-850F-D2B442AD0E0E</string>
@@ -55,12 +119,16 @@
 		<string>DF6EE342-1779-4386-B466-5D988C9D0029</string>
 		<string>487A232C-890D-45EF-9257-FDACA29C14C6</string>
 		<string>FA50D315-68F1-4429-B48E-02B745E8B8F8</string>
-		<string>1F109F01-D0DE-414E-985D-F14FC561AEAB</string>
-		<string>8D2A9CD2-B8C1-42CF-A2C0-AC71A7102068</string>
+		<string>F3A752B6-DD1D-45A9-B2B4-FBAD7D2DEA81</string>
+		<string>24F6EFA9-3C88-4212-8155-EE0A31C2E026</string>
+		<string>BD5D21AD-464C-45B4-BD0C-1B2DC7ECD13C</string>
+		<string>6EB64835-A8BC-4FF4-8336-C2E443E4273C</string>
 		<string>EB28CBAC-55D2-4CAD-B996-2F4A44FDF2B8</string>
 		<string>AA605A6D-4CE8-4920-B4BE-A475B433DD0F</string>
 		<string>757637DD-7736-4D13-9CE7-6A449124FE06</string>
 		<string>6CA68069-410F-4F2F-A8AA-17C3F409DF2D</string>
+		<string>8D2A9CD2-B8C1-42CF-A2C0-AC71A7102068</string>
+		<string>1F109F01-D0DE-414E-985D-F14FC561AEAB</string>
 	</array>
 	<key>uuid</key>
 	<string>D2B42D16-FDEB-4079-9293-725312736384</string>

@@ -33,7 +33,8 @@ public class Server extends Thread {
 		System.out.println("TextMate PID: " + textMatePid);
 	}
 	
-	public void run() {
+	@Override
+  public void run() {
 		try {
 			ServerSocket ss = new ServerSocket(0);
 			ss.setSoTimeout(1000);
