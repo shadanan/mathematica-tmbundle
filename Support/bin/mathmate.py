@@ -9,6 +9,10 @@ import subprocess
 import traceback
 import plistlib
 
+MATHEMATICA_PATH = '/Applications/Mathematica.app'
+JLINK_JAR_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'JLink.jar']).strip()
+MATHKERNEL_PATH = subprocess.check_output(['find', MATHEMATICA_PATH, '-name', 'MathKernel']).strip()
+
 VALID_SYMBOL_CHARS = string.ascii_letters + string.digits + "$"
 
 def exit_discard():
@@ -70,7 +74,7 @@ def is_valid_mathematica_symbol(symbol):
 class MathMate(object):
     def __init__(self, input_file = None, process_entire_document = False, process_up_to_cursor = False):
         self.cacheFolder = '/tmp/tmjlink'
-        self.mlargs = ["-linkmode", "launch", "-linkname", "/Applications/Mathematica.app/Contents/MacOS/MathKernel", "-mathlink"]
+        self.mlargs = ["-linkmode", "launch", "-linkname", MATHKERNEL_PATH, "-mathlink"]
         
         self.parse_tree_level = None
         
@@ -135,7 +139,7 @@ class MathMate(object):
         
         classpath = []
         classpath.append(os.path.join(os.environ.get('TM_BUNDLE_SUPPORT'), "tmjlink/dist/tmjlink.jar"))
-        classpath.append("/Applications/Mathematica.app/SystemFiles/Links/JLink/JLink.jar")
+        classpath.append(JLINK_JAR_PATH)
         
         if os.path.exists(self.cacheFolder):
             shutil.rmtree(self.cacheFolder) 
