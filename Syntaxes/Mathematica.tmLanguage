@@ -516,10 +516,6 @@
 					<string>$self</string>
 				</dict>
 				<dict>
-					<key>include</key>
-					<string>meta.scope.any.mathematica</string>
-				</dict>
-				<dict>
 					<key>match</key>
 					<string>,</string>
 					<key>name</key>
